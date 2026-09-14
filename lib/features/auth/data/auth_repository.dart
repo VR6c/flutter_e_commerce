@@ -1,0 +1,85 @@
+import '../../../core/api/api_client.dart';
+import '../models/customer.dart';
+
+class AuthRepository {
+  final ApiClient _apiClient;
+
+  AuthRepository(this._apiClient);
+
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _apiClient.post(
+      '/customer/login',
+      data: {
+        'email': email,
+        'password': password,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await _apiClient.post(
+      '/customer/register',
+      data: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Customer> getProfile() async {
+    final response = await _apiClient.get('/customer/profile');
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      final customerData = data['data'] ?? data['customer'] ?? data;
+      return Customer.fromJson(customerData as Map<String, dynamic>);
+    }
+    throw Exception('Invalid profile response');
+  }
+
+  Future<Customer> updateProfile({
+    required String name,
+    required String email,
+    String? currentPassword,
+    String? newPassword,
+    String? newPasswordConfirmation,
+  }) async {
+    final payload = <String, dynamic>{
+      'name': name,
+      'email': email,
+    };
+    if (newPassword != null && newPassword.isNotEmpty) {
+      payload['current_password'] = currentPassword;
+      payload['new_password'] = newPassword;
+      payload['new_password_confirmation'] = newPasswordConfirmation;
+    }
+    final response = await _apiClient.put(
+      '/customer/profile',
+      data: payload,
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      final customerData = Map<String, dynamic>.from(
+        (data['customer'] ?? data['data'] ?? data) as Map,
+      );
+      customerData['status'] ??= 'active';
+      return Customer.fromJson(customerData);
+    }
+    throw Exception('Invalid profile update response');
+  }
+
+  Future<void> logout() async {
+    await _apiClient.post('/customer/logout');
+  }
+}
