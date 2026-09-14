@@ -256,6 +256,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       theme: theme,
                       isDark: isDark,
                       children: [
+                        _buildMenuTile(
+                          icon: Icons.auto_awesome_rounded,
+                          iconColor: const Color(0xFF8B5CF6),
+                          title: 'TVR Assistant',
+                          subtitle: 'Smart shopping & generative AI settings',
+                          theme: theme,
+                          onTap: () => context.push(AppRoutes.aiAssistant),
+                        ),
+                        _buildTileDivider(theme),
                         _buildThemeToggleTile(theme, isDark),
                         _buildTileDivider(theme),
                         _buildNotificationToggleTile(theme, isDark),

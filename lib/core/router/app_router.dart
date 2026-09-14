@@ -20,6 +20,7 @@ import '../../features/cart/screens/order_success_screen.dart';
 import '../../features/wishlist/screens/wishlist_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/profile/screens/avatar_customizer_screen.dart';
+import '../../features/ai_assistant/screens/ai_assistant_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -164,6 +165,35 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.avatarCustomizerName,
         path: AppRoutes.avatarCustomizer,
         builder: (context, state) => const AvatarCustomizerScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.aiAssistantName,
+        path: AppRoutes.aiAssistant,
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const AiAssistantScreen(),
+            transitionDuration: const Duration(milliseconds: 300),
+            reverseTransitionDuration: const Duration(milliseconds: 260),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              final curvedAnimation = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              );
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.08),
+                  end: Offset.zero,
+                ).animate(curvedAnimation),
+                child: FadeTransition(
+                  opacity: curvedAnimation,
+                  child: child,
+                ),
+              );
+            },
+          );
+        },
       ),
 
       // ── Stateful Tab Shell with 4 Persistent Branches ───────────────

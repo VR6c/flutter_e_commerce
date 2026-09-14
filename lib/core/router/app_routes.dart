@@ -50,4 +50,9 @@ class AppRoutes {
   // Profile & Customization
   static const avatarCustomizer = '/avatar-customizer';
   static const avatarCustomizerName = 'avatar-customizer';
+
+  // AI Assistant
+  static const aiAssistant = '/ai-assistant';
+  static const aiAssistantName = 'ai-assistant';
 }
+
