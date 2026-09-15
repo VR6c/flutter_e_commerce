@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/utils/image_url_formatter.dart';
 import '../models/order.dart';
 
@@ -8,7 +9,7 @@ class OrderRepository {
   OrderRepository(this._apiClient);
 
   Future<List<Order>> fetchOrders() async {
-    final response = await _apiClient.get('/orders');
+    final response = await _apiClient.get(ApiEndpoints.orders);
     final data = response.data;
     if (data == null) return [];
 
@@ -57,5 +58,41 @@ class OrderRepository {
     return mappedOrders
         .map((e) => Order.fromJson(e))
         .toList();
+  }
+
+  Future<Order?> fetchOrderDetail(int id) async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.orderDetail(id));
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final orderData = data['data'] ?? data['order'] ?? data;
+        if (orderData is Map) {
+          final orderMap = Map<String, dynamic>.from(orderData);
+          final baseUrl = _apiClient.dio.options.baseUrl;
+          if (orderMap['items'] is List) {
+            final itemsList = orderMap['items'] as List;
+            orderMap['items'] = itemsList.map((itemObj) {
+              if (itemObj is Map) {
+                final itemMap = Map<String, dynamic>.from(itemObj);
+                itemMap['product_thumbnail'] = formatImageUrl(
+                  itemMap['product_thumbnail']?.toString(),
+                  baseUrl,
+                  title: itemMap['product_name']?.toString(),
+                );
+                return itemMap;
+              }
+              return itemObj;
+            }).toList();
+          }
+          return Order.fromJson(orderMap);
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  String getReceiptUrl(int id) {
+    final baseUrl = _apiClient.dio.options.baseUrl;
+    return '$baseUrl${ApiEndpoints.orderReceipt(id)}';
   }
 }

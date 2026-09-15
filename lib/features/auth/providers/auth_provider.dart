@@ -39,7 +39,11 @@ class AuthState extends _$AuthState {
       final response = await _authRepository.login(email: email, password: password);
       final token = response['token'] ?? response['data']?['token'];
       if (token != null) {
-        await _secureStorageService.saveToken(token as String);
+        final tokenStr = token as String;
+        await _secureStorageService.saveTokens(
+          accessToken: tokenStr,
+          refreshToken: tokenStr,
+        );
         return await _authRepository.getProfile();
       }
       throw Exception('Login failed: Token not found in response');
@@ -62,7 +66,11 @@ class AuthState extends _$AuthState {
       );
       final token = response['token'] ?? response['data']?['token'];
       if (token != null) {
-        await _secureStorageService.saveToken(token as String);
+        final tokenStr = token as String;
+        await _secureStorageService.saveTokens(
+          accessToken: tokenStr,
+          refreshToken: tokenStr,
+        );
         return await _authRepository.getProfile();
       }
       throw Exception('Registration failed: Token not found in response');

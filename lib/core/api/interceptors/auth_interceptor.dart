@@ -56,32 +56,45 @@ class AuthInterceptor extends QueuedInterceptor {
         return handler.next(err);
       }
 
-      // Check for available refresh token
+      // Check for available refresh token (or fallback to current token for Sanctum rotation)
       String? refreshToken;
       try {
         refreshToken = await _storageService.getRefreshToken();
+        if (refreshToken == null || refreshToken.isEmpty) {
+          refreshToken = await _storageService.getToken();
+        }
       } catch (_) {
         refreshToken = null;
       }
 
       if (refreshToken == null || refreshToken.isEmpty) {
-        // No refresh token available, session is expired
+        // No token available, session is expired
         await _handleAuthFailure();
         return handler.next(err);
       }
 
-      // Attempt token refresh
+      // Attempt token refresh with header and body compatibility
       try {
         final refreshResponse = await _refreshDio.post(
           ApiEndpoints.refreshToken,
-          data: {'refresh_token': refreshToken},
+          data: {
+            'refresh_token': refreshToken,
+            'token': refreshToken,
+          },
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $refreshToken',
+            },
+          ),
         );
 
         final newTokens = _extractTokens(refreshResponse.data);
         if (newTokens != null) {
+          final effectiveRefreshToken =
+              newTokens.refreshToken ?? newTokens.accessToken;
           await _storageService.saveTokens(
             accessToken: newTokens.accessToken,
-            refreshToken: newTokens.refreshToken,
+            refreshToken: effectiveRefreshToken,
           );
 
           // Update header and retry the original request
@@ -97,7 +110,7 @@ class AuthInterceptor extends QueuedInterceptor {
         }
       } catch (refreshErr) {
         if (kDebugMode) {
-          debugPrint('🔒 [AUTH INTERCEPTOR] Token refresh failed: $refreshErr');
+          debugPrint('[AUTH INTERCEPTOR] Token refresh failed: $refreshErr');
         }
         await _handleAuthFailure();
         return handler.next(err);

@@ -3,6 +3,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/utils/image_url_formatter.dart';
 import '../models/product.dart';
+import '../models/product_review.dart';
 import '../models/product_suggestion.dart';
 
 class PaginatedProductsResponse {
@@ -230,6 +231,57 @@ class ProductRepository {
           .toList();
     }
     return <Product>[];
+  }
+
+  /// Fetches a single product by slug from GET /api/products/{slug}.
+  Future<Product?> fetchProductDetail(String slug) async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.productDetail(slug));
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final rawItem = data['data'] ?? data['product'] ?? data;
+        if (rawItem is Map) {
+          final baseUrl = _apiClient.dio.options.baseUrl;
+          return _parseProduct(rawItem, baseUrl);
+        }
+      }
+    } catch (_) {
+      // Fallback or network error
+    }
+    return null;
+  }
+
+  /// Fetches approved customer reviews for a product by slug.
+  Future<ProductReviewsResult> fetchProductReviews(String slug) async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.productReviews(slug));
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return ProductReviewsResult.fromJson(data);
+      }
+    } catch (_) {}
+    return const ProductReviewsResult();
+  }
+
+  /// Submits a customer review for a product by slug. Requires authentication.
+  Future<bool> submitProductReview(
+    String slug, {
+    required int rating,
+    String? review,
+  }) async {
+    final payload = <String, dynamic>{
+      'rating': rating,
+      if (review != null && review.trim().isNotEmpty) 'review': review.trim(),
+    };
+    final response = await _apiClient.post(
+      ApiEndpoints.productReviews(slug),
+      data: payload,
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data['status'] == true;
+    }
+    return false;
   }
 
   Product _parseProduct(dynamic item, String baseUrl) {

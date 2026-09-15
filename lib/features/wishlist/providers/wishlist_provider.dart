@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/api/providers.dart';
 import '../../products/models/product.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -36,7 +37,7 @@ class Wishlist extends _$Wishlist {
   Future<void> _syncWithApi(int userId) async {
     try {
       final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.get<Map<String, dynamic>>('/wishlist');
+      final response = await apiClient.get<Map<String, dynamic>>(ApiEndpoints.wishlist);
       final data = response.data;
 
       if (data != null && data['data'] is List) {
@@ -58,7 +59,7 @@ class Wishlist extends _$Wishlist {
       final apiClient = ref.read(apiClientProvider);
       final body = <String, dynamic>{'product_id': productId};
       if (action != null) body['action'] = action;
-      await apiClient.post('/wishlist/toggle', data: body);
+      await apiClient.post(ApiEndpoints.wishlistToggle, data: body);
     } catch (_) {
       // Silently catch to ensure optimistic UI does not break
     }
@@ -67,7 +68,7 @@ class Wishlist extends _$Wishlist {
   Future<void> _apiRemove(int productId) async {
     try {
       final apiClient = ref.read(apiClientProvider);
-      await apiClient.delete('/wishlist/$productId');
+      await apiClient.delete(ApiEndpoints.wishlistDelete(productId));
     } catch (_) {
       // Silently catch
     }
