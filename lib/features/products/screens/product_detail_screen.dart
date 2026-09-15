@@ -448,8 +448,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               _buildStepperBtn(
                                 icon: Icons.remove_rounded,
                                 onTap: () {
-                                  if (_quantity > 1)
+                                  if (_quantity > 1) {
                                     setState(() => _quantity--);
+                                  }
                                 },
                                 theme: theme,
                               ),
