@@ -70,7 +70,9 @@ void main() {
     });
 
     test('onError deletes token when status is 401', () async {
+      when(() => mockStorageService.getRefreshToken()).thenAnswer((_) async => null);
       when(() => mockStorageService.deleteToken()).thenAnswer((_) async => {});
+      when(() => mockStorageService.clearTokens()).thenAnswer((_) async => {});
 
       final interceptor = dio.interceptors.last;
       final requestOptions = RequestOptions(path: '/test');
@@ -92,7 +94,7 @@ void main() {
 
       await completer.future;
 
-      verify(() => mockStorageService.deleteToken()).called(1);
+      verify(() => mockStorageService.clearTokens()).called(1);
       verify(() => handler.next(dioException)).called(1);
     });
   });

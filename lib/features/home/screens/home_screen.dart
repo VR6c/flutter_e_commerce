@@ -16,8 +16,8 @@ import '../../../shared/widgets/product_card.dart';
 import '../../../shared/widgets/user_avatar.dart';
 
 import '../../auth/providers/auth_provider.dart';
-import '../../categories/models/category.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../categories/providers/category_products_provider.dart';
 import '../../../core/router/app_routes.dart';
 import '../models/banner.dart';
 import '../providers/banner_provider.dart';
@@ -30,7 +30,6 @@ import '../../products/providers/product_provider.dart';
 import '../../products/providers/product_suggestions_provider.dart';
 import '../../products/widgets/search_suggestion_overlay.dart';
 import '../../../shared/providers/bottom_nav_scroll_provider.dart';
-import '../../../core/storage/local_cache_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -67,7 +66,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     _searchFocusNode.addListener(_onSearchFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _warmCategoryCache();
+      final categories = ref.read(categoriesProvider).valueOrNull ?? [];
+      ref.read(categoryProductsProvider.notifier).warmCache(categories);
     });
   }
 
@@ -111,203 +111,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  // Category-specific products cache and pagination
-  final Map<int, List<Product>> _categoryProducts = {};
-  final Map<int, int> _categoryCurrentPage = {};
-  final Map<int, int> _categoryLastPage = {};
-  bool _isLoadingCategory = false;
-  bool _isLoadingMoreCategory = false;
-
-  Category? _findCategory(String? slug, List<Category> categories) {
-    if (slug == null) return null;
-    final s = slug.toLowerCase().trim();
-    final sClean = s.replaceAll(_alphanumericRegex, '');
-    for (final c in categories) {
-      final cSlug = c.slug.toLowerCase().trim();
-      final cName = c.name.toLowerCase().trim();
-      if (cSlug == s ||
-          cName == s ||
-          cSlug.replaceAll(_alphanumericRegex, '') == sClean ||
-          cName.replaceAll(_alphanumericRegex, '') == sClean) {
-        return c;
-      }
-      for (final child in c.children) {
-        final childSlug = child.slug.toLowerCase().trim();
-        final childName = child.name.toLowerCase().trim();
-        if (childSlug == s ||
-            childName == s ||
-            childSlug.replaceAll(_alphanumericRegex, '') == sClean ||
-            childName.replaceAll(_alphanumericRegex, '') == sClean) {
-          return Category(
-            id: child.id,
-            slug: child.slug,
-            name: child.name,
-            description: child.description,
-            imageUrl: child.imageUrl,
-            children: const [],
-          );
-        }
-      }
-    }
-    return null;
-  }
-
-  Future<void> _fetchCategoryProducts(
-    int categoryId, {
-    int page = 1,
-    bool isSilent = false,
-  }) async {
-    if (page == 1) {
-      if (!isSilent) {
-        setState(() => _isLoadingCategory = true);
-      }
-    } else {
-      if (_isLoadingMoreCategory) return;
-      setState(() => _isLoadingMoreCategory = true);
-    }
-
-    try {
-      final repository = ref.read(productRepositoryProvider);
-      final cacheService = ref.read(localCacheServiceProvider);
-      final response = await repository.fetchProductsPage(
-        page: page,
-        perPage: 20,
-        categoryId: categoryId,
-      );
-
-      if (!mounted) return;
-      final current = _categoryProducts[categoryId] ?? [];
-      final existingIds = current.map((p) => p.id).toSet();
-      final newItems =
-          response.products.where((p) => !existingIds.contains(p.id)).toList();
-
-      setState(() {
-        _categoryProducts[categoryId] =
-            page == 1 ? response.products : [...current, ...newItems];
-        _categoryCurrentPage[categoryId] = response.currentPage;
-        _categoryLastPage[categoryId] = response.lastPage;
-        _isLoadingCategory = false;
-        _isLoadingMoreCategory = false;
-      });
-
-      if (page == 1 && response.products.isNotEmpty) {
-        await cacheService.saveCachedCategoryProducts(categoryId, response.products);
-      }
-    } catch (e) {
-      debugPrint('Error fetching products for category $categoryId: $e');
-      if (mounted) {
-        setState(() {
-          _isLoadingCategory = false;
-          _isLoadingMoreCategory = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _warmCategoryCache() async {
-    final cacheService = ref.read(localCacheServiceProvider);
-    final categories = ref.read(categoriesProvider).valueOrNull ?? [];
-    for (final cat in categories) {
-      if (!_categoryProducts.containsKey(cat.id)) {
-        final cached = await cacheService.getCachedCategoryProducts(cat.id);
-        if (cached != null && cached.isNotEmpty && mounted) {
-          setState(() {
-            _categoryProducts[cat.id] = cached;
-          });
-        }
-      }
-    }
-  }
-
-  Future<void> _onCategorySelected(String? slug) async {
+  void _onCategorySelected(String? slug) {
     setState(() {
       _selectedCategorySlug = slug;
     });
     if (slug == null) return;
 
     final categories = ref.read(categoriesProvider).valueOrNull ?? [];
-    final cat = _findCategory(slug, categories);
+    final cat = CategoryProductsNotifier.findCategory(slug, categories);
     if (cat == null) return;
 
-    final categoryId = cat.id;
-    final cacheService = ref.read(localCacheServiceProvider);
-
-    // 1. In-memory check: 0ms instant display!
-    if (_categoryProducts.containsKey(categoryId) &&
-        _categoryProducts[categoryId]!.isNotEmpty) {
-      _fetchCategoryProducts(categoryId, page: 1, isSilent: true);
-      return;
-    }
-
-    // 2. Persistent disk cache check: < 10ms instant display!
-    final diskCached = await cacheService.getCachedCategoryProducts(categoryId);
-    if (diskCached != null && diskCached.isNotEmpty && mounted) {
-      setState(() {
-        _categoryProducts[categoryId] = diskCached;
-        _isLoadingCategory = false;
-      });
-      _fetchCategoryProducts(categoryId, page: 1, isSilent: true);
-      return;
-    }
-
-    // 3. Fallback to all-products cache
-    final allProducts = ref.read(productsProvider).valueOrNull ??
-        await cacheService.getCachedProducts() ??
-        [];
-    final localMatches = _extractLocalMatchesForCategory(cat, allProducts);
-    if (localMatches.isNotEmpty && mounted) {
-      setState(() {
-        _categoryProducts[categoryId] = localMatches;
-        _isLoadingCategory = false;
-      });
-      _fetchCategoryProducts(categoryId, page: 1, isSilent: true);
-      return;
-    }
-
-    // 4. Cold start fetch
-    _fetchCategoryProducts(categoryId, page: 1, isSilent: false);
-  }
-
-  List<Product> _extractLocalMatchesForCategory(
-    Category category,
-    List<Product> allProducts,
-  ) {
-    final target = category.slug.toLowerCase().trim();
-    final targetName = category.name.toLowerCase().trim();
-    final targetClean = target.replaceAll(_alphanumericRegex, '');
-    final targetNameClean = targetName.replaceAll(_alphanumericRegex, '');
-
-    final matchingSlugs = <String>{
-      target,
-      targetName,
-      targetClean,
-      targetNameClean,
-    };
-
-    for (final child in category.children) {
-      final cSlug = child.slug.toLowerCase().trim();
-      final cName = child.name.toLowerCase().trim();
-      matchingSlugs.addAll([
-        cSlug,
-        cName,
-        cSlug.replaceAll(_alphanumericRegex, ''),
-        cName.replaceAll(_alphanumericRegex, ''),
-      ]);
-    }
-
-    return allProducts.where((p) {
-      final cat = p.category.toLowerCase().trim();
-      final catClean = cat.replaceAll(_alphanumericRegex, '');
-      return matchingSlugs.contains(cat) ||
-          matchingSlugs.contains(catClean) ||
-          matchingSlugs.any(
-            (slug) =>
-                (slug.length >= 3 &&
-                    (cat.contains(slug) || slug.contains(cat))) ||
-                (slug.length >= 3 &&
-                    (catClean.contains(slug) || slug.contains(catClean))),
-          );
-    }).toList();
+    ref.read(categoryProductsProvider.notifier).selectCategory(cat);
   }
 
   List<Product> _getFilteredProducts(
@@ -762,9 +576,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onRefresh: () async {
           if (_selectedCategorySlug != null) {
             final categories = ref.read(categoriesProvider).valueOrNull ?? [];
-            final cat = _findCategory(_selectedCategorySlug, categories);
+            final cat =
+                CategoryProductsNotifier.findCategory(_selectedCategorySlug, categories);
             if (cat != null) {
-              await _fetchCategoryProducts(cat.id, page: 1);
+              await ref
+                  .read(categoryProductsProvider.notifier)
+                  .fetchCategoryProducts(cat.id, page: 1);
             }
           }
           await Future.wait([
@@ -780,13 +597,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               if (_selectedCategorySlug != null) {
                 final categories =
                     ref.read(categoriesProvider).valueOrNull ?? [];
-                final cat = _findCategory(_selectedCategorySlug, categories);
+                final cat =
+                    CategoryProductsNotifier.findCategory(_selectedCategorySlug, categories);
                 if (cat != null) {
-                  final cur = _categoryCurrentPage[cat.id] ?? 1;
-                  final last = _categoryLastPage[cat.id] ?? 1;
-                  if (cur < last && !_isLoadingMoreCategory) {
-                    _fetchCategoryProducts(cat.id, page: cur + 1);
-                  }
+                  ref.read(categoryProductsProvider.notifier).loadMore(cat.id);
                 }
               } else {
                 ref.read(productsProvider.notifier).loadMore();
@@ -1658,12 +1472,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   final categories =
                       ref.read(categoriesProvider).valueOrNull ?? [];
                   final selectedCat =
-                      _findCategory(_selectedCategorySlug, categories);
+                      CategoryProductsNotifier.findCategory(_selectedCategorySlug, categories);
 
                   if (selectedCat != null) {
-                    if (_isLoadingCategory &&
-                        (!_categoryProducts.containsKey(selectedCat.id) ||
-                            _categoryProducts[selectedCat.id]!.isEmpty)) {
+                    final catState = ref.watch(categoryProductsProvider);
+                    final catProducts = catState.productsFor(selectedCat.id);
+                    final isLoadingCategory = catState.isLoading(selectedCat.id);
+
+                    if (isLoadingCategory && catProducts.isEmpty) {
                       return SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         sliver: SliverGrid(
@@ -1682,8 +1498,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       );
                     }
 
-                    final catProducts =
-                        _categoryProducts[selectedCat.id] ?? [];
                     final filtered = _getFilteredProducts(
                       catProducts,
                       filterCategory: false,
@@ -1829,8 +1643,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Loading more indicator
               Consumer(
                 builder: (context, ref, _) {
-                  final isCategoryLoadingMore =
-                      _selectedCategorySlug != null && _isLoadingMoreCategory;
+                  final catState = ref.watch(categoryProductsProvider);
+                  final selectedCat = _selectedCategorySlug != null
+                      ? CategoryProductsNotifier.findCategory(
+                          _selectedCategorySlug,
+                          ref.read(categoriesProvider).valueOrNull ?? [],
+                        )
+                      : null;
+                  final isCategoryLoadingMore = selectedCat != null &&
+                      catState.isLoadingMore(selectedCat.id);
                   final isLoadingMore = isCategoryLoadingMore ||
                       ref.watch(isProductsLoadingMoreProvider);
                   if (!isLoadingMore) {

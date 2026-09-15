@@ -13,6 +13,7 @@ import 'package:flutter_e_commerce/features/profile/models/social_media_link.dar
 import 'package:flutter_e_commerce/features/profile/providers/social_media_link_provider.dart';
 import 'package:flutter_e_commerce/features/profile/screens/profile_screen.dart';
 import 'package:flutter_e_commerce/features/wishlist/providers/wishlist_provider.dart';
+import 'package:flutter_e_commerce/core/localization/app_localizations.dart';
 
 class TestAuthStateNotifier extends AuthState {
   final Customer? _initialCustomer;
@@ -99,7 +100,11 @@ void main() {
         wishlistProvider.overrideWith(() => TestWishlistNotifier()),
         cartProvider.overrideWith(() => TestCartNotifier()),
       ],
-      child: const MaterialApp(home: ProfileScreen()),
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const ProfileScreen(),
+      ),
     );
   }
 
@@ -110,7 +115,7 @@ void main() {
 
       expect(find.text('My Profile'), findsOneWidget);
       expect(find.text('Welcome to TVR'), findsOneWidget);
-      expect(find.text('Sign In'), findsOneWidget);
+      expect(find.text('Log In'), findsOneWidget);
       expect(find.text('Create Account'), findsOneWidget);
       expect(find.text('Live Tracking'), findsOneWidget);
       expect(find.text('Synced Wishlist'), findsOneWidget);
@@ -147,7 +152,7 @@ void main() {
         expect(find.text('SHOPPING & ACCOUNT'), findsOneWidget);
         expect(find.text('Delivery Addresses'), findsOneWidget);
         expect(find.text('Payment Methods'), findsOneWidget);
-        expect(find.text('PREFERENCES'), findsOneWidget);
+        expect(find.text('SETTINGS & PREFERENCES'), findsOneWidget);
         expect(find.text('SUPPORT & LEGAL'), findsOneWidget);
         expect(find.text('CONNECT WITH US'), findsOneWidget);
 

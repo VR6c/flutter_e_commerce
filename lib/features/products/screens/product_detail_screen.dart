@@ -515,7 +515,26 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               alpha: 0.15,
                             ),
                             onSelected: (val) {
-                              if (val) setState(() => _selectedColor = color);
+                              if (val) {
+                                setState(() {
+                                  _selectedColor = color;
+                                  final newSizes = _variants
+                                      .where((v) => _attr(v, 'Color') == color)
+                                      .map((v) => _attr(v, 'Size') ?? '')
+                                      .where((s) => s.isNotEmpty)
+                                      .toSet()
+                                      .toList();
+                                  if (_selectedSize != null &&
+                                      !newSizes.contains(_selectedSize)) {
+                                    _selectedSize = newSizes.isNotEmpty
+                                        ? newSizes.first
+                                        : null;
+                                  } else if (_selectedSize == null &&
+                                      newSizes.isNotEmpty) {
+                                    _selectedSize = newSizes.first;
+                                  }
+                                });
+                              }
                             },
                           );
                         }).toList(),
@@ -683,9 +702,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 icon: const Icon(Icons.shopping_bag_rounded, size: 20),
                 label: Text(
                   _inStock
-                      ? (context.l10n.isKhmer
-                            ? 'ទិញឥឡូវនេះ · \$${(_displayPrice * _quantity).toStringAsFixed(2)}'
-                            : 'Buy Now · \$${(_displayPrice * _quantity).toStringAsFixed(2)}')
+                      ? '${context.l10n.addToCart} · \$${(_displayPrice * _quantity).toStringAsFixed(2)}'
                       : context.l10n.outOfStock,
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,

@@ -14,6 +14,7 @@ class MockSecureStorageService extends Mock implements SecureStorageService {}
 class MockRequestInterceptorHandler extends Mock implements RequestInterceptorHandler {}
 class MockErrorInterceptorHandler extends Mock implements ErrorInterceptorHandler {}
 class FakeRequestOptions extends Fake implements RequestOptions {}
+class FakeDioException extends Fake implements DioException {}
 
 class DummyItem {
   final int id;
@@ -32,6 +33,7 @@ class DummyItem {
 void main() {
   setUpAll(() {
     registerFallbackValue(FakeRequestOptions());
+    registerFallbackValue(FakeDioException());
   });
 
   group('Pagination Parsing', () {
@@ -173,6 +175,7 @@ void main() {
 
       when(() => mockStorage.deleteToken()).thenAnswer((_) async {});
       when(() => mockStorage.deleteRefreshToken()).thenAnswer((_) async {});
+      when(() => mockStorage.clearTokens()).thenAnswer((_) async {});
 
       final interceptor = AuthInterceptor(
         storageService: mockStorage,
@@ -200,7 +203,7 @@ void main() {
 
       // Must NOT call refreshDio
       verifyNever(() => mockRefreshDio.post(any(), data: any(named: 'data')));
-      verify(() => mockStorage.deleteToken()).called(1);
+      verify(() => mockStorage.clearTokens()).called(1);
     });
   });
 }

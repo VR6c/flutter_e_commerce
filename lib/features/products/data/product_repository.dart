@@ -235,6 +235,7 @@ class ProductRepository {
   Product _parseProduct(dynamic item, String baseUrl) {
     final json = Map<String, dynamic>.from(item as Map);
     try {
+      json['id'] = int.tryParse(json['id']?.toString() ?? '0') ?? 0;
       json['slug'] ??= '';
       json['name'] ??= 'Unnamed Product';
       json['short_description'] ??= '';

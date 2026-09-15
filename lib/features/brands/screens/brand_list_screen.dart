@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../providers/brand_provider.dart';
@@ -100,7 +101,15 @@ class BrandListScreen extends ConsumerWidget {
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        context.push(
+                          AppRoutes.categoryProducts,
+                          extra: {
+                            'categoryName': brand.name,
+                            'categorySlugs': [brand.slug, brand.name],
+                          },
+                        );
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(

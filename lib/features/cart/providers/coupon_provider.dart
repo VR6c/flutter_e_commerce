@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/app_exception.dart';
 import '../../../core/api/providers.dart';
 
 /// State for the coupon step in checkout.
@@ -91,10 +92,14 @@ class CouponNotifier extends StateNotifier<CouponState> {
           discountAmount: 0.0,
         );
       }
+    } on AppException catch (e) {
+      state = state.copyWith(
+        errorMessage: e.message,
+        isApplied: false,
+        isLoading: false,
+        discountAmount: 0.0,
+      );
     } on DioException catch (e) {
-      // The API returns 422 with a JSON body for invalid/expired coupons.
-      // Pull the message out of the error response instead of showing the
-      // generic fallback.
       final errorData = e.response?.data;
       final message = (errorData is Map<String, dynamic>
               ? errorData['message'] as String?

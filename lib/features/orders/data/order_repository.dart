@@ -8,16 +8,22 @@ class OrderRepository {
   OrderRepository(this._apiClient);
 
   Future<List<Order>> fetchOrders() async {
-    final response = await _apiClient.get<Map<String, dynamic>>('/orders');
+    final response = await _apiClient.get('/orders');
     final data = response.data;
     if (data == null) return [];
 
     // Handle both { data: [...] } and direct list responses
     final List<dynamic> raw;
-    if (data['data'] is List) {
-      raw = data['data'] as List<dynamic>;
-    } else if (data['orders'] is List) {
-      raw = data['orders'] as List<dynamic>;
+    if (data is List) {
+      raw = data;
+    } else if (data is Map<String, dynamic>) {
+      if (data['data'] is List) {
+        raw = data['data'] as List<dynamic>;
+      } else if (data['orders'] is List) {
+        raw = data['orders'] as List<dynamic>;
+      } else {
+        raw = [];
+      }
     } else {
       raw = [];
     }

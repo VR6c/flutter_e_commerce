@@ -45,15 +45,6 @@ class Wishlist extends _$Wishlist {
             .map((e) => Product.fromJson(e as Map<String, dynamic>))
             .toList();
 
-        // If local cache has items not yet on the server, push them to the server
-        final serverIds = serverProducts.map((p) => p.id).toSet();
-        for (final localProduct in state) {
-          if (!serverIds.contains(localProduct.id)) {
-            await _apiToggle(localProduct.id, action: 'add');
-            serverProducts.add(localProduct);
-          }
-        }
-
         state = serverProducts;
         await _persistWishlist(serverProducts);
       }
@@ -147,9 +138,9 @@ class Wishlist extends _$Wishlist {
     state = [];
     _persistWishlist([]);
 
-    // Sync with backend API
-    for (final id in currentIds) {
-      _apiRemove(id);
+    // Sync with backend API in parallel
+    if (currentIds.isNotEmpty) {
+      Future.wait(currentIds.map((id) => _apiRemove(id)));
     }
   }
 

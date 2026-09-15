@@ -14,8 +14,8 @@ import '../../products/models/product.dart';
 import '../../products/providers/product_provider.dart';
 import '../models/category.dart';
 import '../providers/category_provider.dart';
+import '../providers/category_products_provider.dart';
 import '../../../shared/providers/bottom_nav_scroll_provider.dart';
-import '../../../core/storage/local_cache_service.dart';
 
 /// All Products screen listing all store items with category filtering, search, and sorting.
 class AllProductsScreen extends ConsumerStatefulWidget {
@@ -40,145 +40,16 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
   String? _selectedCategorySlug;
   SortOption _sortBy = SortOption.none;
 
-  // Per-category products state fetched on-demand from server
-  final Map<int, List<Product>> _categoryProducts = {};
-  final Map<int, int> _categoryCurrentPage = {};
-  final Map<int, int> _categoryLastPage = {};
-  bool _isLoadingCategory = false;
-  bool _isLoadingMoreCategory = false;
-
   // Memoization cache
   List<Product>? _cachedOriginal;
   List<Product> _cachedFiltered = [];
   String _lastQuery = '';
   String? _lastCategory;
   SortOption _lastSort = SortOption.none;
-
   static final _alphanumericRegex = RegExp(r'[^a-z0-9]');
 
-  Category? _findCategory(String? slug, List<Category> categories) {
-    if (slug == null) return null;
-    final s = slug.toLowerCase().trim();
-    final sClean = s.replaceAll(_alphanumericRegex, '');
-    for (final c in categories) {
-      final cSlug = c.slug.toLowerCase().trim();
-      final cName = c.name.toLowerCase().trim();
-      if (cSlug == s ||
-          cName == s ||
-          cSlug.replaceAll(_alphanumericRegex, '') == sClean ||
-          cName.replaceAll(_alphanumericRegex, '') == sClean) {
-        return c;
-      }
-    }
-    return null;
-  }
-
-  Future<void> _fetchCategoryProducts(
-    int categoryId, {
-    int page = 1,
-    bool isSilent = false,
-  }) async {
-    if (page == 1) {
-      if (!isSilent) {
-        setState(() => _isLoadingCategory = true);
-      }
-    } else {
-      if (_isLoadingMoreCategory) return;
-      setState(() => _isLoadingMoreCategory = true);
-    }
-
-    try {
-      final repository = ref.read(productRepositoryProvider);
-      final cacheService = ref.read(localCacheServiceProvider);
-      final response = await repository.fetchProductsPage(
-        page: page,
-        perPage: 20,
-        categoryId: categoryId,
-      );
-
-      if (!mounted) return;
-      final current = _categoryProducts[categoryId] ?? [];
-      final existingIds = current.map((p) => p.id).toSet();
-      final newItems = response.products.where((p) => !existingIds.contains(p.id)).toList();
-
-      setState(() {
-        _categoryProducts[categoryId] = page == 1 ? response.products : [...current, ...newItems];
-        _categoryCurrentPage[categoryId] = response.currentPage;
-        _categoryLastPage[categoryId] = response.lastPage;
-        _isLoadingCategory = false;
-        _isLoadingMoreCategory = false;
-      });
-
-      if (page == 1 && response.products.isNotEmpty) {
-        await cacheService.saveCachedCategoryProducts(categoryId, response.products);
-      }
-    } catch (e) {
-      debugPrint('Error fetching products for category $categoryId: $e');
-      if (mounted) {
-        setState(() {
-          _isLoadingCategory = false;
-          _isLoadingMoreCategory = false;
-        });
-      }
-    }
-  }
-
-  List<Product> _extractLocalMatchesForCategory(
-    Category category,
-    List<Product> allProducts,
-  ) {
-    final target = category.slug.toLowerCase().trim();
-    final targetName = category.name.toLowerCase().trim();
-    final targetClean = target.replaceAll(_alphanumericRegex, '');
-    final targetNameClean = targetName.replaceAll(_alphanumericRegex, '');
-
-    final matchingSlugs = <String>{
-      target,
-      targetName,
-      targetClean,
-      targetNameClean,
-    };
-
-    for (final child in category.children) {
-      final cSlug = child.slug.toLowerCase().trim();
-      final cName = child.name.toLowerCase().trim();
-      matchingSlugs.addAll([
-        cSlug,
-        cName,
-        cSlug.replaceAll(_alphanumericRegex, ''),
-        cName.replaceAll(_alphanumericRegex, ''),
-      ]);
-    }
-
-    return allProducts.where((p) {
-      final cat = p.category.toLowerCase().trim();
-      final catClean = cat.replaceAll(_alphanumericRegex, '');
-      return matchingSlugs.contains(cat) ||
-          matchingSlugs.contains(catClean) ||
-          matchingSlugs.any(
-            (slug) =>
-                (slug.length >= 3 &&
-                    (cat.contains(slug) || slug.contains(cat))) ||
-                (slug.length >= 3 &&
-                    (catClean.contains(slug) || slug.contains(catClean))),
-          );
-    }).toList();
-  }
-
-  Future<void> _warmCategoryCache() async {
-    final cacheService = ref.read(localCacheServiceProvider);
-    final categories = ref.read(categoriesProvider).valueOrNull ?? [];
-    for (final cat in categories) {
-      if (!_categoryProducts.containsKey(cat.id)) {
-        final cached = await cacheService.getCachedCategoryProducts(cat.id);
-        if (cached != null && cached.isNotEmpty && mounted) {
-          setState(() {
-            _categoryProducts[cat.id] = cached;
-          });
-        }
-      }
-    }
-  }
+  Category? _findCategory(String? slug, List<Category> categories) =>
+      CategoryProductsNotifier.findCategory(slug, categories);
 
   Future<void> _selectCategoryWithCache(Category category) async {
     final isSelected = _selectedCategorySlug == category.slug ||
@@ -208,43 +79,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
       return;
     }
 
-    final categoryId = category.id;
-    final cacheService = ref.read(localCacheServiceProvider);
-
-    // 1. In-memory cache hit: 0ms instant display!
-    if (_categoryProducts.containsKey(categoryId) &&
-        _categoryProducts[categoryId]!.isNotEmpty) {
-      _fetchCategoryProducts(categoryId, page: 1, isSilent: true);
-      return;
-    }
-
-    // 2. Persistent disk cache hit (SharedPreferences): < 10ms instant display!
-    final diskCached = await cacheService.getCachedCategoryProducts(categoryId);
-    if (diskCached != null && diskCached.isNotEmpty && mounted) {
-      setState(() {
-        _categoryProducts[categoryId] = diskCached;
-        _isLoadingCategory = false;
-      });
-      _fetchCategoryProducts(categoryId, page: 1, isSilent: true);
-      return;
-    }
-
-    // 3. Fallback: extract matches from all-products cache
-    final allProducts = ref.read(productsProvider).valueOrNull ??
-        await cacheService.getCachedProducts() ??
-        [];
-    final localMatches = _extractLocalMatchesForCategory(category, allProducts);
-    if (localMatches.isNotEmpty && mounted) {
-      setState(() {
-        _categoryProducts[categoryId] = localMatches;
-        _isLoadingCategory = false;
-      });
-      _fetchCategoryProducts(categoryId, page: 1, isSilent: true);
-      return;
-    }
-
-    // 4. Cold start: fetch page 1 with skeleton shimmer
-    _fetchCategoryProducts(categoryId, page: 1, isSilent: false);
+    await ref.read(categoryProductsProvider.notifier).selectCategory(category);
   }
 
   @override
@@ -252,9 +87,9 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
     super.initState();
     _selectedCategorySlug = widget.initialCategorySlug;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _warmCategoryCache();
+      final categories = ref.read(categoriesProvider).valueOrNull ?? [];
+      ref.read(categoryProductsProvider.notifier).warmCache(categories);
       if (_selectedCategorySlug != null) {
-        final categories = ref.read(categoriesProvider).valueOrNull ?? [];
         final cat = _findCategory(_selectedCategorySlug, categories);
         if (cat != null) {
           _selectCategoryWithCache(cat);
@@ -839,7 +674,9 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                 final categories = categoriesState.valueOrNull ?? <Category>[];
                 final selectedCat = _findCategory(_selectedCategorySlug, categories);
                 if (selectedCat != null) {
-                  await _fetchCategoryProducts(selectedCat.id, page: 1);
+                  await ref
+                      .read(categoryProductsProvider.notifier)
+                      .fetchCategoryProducts(selectedCat.id, page: 1);
                 } else {
                   await Future.wait([
                     ref.read(productsProvider.notifier).refresh(),
@@ -853,11 +690,9 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                     final categories = categoriesState.valueOrNull ?? <Category>[];
                     final selectedCat = _findCategory(_selectedCategorySlug, categories);
                     if (selectedCat != null) {
-                      final cur = _categoryCurrentPage[selectedCat.id] ?? 1;
-                      final last = _categoryLastPage[selectedCat.id] ?? 1;
-                      if (cur < last && !_isLoadingMoreCategory) {
-                        _fetchCategoryProducts(selectedCat.id, page: cur + 1);
-                      }
+                      ref
+                          .read(categoryProductsProvider.notifier)
+                          .loadMore(selectedCat.id);
                     } else {
                       ref.read(productsProvider.notifier).loadMore();
                     }
@@ -868,18 +703,19 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                   builder: (context) {
                     final categories = categoriesState.valueOrNull ?? <Category>[];
                     final selectedCat = _findCategory(_selectedCategorySlug, categories);
+                    final catState = ref.watch(categoryProductsProvider);
 
                     if (selectedCat != null) {
-                      final hasCachedItems = _categoryProducts.containsKey(selectedCat.id) &&
-                          _categoryProducts[selectedCat.id]!.isNotEmpty;
-                      if (_isLoadingCategory && !hasCachedItems) {
+                      final catItems = catState.productsFor(selectedCat.id);
+                      final isCatLoading =
+                          catState.isLoading(selectedCat.id) && catItems.isEmpty;
+                      if (isCatLoading) {
                         return const _ProductGridShimmer();
                       }
-                      final catItems = _categoryProducts[selectedCat.id] ?? [];
                       final filtered = _getFilteredProducts(catItems, filterCategory: false);
                       return _buildProductGrid(
                         filtered,
-                        isLoadingMore: _isLoadingMoreCategory,
+                        isLoadingMore: catState.isLoadingMore(selectedCat.id),
                         theme: theme,
                         hasActiveFilter: hasActiveFilter,
                       );

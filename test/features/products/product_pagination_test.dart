@@ -123,5 +123,36 @@ void main() {
 
       verify(() => mockCacheService.saveCachedProducts(any())).called(greaterThanOrEqualTo(2));
     });
+
+    test('fetchProductsPage normalizes string and numeric id safely', () async {
+      when(() => mockApiClient.get('/products', queryParameters: {'page': 1, 'per_page': 20})).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/products'),
+          data: {
+            'data': [
+              {
+                'id': '99',
+                'slug': 'product-99',
+                'name': 'String ID Product',
+                'short_description': 'Description',
+                'price': 49.99,
+                'thumbnail': '/uploads/p99.png',
+                'category': 'Shoes',
+              }
+            ],
+            'meta': {
+              'current_page': 1,
+              'last_page': 1,
+              'total': 1,
+            },
+          },
+          statusCode: 200,
+        ),
+      );
+
+      final res = await repository.fetchProductsPage(page: 1);
+      expect(res.products.length, 1);
+      expect(res.products.first.id, 99);
+    });
   });
 }

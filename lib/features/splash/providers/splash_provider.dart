@@ -59,7 +59,7 @@ class SplashNotifier extends StateNotifier<SplashState> {
       }
 
       // 1. Session & Auth pre-warming
-      state = state.copyWith(message: 'Wait a minutes...');
+      state = state.copyWith(message: 'Loading...');
       try {
         await _ref
             .read(authStateProvider.future)
