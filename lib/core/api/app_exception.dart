@@ -1,16 +1,11 @@
 import 'package:dio/dio.dart';
 
-/// Base exception class for all API and networking errors.
 class AppException implements Exception {
   final String message;
   final int? statusCode;
   final Map<String, dynamic>? errors;
 
-  const AppException({
-    required this.message,
-    this.statusCode,
-    this.errors,
-  });
+  const AppException({required this.message, this.statusCode, this.errors});
 
   factory AppException.fromDioException(DioException dioException) {
     switch (dioException.type) {
@@ -22,13 +17,12 @@ class AppException implements Exception {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return TimeoutException(
-          message: _getTimeoutMessage(dioException.type),
-        );
+        return TimeoutException(message: _getTimeoutMessage(dioException.type));
 
       case DioExceptionType.connectionError:
         return const NetworkException(
-          message: 'No internet connection. Please check your network settings.',
+          message:
+              'No internet connection. Please check your network settings.',
         );
 
       case DioExceptionType.badResponse:
@@ -44,7 +38,8 @@ class AppException implements Exception {
         if (dioException.error != null &&
             dioException.error.toString().contains('SocketException')) {
           return const NetworkException(
-            message: 'No internet connection. Please check your network settings.',
+            message:
+                'No internet connection. Please check your network settings.',
           );
         }
         return UnexpectedException(
@@ -55,7 +50,9 @@ class AppException implements Exception {
 
   static AppException _handleBadResponse(Response? response) {
     if (response == null) {
-      return const UnexpectedException(message: 'Empty response received from server');
+      return const UnexpectedException(
+        message: 'Empty response received from server',
+      );
     }
 
     final statusCode = response.statusCode ?? 500;
@@ -67,7 +64,8 @@ class AppException implements Exception {
       if (data.containsKey('errors') && data['errors'] is Map) {
         rawErrors = data['errors'] as Map<String, dynamic>;
       }
-      message = data['message']?.toString() ??
+      message =
+          data['message']?.toString() ??
           data['error']?.toString() ??
           'Server error occurred';
     } else if (data is String && data.isNotEmpty) {
@@ -84,10 +82,7 @@ class AppException implements Exception {
       case 404:
         return NotFoundException(message: message, errors: rawErrors);
       case 422:
-        return ValidationException(
-          message: message,
-          rawErrors: rawErrors,
-        );
+        return ValidationException(message: message, rawErrors: rawErrors);
       case 500:
       case 502:
       case 503:
@@ -173,11 +168,9 @@ class BadRequestException extends AppException {
 class ValidationException extends AppException {
   final Map<String, List<String>> fieldErrors;
 
-  ValidationException({
-    required super.message,
-    Map<String, dynamic>? rawErrors,
-  })  : fieldErrors = _normalizeValidationErrors(rawErrors),
-        super(statusCode: 422, errors: rawErrors);
+  ValidationException({required super.message, Map<String, dynamic>? rawErrors})
+    : fieldErrors = _normalizeValidationErrors(rawErrors),
+      super(statusCode: 422, errors: rawErrors);
 
   /// Returns the first error message across all fields, useful for a quick banner/toast.
   String? get firstError {
@@ -221,20 +214,15 @@ class ServerException extends AppException {
 
 /// Thrown when client cancels the HTTP request.
 class CancelException extends AppException {
-  const CancelException({
-    required super.message,
-    super.statusCode,
-  });
+  const CancelException({required super.message, super.statusCode});
 }
 
 /// Thrown when deserializing response JSON fails.
 class ParseException extends AppException {
   final dynamic originalData;
 
-  const ParseException({
-    required super.message,
-    this.originalData,
-  }) : super(statusCode: -1);
+  const ParseException({required super.message, this.originalData})
+    : super(statusCode: -1);
 }
 
 /// Thrown when an unexpected error occurs.

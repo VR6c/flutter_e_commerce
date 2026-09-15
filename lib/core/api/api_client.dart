@@ -7,8 +7,6 @@ import 'dio_client.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'pagination/paginated_response.dart';
 
-/// Highly reusable, type-safe API Client wrapping Dio.
-/// Supports generic deserialization, pagination, standard error mapping, and token refresh.
 class ApiClient {
   static const String baseUrl = ApiEndpoints.baseUrl;
 
@@ -16,8 +14,9 @@ class ApiClient {
   final SecureStorageService? _storageService;
 
   ApiClient(this.dio, [this._storageService]) {
-    dio.options.baseUrl =
-        dio.options.baseUrl.isNotEmpty ? dio.options.baseUrl : baseUrl;
+    dio.options.baseUrl = dio.options.baseUrl.isNotEmpty
+        ? dio.options.baseUrl
+        : baseUrl;
     dio.options.connectTimeout ??= const Duration(seconds: 30);
     dio.options.receiveTimeout ??= const Duration(seconds: 30);
     dio.options.sendTimeout ??= const Duration(seconds: 30);
@@ -28,8 +27,9 @@ class ApiClient {
     if (_storageService != null) {
       final hasAuth = dio.interceptors.any((i) => i is AuthInterceptor);
       if (!hasAuth) {
-        final refreshDio =
-            DioClient.createRefreshDio(baseUrl: dio.options.baseUrl);
+        final refreshDio = DioClient.createRefreshDio(
+          baseUrl: dio.options.baseUrl,
+        );
         dio.interceptors.add(
           AuthInterceptor(
             storageService: _storageService,
@@ -40,10 +40,6 @@ class ApiClient {
       }
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Core HTTP Methods returning Response<T> (100% backwards-compatible with Dio)
-  // ---------------------------------------------------------------------------
 
   /// Standard GET request returning [Response<T>].
   Future<Response<T>> get<T>(
@@ -148,10 +144,6 @@ class ApiClient {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Generic Deserialized Model Methods (Automatically parses into Domain Models)
-  // ---------------------------------------------------------------------------
-
   /// Performs a GET request and directly deserializes the response payload into [T].
   Future<T> getModel<T>(
     String path, {
@@ -250,10 +242,6 @@ class ApiClient {
     return _parseData<T>(response.data, fromJson, unwrapData: unwrapData);
   }
 
-  // ---------------------------------------------------------------------------
-  // Generic Pagination
-  // ---------------------------------------------------------------------------
-
   /// Fetches paginated data and deserializes it directly into a [PaginatedResponse<T>].
   Future<PaginatedResponse<T>> getPaginated<T>(
     String path, {
@@ -280,10 +268,6 @@ class ApiClient {
       );
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Envelope & Raw Requests
-  // ---------------------------------------------------------------------------
 
   /// Unified request method returning an [ApiResponse<T>] wrapper.
   Future<ApiResponse<T>> requestEnvelope<T>({

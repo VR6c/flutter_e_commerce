@@ -12,7 +12,6 @@ class DioClient {
   static const Duration defaultTimeout = Duration(seconds: 25);
   static const Duration refreshTimeout = Duration(seconds: 15);
 
-  /// Creates and configures the primary Dio instance with all interceptors.
   static Dio createDio({
     required SecureStorageService storageService,
     VoidCallback? onAuthFailed,
@@ -48,7 +47,6 @@ class DioClient {
     return dio;
   }
 
-  /// Creates a clean, un-intercepted Dio instance strictly for token renewal.
   static Dio createRefreshDio({String? baseUrl}) {
     final dio = Dio(
       BaseOptions(

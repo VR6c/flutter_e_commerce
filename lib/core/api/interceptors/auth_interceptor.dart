@@ -3,12 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../../storage/secure_storage_service.dart';
 import '../api_endpoints.dart';
 
-/// Interceptor that:
-/// 1. Automatically attaches Bearer JWT token to outgoing requests
-/// 2. Catches 401 Unauthorized errors
-/// 3. Queues subsequent requests while refreshing access token via clean refreshDio
-/// 4. Retries failed requests with newly acquired token upon successful refresh
-/// 5. Automatically logs out and clears tokens if refresh fails
 class AuthInterceptor extends QueuedInterceptor {
   final SecureStorageService _storageService;
   final Dio _dio;
@@ -20,9 +14,9 @@ class AuthInterceptor extends QueuedInterceptor {
     required Dio dio,
     required Dio refreshDio,
     this.onAuthFailed,
-  })  : _storageService = storageService,
-        _dio = dio,
-        _refreshDio = refreshDio;
+  }) : _storageService = storageService,
+       _dio = dio,
+       _refreshDio = refreshDio;
 
   @override
   Future<void> onRequest(
@@ -51,7 +45,8 @@ class AuthInterceptor extends QueuedInterceptor {
       final requestPath = err.requestOptions.path;
 
       // Avoid infinite refresh loops if auth endpoints themselves failed with 401
-      final isAuthEndpoint = requestPath.contains(ApiEndpoints.login) ||
+      final isAuthEndpoint =
+          requestPath.contains(ApiEndpoints.login) ||
           requestPath.contains(ApiEndpoints.register) ||
           requestPath.contains(ApiEndpoints.refreshToken) ||
           requestPath.contains('refresh');
@@ -91,7 +86,8 @@ class AuthInterceptor extends QueuedInterceptor {
 
           // Update header and retry the original request
           final retryOptions = err.requestOptions;
-          retryOptions.headers['Authorization'] = 'Bearer ${newTokens.accessToken}';
+          retryOptions.headers['Authorization'] =
+              'Bearer ${newTokens.accessToken}';
 
           final retryResponse = await _dio.fetch(retryOptions);
           return handler.resolve(retryResponse);
@@ -123,7 +119,8 @@ class AuthInterceptor extends QueuedInterceptor {
         ? data['data'] as Map<String, dynamic>
         : data;
 
-    final accessToken = payload['token']?.toString() ??
+    final accessToken =
+        payload['token']?.toString() ??
         payload['access_token']?.toString() ??
         payload['jwt']?.toString();
 
@@ -131,10 +128,7 @@ class AuthInterceptor extends QueuedInterceptor {
 
     final refreshToken = payload['refresh_token']?.toString();
 
-    return _TokenPair(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    );
+    return _TokenPair(accessToken: accessToken, refreshToken: refreshToken);
   }
 }
 

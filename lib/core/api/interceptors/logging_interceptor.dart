@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Clean, structured logger for API requests, responses, and errors.
-/// Active only in debug mode.
 class LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
@@ -39,7 +37,7 @@ class LoggingInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
       debugPrint(
-        '❌ [DIO !! ERROR] ${err.response?.statusCode ?? 'NO_STATUS'} ${err.requestOptions.method} ${err.requestOptions.uri}',
+        '[DIO !! ERROR] ${err.response?.statusCode ?? 'NO_STATUS'} ${err.requestOptions.method} ${err.requestOptions.uri}',
       );
       debugPrint('   Message: ${err.message}');
       if (err.response?.data != null) {

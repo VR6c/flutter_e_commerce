@@ -20,4 +20,8 @@ class ApiEndpoints {
   static const String banners = '/banners';
   static const String coupons = '/coupons';
   static const String socialMediaLinks = '/social-media-links';
+
+  static const String wishlists = '/wishlists';
+  static String wishlistToggle(String productId) =>
+      '/wishlists/$productId/toggle';
 }

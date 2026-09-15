@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import '../app_exception.dart';
 
-/// Interceptor that translates low-level DioExceptions into structured AppExceptions.
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
