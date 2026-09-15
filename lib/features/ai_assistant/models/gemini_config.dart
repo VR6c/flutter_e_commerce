@@ -22,8 +22,7 @@ class GeminiConfig {
   /// flutter build ipa --dart-define=OPENROUTER_API_KEY=your_key
   static const String openRouterApiKey = String.fromEnvironment(
     'OPENROUTER_API_KEY',
-    defaultValue:
-        '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', // <-- Paste your OpenRouter API Key here (sk-or-v1-...)
+    defaultValue: '', // <-- Paste your OpenRouter API Key here (sk-or-v1-...)
   );
 
   /// Key aliases for backward compatibility across existing providers
