@@ -690,43 +690,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // AI Assistant Shortcut Button
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: theme.cardColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : const Color(0xFFE2E8F0),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(
-                          alpha: isDark ? 0.2 : 0.03,
-                        ),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
-                    tooltip: 'TVR Assistant',
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      context.push(AppRoutes.aiAssistant);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
                 // Wishlist Shortcut Button
                 Container(
                   width: 42,

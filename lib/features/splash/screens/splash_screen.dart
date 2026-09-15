@@ -255,7 +255,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             const SizedBox(height: 8),
                             Text(
                               context.l10n.isKhmer
-                                  ? 'ទំនិញស្រស់ៗ និងគ្រឿងឧបភោគបរិភោគដឹកជញ្ជូនរហ័ស'
+                                  ? 'ទំនិញគុណភាពល្អៗ និងគ្រឿងឧបភោគបរិភោគដឹកជញ្ជូនរហ័ស'
                                   : 'Fresh groceries & essentials delivered',
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(

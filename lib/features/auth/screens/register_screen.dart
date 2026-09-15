@@ -116,7 +116,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 6),
                 Text(
                   context.l10n.isKhmer
-                      ? 'ចុះឈ្មោះជាមួយយើងដើម្បីទទួលបានទំនិញស្រស់ៗដឹកដល់ផ្ទះរបស់អ្នក។'
+                      ? 'ចុះឈ្មោះជាមួយយើងដើម្បីទទួលបានទំនិញគុណភាពល្អៗដឹកដល់ផ្ទះរបស់អ្នក។'
                       : 'Join us to get fresh organic groceries delivered right to your door.',
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
@@ -185,17 +185,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     letterSpacing: 0,
                   ),
                   decoration: InputDecoration(
-                    hintText: context.l10n.isKhmer ? 'ឈ្មោះរបស់អ្នក' : 'John Doe',
+                    hintText: context.l10n.isKhmer
+                        ? 'ឈ្មោះរបស់អ្នក'
+                        : 'John Doe',
                     hintStyle: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       letterSpacing: 0,
                     ),
-                    prefixIcon: const Icon(Icons.person_outline_rounded, size: 20),
+                    prefixIcon: const Icon(
+                      Icons.person_outline_rounded,
+                      size: 20,
+                    ),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? (context.l10n.isKhmer
-                          ? 'សូមបញ្ចូលឈ្មោះពេញ'
-                          : 'Full name is required')
+                            ? 'សូមបញ្ចូលឈ្មោះពេញ'
+                            : 'Full name is required')
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -304,7 +309,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Confirm Password Field
                 Text(
-                  context.l10n.isKhmer ? 'បញ្ជាក់ពាក្យសម្ងាត់' : 'Confirm Password',
+                  context.l10n.isKhmer
+                      ? 'បញ្ជាក់ពាក្យសម្ងាត់'
+                      : 'Confirm Password',
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
@@ -331,7 +338,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       fontFamily: AppTheme.fontFamily,
                       letterSpacing: 0,
                     ),
-                    prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      size: 20,
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) {

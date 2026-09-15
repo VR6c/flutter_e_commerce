@@ -100,7 +100,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                context.l10n.isKhmer ? 'កំណត់ពាក្យសម្ងាត់ឡើងវិញ!' : 'Reset your password!',
+                context.l10n.isKhmer
+                    ? 'កំណត់ពាក្យសម្ងាត់ឡើងវិញ!'
+                    : 'Reset your password!',
                 style: TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   fontSize: 20,
@@ -173,7 +175,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   child: Text(
-                    context.l10n.isKhmer ? 'ផ្ញើលេខកូដផ្ទៀងផ្ទាត់' : 'Send Verification Code',
+                    context.l10n.isKhmer
+                        ? 'ផ្ញើលេខកូដផ្ទៀងផ្ទាត់'
+                        : 'Send Verification Code',
                     style: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w700,
@@ -236,7 +240,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   context.l10n.isKhmer
-                      ? 'ចូលគណនីដើម្បីស្វែងរកទំនិញស្រស់ៗ និងតាមដានការដឹកជញ្ជូនរបស់អ្នក។'
+                      ? 'ចូលគណនីដើម្បីស្វែងរកទំនិញគុណភាពល្អៗ និងតាមដានការដឹកជញ្ជូនរបស់អ្នក។'
                       : 'Sign in to explore organic fresh foods and track your deliveries.',
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
@@ -286,7 +290,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Email / Mobile Field
                 Text(
-                  context.l10n.isKhmer ? 'អ៊ីមែល ឬលេខទូរស័ព្ទ' : 'Email or Mobile',
+                  context.l10n.isKhmer
+                      ? 'អ៊ីមែល ឬលេខទូរស័ព្ទ'
+                      : 'Email or Mobile',
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
@@ -311,7 +317,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       fontFamily: AppTheme.fontFamily,
                       letterSpacing: 0,
                     ),
-                    prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
+                    prefixIcon: const Icon(
+                      Icons.alternate_email_rounded,
+                      size: 20,
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
@@ -396,7 +405,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: GestureDetector(
                     onTap: _showForgotPasswordSheet,
                     child: Text(
-                      context.l10n.isKhmer ? 'ភ្លេចពាក្យសម្ងាត់?' : 'Forgot password?',
+                      context.l10n.isKhmer
+                          ? 'ភ្លេចពាក្យសម្ងាត់?'
+                          : 'Forgot password?',
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         color: theme.colorScheme.primary,

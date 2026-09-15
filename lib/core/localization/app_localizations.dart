@@ -169,8 +169,6 @@ class AppLocalizations {
       'log_out_confirm': 'Are you sure you want to log out?',
       'log_in': 'Log In',
       'create_account': 'Create Account',
-      'ai_assistant': 'TVR Assistant',
-      'ai_assistant_sub': 'Smart shopping & generative AI settings',
 
       // Profile Screen Details
       'account_profile': 'Account Profile',
@@ -378,8 +376,6 @@ class AppLocalizations {
       'log_out_confirm': 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីមែនទេ?',
       'log_in': 'ចូលគណនី',
       'create_account': 'បង្កើតគណនីថ្មី',
-      'ai_assistant': 'ជំនួយការ TVR AI',
-      'ai_assistant_sub': 'ការទិញទំនិញឆ្លាតវៃ & ការកំណត់ AI',
 
       // Profile Screen Details
       'account_profile': 'ព័ត៌មានគណនី',
@@ -543,8 +539,6 @@ class AppLocalizations {
   String get logIn => text('log_in');
   String get signIn => text('log_in');
   String get createAccount => text('create_account');
-  String get aiAssistant => text('ai_assistant');
-  String get aiAssistantSub => text('ai_assistant_sub');
 
   String get accountProfile => text('account_profile');
   String get defaultAddress => text('default_address');
