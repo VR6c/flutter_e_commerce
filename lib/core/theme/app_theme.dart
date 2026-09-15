@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Vibrant Leaf / Emerald Green palette (from grocery UI design)
@@ -28,38 +27,96 @@ class AppTheme {
   static final ThemeData lightTheme = _buildLightTheme();
   static final ThemeData darkTheme = _buildDarkTheme();
 
+  static const String fontFamily = 'GoogleSans';
+  static const List<String> fontFallbacks = ['GoogleSans', 'Google Sans'];
+
   static ThemeData _buildLightTheme() {
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
-      ThemeData.light().textTheme,
+    final baseTextTheme = ThemeData.light().textTheme.apply(
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFallbacks,
     );
 
     return ThemeData(
       useMaterial3: true,
-      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-      textTheme: textTheme.copyWith(
-        displayLarge: textTheme.displayLarge?.copyWith(
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFallbacks,
+      textTheme: baseTextTheme.copyWith(
+        displayLarge: baseTextTheme.displayLarge?.copyWith(
           color: lightOnSurface,
           fontWeight: FontWeight.w800,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.2,
         ),
-        displayMedium: textTheme.displayMedium?.copyWith(
+        displayMedium: baseTextTheme.displayMedium?.copyWith(
           color: lightOnSurface,
           fontWeight: FontWeight.w700,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.2,
         ),
-        titleLarge: textTheme.titleLarge?.copyWith(
+        titleLarge: baseTextTheme.titleLarge?.copyWith(
           color: lightOnSurface,
           fontWeight: FontWeight.w700,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.25,
         ),
-        titleMedium: textTheme.titleMedium?.copyWith(
+        titleMedium: baseTextTheme.titleMedium?.copyWith(
           color: lightOnSurface,
           fontWeight: FontWeight.w600,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.3,
         ),
-        titleSmall: textTheme.titleSmall?.copyWith(
+        titleSmall: baseTextTheme.titleSmall?.copyWith(
           color: lightOnSurface,
           fontWeight: FontWeight.w600,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.3,
         ),
-        bodyLarge: textTheme.bodyLarge?.copyWith(color: lightOnSurface),
-        bodyMedium: textTheme.bodyMedium?.copyWith(color: lightSubtext),
-        bodySmall: textTheme.bodySmall?.copyWith(color: lightSubtext),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+          color: lightOnSurface,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.35,
+        ),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+          color: lightSubtext,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.35,
+        ),
+        bodySmall: baseTextTheme.bodySmall?.copyWith(
+          color: lightSubtext,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.35,
+        ),
+        labelLarge: baseTextTheme.labelLarge?.copyWith(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+        ),
+        labelMedium: baseTextTheme.labelMedium?.copyWith(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+        ),
+        labelSmall: baseTextTheme.labelSmall?.copyWith(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+        ),
       ),
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
@@ -79,9 +136,12 @@ class AppTheme {
         scrolledUnderElevation: 0,
         iconTheme: IconThemeData(color: lightOnSurface),
         titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
           color: lightOnSurface,
           fontSize: 18,
           fontWeight: FontWeight.w700,
+          letterSpacing: 0,
         ),
       ),
       cardTheme: CardThemeData(
@@ -101,7 +161,13 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFallbacks,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            letterSpacing: 0,
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -111,7 +177,13 @@ class AppTheme {
           horizontal: 18,
           vertical: 16,
         ),
-        hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+        hintStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          color: Color(0xFF94A3B8),
+          fontSize: 14,
+          letterSpacing: 0,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: lightBorderStrong, width: 1),
@@ -137,37 +209,92 @@ class AppTheme {
   }
 
   static ThemeData _buildDarkTheme() {
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
-      ThemeData.dark().textTheme,
+    final baseTextTheme = ThemeData.dark().textTheme.apply(
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFallbacks,
     );
 
     return ThemeData(
       useMaterial3: true,
-      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-      textTheme: textTheme.copyWith(
-        displayLarge: textTheme.displayLarge?.copyWith(
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFallbacks,
+      textTheme: baseTextTheme.copyWith(
+        displayLarge: baseTextTheme.displayLarge?.copyWith(
           color: darkOnSurface,
           fontWeight: FontWeight.w800,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.2,
         ),
-        displayMedium: textTheme.displayMedium?.copyWith(
+        displayMedium: baseTextTheme.displayMedium?.copyWith(
           color: darkOnSurface,
           fontWeight: FontWeight.w700,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.2,
         ),
-        titleLarge: textTheme.titleLarge?.copyWith(
+        titleLarge: baseTextTheme.titleLarge?.copyWith(
           color: darkOnSurface,
           fontWeight: FontWeight.w700,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.25,
         ),
-        titleMedium: textTheme.titleMedium?.copyWith(
+        titleMedium: baseTextTheme.titleMedium?.copyWith(
           color: darkOnSurface,
           fontWeight: FontWeight.w600,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.3,
         ),
-        titleSmall: textTheme.titleSmall?.copyWith(
+        titleSmall: baseTextTheme.titleSmall?.copyWith(
           color: darkOnSurface,
           fontWeight: FontWeight.w600,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.3,
         ),
-        bodyLarge: textTheme.bodyLarge?.copyWith(color: darkOnSurface),
-        bodyMedium: textTheme.bodyMedium?.copyWith(color: darkSubtext),
-        bodySmall: textTheme.bodySmall?.copyWith(color: darkSubtext),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+          color: darkOnSurface,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.35,
+        ),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+          color: darkSubtext,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.35,
+        ),
+        bodySmall: baseTextTheme.bodySmall?.copyWith(
+          color: darkSubtext,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+          height: 1.35,
+        ),
+        labelLarge: baseTextTheme.labelLarge?.copyWith(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+        ),
+        labelMedium: baseTextTheme.labelMedium?.copyWith(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+        ),
+        labelSmall: baseTextTheme.labelSmall?.copyWith(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          letterSpacing: 0,
+        ),
       ),
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
@@ -187,9 +314,12 @@ class AppTheme {
         scrolledUnderElevation: 0,
         iconTheme: IconThemeData(color: darkOnSurface),
         titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
           color: darkOnSurface,
           fontSize: 18,
           fontWeight: FontWeight.w700,
+          letterSpacing: 0,
         ),
       ),
       cardTheme: CardThemeData(
@@ -209,7 +339,13 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFallbacks,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            letterSpacing: 0,
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -219,7 +355,13 @@ class AppTheme {
           horizontal: 18,
           vertical: 16,
         ),
-        hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+        hintStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFallbacks,
+          color: Color(0xFF64748B),
+          fontSize: 14,
+          letterSpacing: 0,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: darkBorderStrong, width: 1),

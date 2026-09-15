@@ -18,6 +18,25 @@ extension SortOptionExtension on SortOption {
     }
   }
 
+  String localizedLabel(BuildContext context) {
+    // Check if locale is Khmer
+    final locale = Localizations.maybeLocaleOf(context);
+    final isKhmer = locale?.languageCode == 'km';
+    if (!isKhmer) return label;
+    switch (this) {
+      case SortOption.none:
+        return 'លំនាំដើម';
+      case SortOption.priceAsc:
+        return 'តម្លៃ: ទាបទៅខ្ពស់';
+      case SortOption.priceDesc:
+        return 'តម្លៃ: ខ្ពស់ទៅទាប';
+      case SortOption.nameAsc:
+        return 'ឈ្មោះ: A – Z';
+      case SortOption.rating:
+        return 'ការវាយតម្លៃខ្ពស់បំផុត';
+    }
+  }
+
   IconData get icon {
     switch (this) {
       case SortOption.none:

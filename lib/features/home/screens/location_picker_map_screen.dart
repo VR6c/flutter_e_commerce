@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/services/location_service.dart';
 import '../models/delivery_location.dart';
 import '../providers/delivery_location_provider.dart';
@@ -369,11 +371,15 @@ class _LocationPickerMapScreenState
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Pin Delivery Location',
+                              context.l10n.isKhmer
+                                  ? 'កំណត់ទីតាំងដឹកជញ្ជូន'
+                                  : 'Pin Delivery Location',
                               style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 14,
                                 color: theme.colorScheme.onSurface,
+                                letterSpacing: 0,
                               ),
                             ),
                           ),
@@ -477,11 +483,14 @@ class _LocationPickerMapScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'SELECTED LOCATION',
+                                context.l10n.isKhmer
+                                    ? 'ទីតាំងដែលបានជ្រើសរើស'
+                                    : 'SELECTED LOCATION',
                                 style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
+                                  letterSpacing: context.l10n.isKhmer ? 0 : 0.8,
                                   color: isDark
                                       ? Colors.grey[400]
                                       : const Color(0xFF94A3B8),
@@ -504,9 +513,13 @@ class _LocationPickerMapScreenState
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Locating address...',
+                                      context.l10n.isKhmer
+                                          ? 'កំពុងកំណត់អាសយដ្ឋាន...'
+                                          : 'Locating address...',
                                       style: TextStyle(
+                                        fontFamily: AppTheme.fontFamily,
                                         fontSize: 14,
+                                        letterSpacing: 0,
                                         color: isDark
                                             ? Colors.grey[400]
                                             : const Color(0xFF64748B),
@@ -518,9 +531,11 @@ class _LocationPickerMapScreenState
                                 Text(
                                   _streetAddress,
                                   style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     color: theme.colorScheme.onSurface,
+                                    letterSpacing: 0,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -529,7 +544,9 @@ class _LocationPickerMapScreenState
                               Text(
                                 '$_cityName, $_countryName',
                                 style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   fontSize: 12,
+                                  letterSpacing: 0,
                                   color: isDark
                                       ? Colors.grey[400]
                                       : const Color(0xFF64748B),
@@ -552,23 +569,27 @@ class _LocationPickerMapScreenState
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: ChoiceChip(
-                            label: Text(label),
+                            label: Text(
+                              _translateLabelType(label, context.l10n.isKhmer),
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : (isDark
+                                          ? Colors.grey[300]
+                                          : const Color(0xFF475569)),
+                                letterSpacing: 0,
+                              ),
+                            ),
                             selected: isSelected,
                             onSelected: (_) =>
                                 setState(() => _selectedLabel = label),
                             selectedColor: theme.colorScheme.primary.withValues(
                               alpha: 0.15,
-                            ),
-                            labelStyle: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isSelected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? theme.colorScheme.primary
-                                  : (isDark
-                                        ? Colors.grey[300]
-                                        : const Color(0xFF475569)),
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -601,11 +622,15 @@ class _LocationPickerMapScreenState
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Confirm Delivery Location',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.isKhmer
+                            ? 'បញ្ជាក់ទីតាំងដឹកជញ្ជូន'
+                            : 'Confirm Delivery Location',
+                        style: const TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: 0,
                         ),
                       ),
                     ),
@@ -617,5 +642,20 @@ class _LocationPickerMapScreenState
         ],
       ),
     );
+  }
+
+  String _translateLabelType(String label, bool isKhmer) {
+    if (!isKhmer) return label;
+    switch (label.toLowerCase()) {
+      case 'home':
+        return 'ផ្ទះ';
+      case 'work':
+        return 'កន្លែងធ្វើការ';
+      case 'apartment':
+        return 'ខុនដូ/បន្ទប់';
+      case 'other':
+      default:
+        return 'ផ្សេងៗ';
+    }
   }
 }

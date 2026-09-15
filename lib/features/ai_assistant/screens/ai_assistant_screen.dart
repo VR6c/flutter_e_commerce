@@ -6,7 +6,6 @@ import '../providers/ai_assistant_provider.dart';
 import '../providers/gemini_key_provider.dart';
 import '../widgets/ai_thinking_indicator.dart';
 import '../widgets/chat_bubble.dart';
-import '../widgets/gemini_key_dialog.dart';
 import '../widgets/suggested_prompts_bar.dart';
 
 class AiAssistantScreen extends ConsumerStatefulWidget {
@@ -179,7 +178,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        isKeyConfigured ? 'Online' : 'Offline Mode',
+                        isKeyConfigured ? 'Online' : 'Smart Assistant',
                         style: TextStyle(
                           fontSize: 11,
                           color: isDark
@@ -207,59 +206,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // API Key Notice Banner if not configured yet
-            if (!isKeyConfigured)
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 6,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF281E0D)
-                      : const Color(0xFFFEF3C7),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.info_outline_rounded,
-                      size: 16,
-                      color: Color(0xFFD97706),
-                    ),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'Using offline demo responses. Add your Gemini API key for real-time AI.',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFFB45309),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => GeminiKeyDialog.show(context),
-                      child: const Text(
-                        'Setup',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.primaryColor,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
             // Message List (reverse: true provides instant, zero-glitch bottom anchoring)
             Expanded(

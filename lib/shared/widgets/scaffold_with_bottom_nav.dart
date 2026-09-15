@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../core/theme/app_theme.dart';
 import '../../features/cart/providers/cart_provider.dart';
 import '../../features/wishlist/providers/wishlist_provider.dart';
 import '../providers/bottom_nav_scroll_provider.dart';
@@ -43,6 +45,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
     final currentIndex = widget.navigationShell.currentIndex;
 
@@ -85,7 +88,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
                     isSelected: currentIndex == 0,
                     inactiveIcon: Icons.home_outlined,
                     activeIcon: Icons.home_rounded,
-                    label: 'Home',
+                    label: l10n.navHome,
                     onTap: () => _onItemTapped(0),
                     theme: theme,
                     isDark: isDark,
@@ -97,7 +100,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
                     isSelected: currentIndex == 1,
                     inactiveIcon: Icons.storefront_outlined,
                     activeIcon: Icons.storefront_rounded,
-                    label: 'Products',
+                    label: l10n.navProducts,
                     onTap: () => _onItemTapped(1),
                     theme: theme,
                     isDark: isDark,
@@ -114,7 +117,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
                     isSelected: currentIndex == 2,
                     inactiveIcon: Icons.favorite_border_rounded,
                     activeIcon: Icons.favorite_rounded,
-                    label: 'Wishlist',
+                    label: l10n.navWishlist,
                     onTap: () => _onItemTapped(2),
                     theme: theme,
                     isDark: isDark,
@@ -142,6 +145,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
                             child: Text(
                               count > 99 ? '99+' : '$count',
                               style: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 color: Colors.white,
                                 fontSize: 8.5,
                                 fontWeight: FontWeight.w800,
@@ -161,7 +165,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
                     isSelected: currentIndex == 3,
                     inactiveIcon: Icons.person_outline_rounded,
                     activeIcon: Icons.person_rounded,
-                    label: 'Profile',
+                    label: l10n.navProfile,
                     onTap: () => _onItemTapped(3),
                     theme: theme,
                     isDark: isDark,
@@ -263,12 +267,14 @@ class _BottomNavItemState extends State<_BottomNavItem> {
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
                 color: widget.isSelected ? activeColor : inactiveColor,
-                fontSize: 11,
+                fontSize: 11.5,
                 fontWeight: widget.isSelected
                     ? FontWeight.w700
                     : FontWeight.w500,
-                letterSpacing: -0.1,
+                letterSpacing: 0,
+                height: 1.25,
               ),
               child: Text(widget.label),
             ),

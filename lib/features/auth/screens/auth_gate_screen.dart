@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// Auth Gate widget shown as a modal bottom sheet when an unauthenticated
 /// guest taps "Proceed to Checkout". Offers three paths:
@@ -15,6 +17,7 @@ class AuthGateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
@@ -55,43 +58,50 @@ class AuthGateScreen extends StatelessWidget {
                           alignment: Alignment.center,
                           children: [
                             Container(
-                              width: 88,
-                              height: 88,
+                              width: 104,
+                              height: 104,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: theme.colorScheme.primary.withValues(
-                                  alpha: 0.08,
+                                  alpha: 0.06,
                                 ),
                               ),
                             ),
                             Container(
-                              width: 68,
-                              height: 68,
+                              width: 84,
+                              height: 84,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: theme.colorScheme.primary.withValues(
-                                  alpha: 0.15,
+                                  alpha: 0.12,
                                 ),
                               ),
                             ),
                             Container(
-                              width: 48,
-                              height: 48,
+                              width: 64,
+                              height: 64,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    theme.colorScheme.primary,
+                                    theme.colorScheme.secondary,
+                                  ],
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: theme.colorScheme.primary.withValues(
-                                      alpha: 0.3,
+                                      alpha: 0.35,
                                     ),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 5),
                                   ),
                                 ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(12),
                                 child: Image.asset(
                                   'assets/images/shopping.png',
                                   fit: BoxFit.contain,
@@ -103,22 +113,30 @@ class AuthGateScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Secure Checkout',
+                        l10n.isKhmer
+                            ? 'ការទូទាត់ប្រាក់ប្រកបដោយសុវត្ថិភាព'
+                            : 'Secure Checkout',
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontFamily: AppTheme.fontFamily,
+                          fontWeight: FontWeight.w700,
                           color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.5,
+                          letterSpacing: 0,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Text(
-                          'Choose how you\'d like to proceed. Sign in to track order status or checkout directly as a guest.',
+                          l10n.isKhmer
+                              ? 'សូមជ្រើសរើសវិធីសាស្ត្របន្តរបស់អ្នក។ ចូលគណនីដើម្បីតាមដានការបញ្ជាទិញ ឬគិតលុយផ្ទាល់ជាភ្ញៀវ។'
+                              : 'Choose how you\'d like to proceed. Sign in to track order status or checkout directly as a guest.',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
+                            fontFamily: AppTheme.fontFamily,
                             color: theme.hintColor,
-                            height: 1.4,
+                            height: 1.45,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -133,10 +151,13 @@ class AuthGateScreen extends StatelessWidget {
                             _AuthOptionCard(
                               icon: Icons.login_rounded,
                               iconBgColor: theme.colorScheme.primary,
-                              title: 'Sign In',
-                              subtitle:
-                                  'Access your account, saved addresses, and order history',
-                              badgeLabel: 'Returning customer',
+                              title: l10n.signIn,
+                              subtitle: l10n.isKhmer
+                                  ? 'ចូលប្រើគណនី អាសយដ្ឋាន និងប្រវត្តិការបញ្ជាទិញ'
+                                  : 'Access your account, saved addresses, and order history',
+                              badgeLabel: l10n.isKhmer
+                                  ? 'អតិថិជនចាស់'
+                                  : 'Returning customer',
                               badgeColor: theme.colorScheme.primary.withValues(
                                 alpha: 0.1,
                               ),
@@ -155,10 +176,13 @@ class AuthGateScreen extends StatelessWidget {
                             _AuthOptionCard(
                               icon: Icons.person_add_rounded,
                               iconBgColor: theme.colorScheme.secondary,
-                              title: 'Create Account',
-                              subtitle:
-                                  'Save your details, track orders, and earn rewards',
-                              badgeLabel: 'New customer',
+                              title: l10n.createAccount,
+                              subtitle: l10n.isKhmer
+                                  ? 'រក្សាទុកព័ត៌មាន តាមដានការបញ្ជាទិញ និងទទួលបានរង្វាន់'
+                                  : 'Save your details, track orders, and earn rewards',
+                              badgeLabel: l10n.isKhmer
+                                  ? 'អតិថិជនថ្មី'
+                                  : 'New customer',
                               badgeColor: theme.colorScheme.secondary
                                   .withValues(alpha: 0.1),
                               badgeTextColor: theme.colorScheme.secondary,
@@ -176,10 +200,15 @@ class AuthGateScreen extends StatelessWidget {
                             _AuthOptionCard(
                               icon: Icons.bolt_rounded,
                               iconBgColor: const Color(0xFF059669),
-                              title: 'Checkout as Guest',
-                              subtitle:
-                                  'No account needed — just enter your email for order updates',
-                              badgeLabel: 'Fastest option',
+                              title: l10n.isKhmer
+                                  ? 'គិតលុយជាភ្ញៀវ'
+                                  : 'Checkout as Guest',
+                              subtitle: l10n.isKhmer
+                                  ? 'មិនចាំបាច់មានគណនី — គ្រាន់តែបញ្ចូលអ៊ីមែលដើម្បីទទួលដំណឹង'
+                                  : 'No account needed — just enter your email for order updates',
+                              badgeLabel: l10n.isKhmer
+                                  ? 'លឿនបំផុត'
+                                  : 'Fastest option',
                               badgeColor: const Color(
                                 0xFF059669,
                               ).withValues(alpha: 0.1),
@@ -210,12 +239,15 @@ class AuthGateScreen extends StatelessWidget {
                                     horizontal: 16,
                                   ),
                                   child: Text(
-                                    'Why create an account?',
+                                    l10n.isKhmer
+                                        ? 'ហេតុអ្វីគួរបង្កើតគណនី?'
+                                        : 'Why create an account?',
                                     style: theme.textTheme.labelMedium
                                         ?.copyWith(
+                                          fontFamily: AppTheme.fontFamily,
                                           color: theme.hintColor,
                                           fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.5,
+                                          letterSpacing: 0,
                                         ),
                                   ),
                                 ),
@@ -238,7 +270,9 @@ class AuthGateScreen extends StatelessWidget {
                                     Expanded(
                                       child: _BenefitCard(
                                         icon: Icons.track_changes_rounded,
-                                        label: 'Track Orders',
+                                        label: l10n.isKhmer
+                                            ? 'តាមដានផ្ទាល់'
+                                            : 'Track Orders',
                                         color: theme.colorScheme.primary,
                                       ),
                                     ),
@@ -246,7 +280,7 @@ class AuthGateScreen extends StatelessWidget {
                                     Expanded(
                                       child: _BenefitCard(
                                         icon: Icons.favorite_rounded,
-                                        label: 'Wishlist Sync',
+                                        label: l10n.navWishlist,
                                         color: Colors.redAccent,
                                       ),
                                     ),
@@ -258,7 +292,7 @@ class AuthGateScreen extends StatelessWidget {
                                     Expanded(
                                       child: _BenefitCard(
                                         icon: Icons.local_offer_rounded,
-                                        label: 'Exclusive Deals',
+                                        label: l10n.exclusiveDeals,
                                         color: const Color(0xFFD97706),
                                       ),
                                     ),
@@ -266,7 +300,7 @@ class AuthGateScreen extends StatelessWidget {
                                     Expanded(
                                       child: _BenefitCard(
                                         icon: Icons.history_rounded,
-                                        label: 'Order History',
+                                        label: l10n.orderHistory,
                                         color: const Color(0xFF059669),
                                       ),
                                     ),
@@ -367,8 +401,10 @@ class _AuthOptionCard extends StatelessWidget {
                             child: Text(
                               title,
                               style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
+                                fontFamily: AppTheme.fontFamily,
+                                fontWeight: FontWeight.w700,
                                 color: theme.colorScheme.onSurface,
+                                letterSpacing: 0,
                               ),
                             ),
                           ),
@@ -385,10 +421,11 @@ class _AuthOptionCard extends StatelessWidget {
                             child: Text(
                               badgeLabel,
                               style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 color: badgeTextColor,
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                letterSpacing: 0.2,
+                                letterSpacing: 0,
                               ),
                             ),
                           ),
@@ -398,8 +435,10 @@ class _AuthOptionCard extends StatelessWidget {
                       Text(
                         subtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
+                          fontFamily: AppTheme.fontFamily,
                           color: theme.hintColor,
                           height: 1.45,
+                          letterSpacing: 0,
                         ),
                       ),
                     ],
@@ -472,7 +511,9 @@ class _BenefitCard extends StatelessWidget {
             child: Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontFamily: AppTheme.fontFamily,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
               ),
               maxLines: 2,

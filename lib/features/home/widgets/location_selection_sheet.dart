@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../models/delivery_location.dart';
 import '../providers/delivery_location_provider.dart';
 import '../screens/location_picker_map_screen.dart';
@@ -65,10 +67,18 @@ class _LocationSelectionSheetState
     final street = _streetController.text.trim();
     if (street.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a street address'),
+        SnackBar(
+          content: Text(
+            context.l10n.isKhmer
+                ? 'សូមបញ្ចូលឈ្មោះផ្លូវ ឬអាសយដ្ឋាន'
+                : 'Please enter a street address',
+            style: const TextStyle(
+              fontFamily: AppTheme.fontFamily,
+              letterSpacing: 0,
+            ),
+          ),
           behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -185,18 +195,26 @@ class _LocationSelectionSheetState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Choose Delivery Location',
+                          context.l10n.isKhmer
+                              ? 'ជ្រើសរើសទីតាំងដឹកជញ្ជូន'
+                              : 'Choose Delivery Location',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                             color: theme.colorScheme.onSurface,
+                            letterSpacing: 0,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Groceries will be delivered to this address',
+                          context.l10n.isKhmer
+                              ? 'ទំនិញនឹងត្រូវដឹកជញ្ជូនទៅកាន់អាសយដ្ឋាននេះ'
+                              : 'Groceries will be delivered to this address',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 12,
+                            letterSpacing: 0,
                             color: isDark
                                 ? Colors.grey[400]
                                 : const Color(0xFF64748B),
@@ -246,10 +264,20 @@ class _LocationSelectionSheetState
                           onChanged: (val) {
                             setState(() => _searchQuery = val.trim());
                           },
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: 0,
+                          ),
                           decoration: InputDecoration(
-                            hintText: 'Search area, street or landmark...',
+                            hintText: context.l10n.isKhmer
+                                ? 'ស្វែងរកតំបន់ ផ្លូវ ឬទីតាំងសម្គាល់...'
+                                : 'Search area, street or landmark...',
                             hintStyle: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 13,
+                              letterSpacing: 0,
                               color: isDark
                                   ? Colors.grey[500]
                                   : const Color(0xFF94A3B8),
@@ -333,11 +361,15 @@ class _LocationSelectionSheetState
                                     Row(
                                       children: [
                                         Text(
-                                          'Set Location on Map',
+                                          context.l10n.isKhmer
+                                              ? 'កំណត់ទីតាំងលើផែនទី'
+                                              : 'Set Location on Map',
                                           style: TextStyle(
+                                            fontFamily: AppTheme.fontFamily,
                                             fontWeight: FontWeight.w700,
                                             fontSize: 14,
                                             color: theme.colorScheme.onSurface,
+                                            letterSpacing: 0,
                                           ),
                                         ),
                                         const SizedBox(width: 6),
@@ -354,11 +386,15 @@ class _LocationSelectionSheetState
                                             ),
                                           ),
                                           child: Text(
-                                            'Interactive',
+                                            context.l10n.isKhmer
+                                                ? 'អន្តរកម្ម'
+                                                : 'Interactive',
                                             style: TextStyle(
+                                              fontFamily: AppTheme.fontFamily,
                                               fontSize: 9,
                                               fontWeight: FontWeight.w800,
                                               color: theme.colorScheme.primary,
+                                              letterSpacing: 0,
                                             ),
                                           ),
                                         ),
@@ -366,9 +402,13 @@ class _LocationSelectionSheetState
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Drag pin to your exact delivery spot',
+                                      context.l10n.isKhmer
+                                          ? 'អូសម្ជុលទៅកាន់ចំណុចដឹកជញ្ជូនជាក់លាក់របស់អ្នក'
+                                          : 'Drag pin to your exact delivery spot',
                                       style: TextStyle(
+                                        fontFamily: AppTheme.fontFamily,
                                         fontSize: 12,
+                                        letterSpacing: 0,
                                         color: isDark
                                             ? Colors.grey[400]
                                             : const Color(0xFF64748B),
@@ -396,20 +436,27 @@ class _LocationSelectionSheetState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'SAVED ADDRESSES',
+                            context.l10n.isKhmer
+                                ? 'អាសយដ្ឋានដែលបានរក្សាទុក'
+                                : 'SAVED ADDRESSES',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: 0.8,
+                              letterSpacing: context.l10n.isKhmer ? 0 : 0.8,
                               color: isDark
                                   ? Colors.grey[400]
                                   : const Color(0xFF94A3B8),
                             ),
                           ),
                           Text(
-                            '${filteredLocations.length} locations',
+                            context.l10n.isKhmer
+                                ? '${filteredLocations.length} ទីតាំង'
+                                : '${filteredLocations.length} locations',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 11,
+                              letterSpacing: 0,
                               color: isDark
                                   ? Colors.grey[500]
                                   : const Color(0xFF94A3B8),
@@ -552,14 +599,16 @@ class _LocationSelectionSheetState
                                                         ),
                                                   ),
                                                   child: Text(
-                                                    'Default',
+                                                    context.l10n.isKhmer ? 'លំនាំដើម' : 'Default',
                                                     style: TextStyle(
+                                                      fontFamily: AppTheme.fontFamily,
                                                       fontSize: 10,
                                                       fontWeight:
                                                           FontWeight.w700,
                                                       color: theme
                                                           .colorScheme
                                                           .primary,
+                                                      letterSpacing: 0,
                                                     ),
                                                   ),
                                                 ),
@@ -572,7 +621,9 @@ class _LocationSelectionSheetState
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
+                                              fontFamily: AppTheme.fontFamily,
                                               fontSize: 12.5,
+                                              letterSpacing: 0,
                                               color: isDark
                                                   ? Colors.grey[400]
                                                   : const Color(0xFF64748B),
@@ -637,9 +688,13 @@ class _LocationSelectionSheetState
                           Icons.add_location_alt_rounded,
                           size: 18,
                         ),
-                        label: const Text(
-                          'Add New Address',
-                          style: TextStyle(fontWeight: FontWeight.w700),
+                        label: Text(
+                          context.l10n.isKhmer ? 'បន្ថែមអាសយដ្ឋានថ្មី' : 'Add New Address',
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: theme.colorScheme.primary,
@@ -660,11 +715,13 @@ class _LocationSelectionSheetState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Add Delivery Address',
+                            context.l10n.isKhmer ? 'បន្ថែមអាសយដ្ឋានដឹកជញ្ជូន' : 'Add Delivery Address',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                               color: theme.colorScheme.onSurface,
+                              letterSpacing: 0,
                             ),
                           ),
                           TextButton.icon(
@@ -675,7 +732,13 @@ class _LocationSelectionSheetState
                               Icons.arrow_back_rounded,
                               size: 16,
                             ),
-                            label: const Text('Back'),
+                            label: Text(
+                              context.l10n.isKhmer ? 'ត្រឡប់ក្រោយ' : 'Back',
+                              style: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                letterSpacing: 0,
+                              ),
+                            ),
                             style: TextButton.styleFrom(
                               foregroundColor: theme.colorScheme.primary,
                             ),
@@ -686,10 +749,12 @@ class _LocationSelectionSheetState
 
                       // Label selection chips
                       Text(
-                        'Address Label',
+                        context.l10n.isKhmer ? 'ស្លាកអាសយដ្ឋាន' : 'Address Label',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0,
                           color: isDark
                               ? Colors.grey[400]
                               : const Color(0xFF64748B),
@@ -704,24 +769,28 @@ class _LocationSelectionSheetState
                           return Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: ChoiceChip(
-                              label: Text(label),
+                              label: Text(
+                                _translateLabelType(label, context.l10n.isKhmer),
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : (isDark
+                                            ? Colors.grey[300]
+                                            : const Color(0xFF475569)),
+                                  fontSize: 12.5,
+                                  letterSpacing: 0,
+                                ),
+                              ),
                               selected: isSelected,
                               onSelected: (_) {
                                 setState(() => _selectedLabelType = label);
                               },
                               selectedColor: theme.colorScheme.primary
                                   .withValues(alpha: 0.15),
-                              labelStyle: TextStyle(
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? theme.colorScheme.primary
-                                    : (isDark
-                                          ? Colors.grey[300]
-                                          : const Color(0xFF475569)),
-                                fontSize: 12.5,
-                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(
@@ -741,9 +810,24 @@ class _LocationSelectionSheetState
                         const SizedBox(height: 10),
                         TextField(
                           controller: _customLabelController,
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: 0,
+                          ),
                           decoration: InputDecoration(
-                            hintText:
-                                'Custom label (e.g. Gym, Friend\'s Place)',
+                            hintText: context.l10n.isKhmer
+                                ? 'ស្លាកផ្ទាល់ខ្លួន (ឧ. កន្លែងហាត់ប្រាណ ផ្ទះមិត្តភក្តិ)'
+                                : 'Custom label (e.g. Gym, Friend\'s Place)',
+                            hintStyle: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 13,
+                              letterSpacing: 0,
+                              color: isDark
+                                  ? Colors.grey[500]
+                                  : const Color(0xFF94A3B8),
+                            ),
                             filled: true,
                             fillColor: isDark
                                 ? const Color(0xFF0F172A)
@@ -768,10 +852,12 @@ class _LocationSelectionSheetState
 
                       // Street Address Input
                       Text(
-                        'Street & House / Building',
+                        context.l10n.isKhmer ? 'ផ្លូវ & ផ្ទះលេខ / អគារ' : 'Street & House / Building',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0,
                           color: isDark
                               ? Colors.grey[400]
                               : const Color(0xFF64748B),
@@ -781,8 +867,24 @@ class _LocationSelectionSheetState
                       TextField(
                         controller: _streetController,
                         autofocus: true,
+                        style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          fontSize: 13,
+                          color: theme.colorScheme.onSurface,
+                          letterSpacing: 0,
+                        ),
                         decoration: InputDecoration(
-                          hintText: 'e.g. Street 2004, Sen Sok, House #42',
+                          hintText: context.l10n.isKhmer
+                              ? 'ឧ. ផ្លូវ ២០០៤, សែនសុខ, ផ្ទះលេខ ៤២'
+                              : 'e.g. Street 2004, Sen Sok, House #42',
+                          hintStyle: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 13,
+                            letterSpacing: 0,
+                            color: isDark
+                                ? Colors.grey[500]
+                                : const Color(0xFF94A3B8),
+                          ),
                           prefixIcon: const Icon(Icons.home_outlined, size: 20),
                           filled: true,
                           fillColor: isDark
@@ -807,10 +909,12 @@ class _LocationSelectionSheetState
 
                       // City Input
                       Text(
-                        'City / District',
+                        context.l10n.isKhmer ? 'រាជធានី / ខេត្ត / ខណ្ឌ' : 'City / District',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0,
                           color: isDark
                               ? Colors.grey[400]
                               : const Color(0xFF64748B),
@@ -819,8 +923,22 @@ class _LocationSelectionSheetState
                       const SizedBox(height: 6),
                       TextField(
                         controller: _cityController,
+                        style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          fontSize: 13,
+                          color: theme.colorScheme.onSurface,
+                          letterSpacing: 0,
+                        ),
                         decoration: InputDecoration(
-                          hintText: 'Phnom Penh',
+                          hintText: context.l10n.isKhmer ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh',
+                          hintStyle: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 13,
+                            letterSpacing: 0,
+                            color: isDark
+                                ? Colors.grey[500]
+                                : const Color(0xFF94A3B8),
+                          ),
                           prefixIcon: const Icon(
                             Icons.location_city_rounded,
                             size: 20,
@@ -858,11 +976,15 @@ class _LocationSelectionSheetState
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Save & Deliver Here',
-                          style: TextStyle(
+                        child: Text(
+                          context.l10n.isKhmer
+                              ? 'រក្សាទុក & ដឹកជញ្ជូនមកទីនេះ'
+                              : 'Save & Deliver Here',
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -875,5 +997,20 @@ class _LocationSelectionSheetState
         ),
       ),
     );
+  }
+
+  String _translateLabelType(String label, bool isKhmer) {
+    if (!isKhmer) return label;
+    switch (label.toLowerCase()) {
+      case 'home':
+        return 'ផ្ទះ';
+      case 'work':
+        return 'កន្លែងធ្វើការ';
+      case 'apartment':
+        return 'ខុនដូ/បន្ទប់';
+      case 'other':
+      default:
+        return 'ផ្សេងៗ';
+    }
   }
 }

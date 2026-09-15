@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/api/app_exception.dart';
 import '../providers/auth_provider.dart';
 
@@ -102,21 +104,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 const SizedBox(height: 10),
                 Text(
-                  'Create Account',
+                  context.l10n.isKhmer ? 'បង្កើតគណនីថ្មី' : 'Create Account',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: theme.colorScheme.onSurface,
-                    letterSpacing: -0.5,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Join us to get fresh organic groceries delivered right to your door.',
+                  context.l10n.isKhmer
+                      ? 'ចុះឈ្មោះជាមួយយើងដើម្បីទទួលបានទំនិញស្រស់ៗដឹកដល់ផ្ទះរបស់អ្នក។'
+                      : 'Join us to get fresh organic groceries delivered right to your door.',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 13.5,
                     color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                     height: 1.5,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -143,9 +150,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: Text(
                             _errorMessage!,
                             style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               color: Color(0xFFEF4444),
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
+                              letterSpacing: 0,
                             ),
                           ),
                         ),
@@ -157,47 +166,76 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Full Name Field
                 Text(
-                  'Full Name',
+                  context.l10n.isKhmer ? 'ឈ្មោះពេញ' : 'Full Name',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    hintText: 'John Doe',
-                    prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 14,
+                    letterSpacing: 0,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.isKhmer ? 'ឈ្មោះរបស់អ្នក' : 'John Doe',
+                    hintStyle: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      letterSpacing: 0,
+                    ),
+                    prefixIcon: const Icon(Icons.person_outline_rounded, size: 20),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Full name is required'
+                      ? (context.l10n.isKhmer
+                          ? 'សូមបញ្ចូលឈ្មោះពេញ'
+                          : 'Full name is required')
                       : null,
                 ),
                 const SizedBox(height: 16),
 
                 // Email Field
                 Text(
-                  'Email Address',
+                  context.l10n.isKhmer ? 'អាសយដ្ឋានអ៊ីមែល' : 'Email Address',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 14,
+                    letterSpacing: 0,
+                  ),
                   decoration: const InputDecoration(
                     hintText: 'user@example.com',
                     prefixIcon: Icon(Icons.alternate_email_rounded, size: 20),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty)
-                      return 'Email is required';
-                    if (!v.contains('@')) return 'Please enter a valid email';
+                    if (v == null || v.trim().isEmpty) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបញ្ចូលអ៊ីមែល'
+                          : 'Email is required';
+                    }
+                    if (!v.contains('@')) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបញ្ចូលអ៊ីមែលដែលត្រឹមត្រូវ'
+                          : 'Please enter a valid email';
+                    }
                     return null;
                   },
                 ),
@@ -205,19 +243,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Password Field
                 Text(
-                  'Password',
+                  context.l10n.isKhmer ? 'ពាក្យសម្ងាត់' : 'Password',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 14,
+                    letterSpacing: 0,
+                  ),
                   decoration: InputDecoration(
-                    hintText: 'At least 6 characters',
+                    hintText: context.l10n.isKhmer
+                        ? 'យ៉ាងហោចណាស់ ៦ តួអក្សរ'
+                        : 'At least 6 characters',
+                    hintStyle: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      letterSpacing: 0,
+                    ),
                     prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
                       size: 20,
@@ -235,9 +287,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Password is required';
-                    if (v.length < 6)
-                      return 'Password must be at least 6 characters';
+                    if (v == null || v.isEmpty) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបញ្ចូលពាក្យសម្ងាត់'
+                          : 'Password is required';
+                    }
+                    if (v.length < 6) {
+                      return context.l10n.isKhmer
+                          ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ'
+                          : 'Password must be at least 6 characters';
+                    }
                     return null;
                   },
                 ),
@@ -245,26 +304,46 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Confirm Password Field
                 Text(
-                  'Confirm Password',
+                  context.l10n.isKhmer ? 'បញ្ជាក់ពាក្យសម្ងាត់' : 'Confirm Password',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscurePassword,
-                  decoration: const InputDecoration(
-                    hintText: 'Re-enter your password',
-                    prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 14,
+                    letterSpacing: 0,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.isKhmer
+                        ? 'បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត'
+                        : 'Re-enter your password',
+                    hintStyle: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      letterSpacing: 0,
+                    ),
+                    prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty)
-                      return 'Please confirm your password';
-                    if (v != _passwordController.text)
-                      return 'Passwords do not match';
+                    if (v == null || v.isEmpty) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបញ្ជាក់ពាក្យសម្ងាត់របស់អ្នក'
+                          : 'Please confirm your password';
+                    }
+                    if (v != _passwordController.text) {
+                      return context.l10n.isKhmer
+                          ? 'ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ'
+                          : 'Passwords do not match';
+                    }
                     return null;
                   },
                 ),
@@ -291,18 +370,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Create Account',
-                                style: TextStyle(
+                                context.l10n.isKhmer
+                                    ? 'បង្កើតគណនី'
+                                    : 'Create Account',
+                                style: const TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
+                                  letterSpacing: 0,
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, size: 18),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
                             ],
                           ),
                   ),
@@ -317,19 +400,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     child: RichText(
                       text: TextSpan(
-                        text: 'Already have an account? ',
+                        text: context.l10n.isKhmer
+                            ? 'មានគណនីរួចហើយមែនទេ? '
+                            : 'Already have an account? ',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           color: isDark
                               ? Colors.grey[400]
                               : const Color(0xFF64748B),
                           fontSize: 14,
+                          letterSpacing: 0,
                         ),
                         children: [
                           TextSpan(
-                            text: 'Sign in',
+                            text: context.l10n.isKhmer ? 'ចូលគណនី' : 'Sign in',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w800,
+                              letterSpacing: 0,
                             ),
                           ),
                         ],

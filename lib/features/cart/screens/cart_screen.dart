@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/auth/screens/auth_gate_screen.dart';
 import '../providers/cart_provider.dart';
@@ -30,6 +32,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     final totalWeight = ref.watch(cartTotalWeightProvider);
     final couponState = ref.watch(couponProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
 
     final double discount = couponState.isApplied
@@ -71,7 +74,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           ),
         ),
         title: Text(
-          'Cart Page',
+          l10n.cartTitle,
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 20,
@@ -82,7 +85,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         actions: [
           if (cartItems.isNotEmpty)
             IconButton(
-              tooltip: 'Clear Cart',
+              tooltip: l10n.clearCart,
               icon: const Icon(
                 Icons.delete_outline_rounded,
                 color: Color(0xFFEF4444),
@@ -95,19 +98,31 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    title: const Text(
-                      'Clear Cart?',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                    title: Text(
+                      l10n.clearCart,
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
+                      ),
                     ),
-                    content: const Text(
-                      'Are you sure you want to remove all items from your cart?',
+                    content: Text(
+                      l10n.clearCartConfirm,
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        letterSpacing: 0,
+                      ),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
                         child: Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.grey[600]),
+                          l10n.cancel,
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            color: Colors.grey[600],
+                            letterSpacing: 0,
+                          ),
                         ),
                       ),
                       ElevatedButton(
@@ -123,11 +138,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Clear',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.clear,
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -215,19 +232,21 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                 Text(
                                   item.selectedSize != null ||
                                           item.selectedColor != null
-                                      ? '${item.selectedColor ?? ''} ${item.selectedSize ?? ''}'
+                                      ? '${item.selectedColor != null ? l10n.translateColor(item.selectedColor!) : ''} ${item.selectedSize != null ? l10n.translateSize(item.selectedSize!) : ''}'
                                             .trim()
                                       : (item
                                                 .product
                                                 .shortDescription
                                                 .isNotEmpty
                                             ? item.product.shortDescription
-                                            : item.product.category),
+                                            : l10n.translateCategory(item.product.category)),
                                   style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
                                     color: isDark
                                         ? Colors.grey[400]
                                         : const Color(0xFF94A3B8),
                                     fontSize: 12,
+                                    letterSpacing: 0,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -351,8 +370,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add Promo',
+                        l10n.addPromo,
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: theme.colorScheme.onSurface,
@@ -365,11 +385,19 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             child: TextField(
                               controller: _couponController,
                               style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 color: theme.colorScheme.onSurface,
                                 fontSize: 13,
                               ),
                               decoration: InputDecoration(
-                                hintText: 'Enter coupon code',
+                                hintText: l10n.couponPlaceholder,
+                                hintStyle: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  color: isDark
+                                      ? const Color(0xFF64748B)
+                                      : const Color(0xFF94A3B8),
+                                  fontSize: 13,
+                                ),
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 14,
                                   vertical: 12,
@@ -428,11 +456,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                     )
                                   : Text(
                                       couponState.isApplied
-                                          ? 'Applied'
-                                          : 'Apply',
+                                          ? l10n.applied
+                                          : l10n.apply,
                                       style: const TextStyle(
+                                        fontFamily: AppTheme.fontFamily,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 13,
+                                        letterSpacing: 0,
                                       ),
                                     ),
                             ),
@@ -452,8 +482,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       if (couponState.isApplied) ...[
                         const SizedBox(height: 6),
                         Text(
-                          'Coupon applied: \$${couponState.discountAmount.toStringAsFixed(2)} discount',
+                          l10n.isKhmer
+                              ? 'បានបញ្ចុះតម្លៃ: -\$${couponState.discountAmount.toStringAsFixed(2)}'
+                              : 'Coupon applied: \$${couponState.discountAmount.toStringAsFixed(2)} discount',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             color: theme.colorScheme.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -481,24 +514,26 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   child: Column(
                     children: [
                       _summaryRow(
-                        'Item Total',
+                        l10n.subtotal,
                         '\$${totalAmount.toStringAsFixed(2)}',
                         theme,
                         isDark,
                       ),
                       const SizedBox(height: 8),
                       _summaryRow(
-                        'Weight',
-                        '${totalWeight.toStringAsFixed(1)} kg',
+                        l10n.weightLabel,
+                        l10n.isKhmer
+                            ? '${totalWeight.toStringAsFixed(1)} គ.ក'
+                            : '${totalWeight.toStringAsFixed(1)} kg',
                         theme,
                         isDark,
                       ),
                       const SizedBox(height: 8),
-                      _summaryRow('VAT (0%)', '\$0.00', theme, isDark),
+                      _summaryRow(l10n.vatLabel, '\$0.00', theme, isDark),
                       if (couponState.isApplied) ...[
                         const SizedBox(height: 8),
                         _summaryRow(
-                          'Coupon Discount',
+                          l10n.discount,
                           '-\$${couponState.discountAmount.toStringAsFixed(2)}',
                           theme,
                           isDark,
@@ -507,8 +542,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       ],
                       const SizedBox(height: 8),
                       _summaryRow(
-                        'Delivery',
-                        'FREE',
+                        l10n.deliveryFee,
+                        l10n.isKhmer ? 'ឥតគិតថ្លៃ' : 'FREE',
                         theme,
                         isDark,
                         valueColor: theme.colorScheme.primary,
@@ -518,7 +553,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                         child: Divider(height: 1),
                       ),
                       _summaryRow(
-                        'Total Price',
+                        l10n.total,
                         '\$${finalTotal.toStringAsFixed(2)}',
                         theme,
                         isDark,
@@ -585,21 +620,25 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Checkout',
-                          style: TextStyle(
+                        Text(
+                          l10n.proceedToCheckout,
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
+                            letterSpacing: 0,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           '(\$${finalTotal.toStringAsFixed(2)})',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white.withValues(alpha: 0.9),
+                            letterSpacing: 0,
                           ),
                         ),
                       ],
@@ -626,14 +665,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         Text(
           label,
           style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
             color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
             fontSize: fontSize,
             fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
+            letterSpacing: 0,
           ),
         ),
         Text(
           value,
           style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
             color:
                 valueColor ??
                 (isBold
@@ -641,6 +683,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     : theme.colorScheme.onSurface),
             fontSize: fontSize,
             fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            letterSpacing: 0,
           ),
         ),
       ],
@@ -648,6 +691,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context, ThemeData theme, bool isDark) {
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -672,21 +716,24 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             ),
             const SizedBox(height: 28),
             Text(
-              'Your Cart is Empty',
+              l10n.emptyCart,
               style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: theme.colorScheme.onSurface,
-                letterSpacing: -0.5,
+                letterSpacing: l10n.isKhmer ? 0 : -0.5,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Looks like you haven\'t added any items to your cart yet.',
+              l10n.emptyCartSub,
               style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
                 color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                 fontSize: 14,
                 height: 1.5,
+                letterSpacing: 0,
               ),
               textAlign: TextAlign.center,
             ),
@@ -703,12 +750,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Start shopping',
-                  style: TextStyle(
+                child: Text(
+                  l10n.startShopping,
+                  style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: Colors.white,
+                    letterSpacing: 0,
                   ),
                 ),
               ),

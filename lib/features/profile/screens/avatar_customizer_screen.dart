@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermoji/fluttermoji.dart';
-
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../providers/user_avatar_provider.dart';
 
 class AvatarCustomizerScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,7 @@ class _AvatarCustomizerScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
@@ -35,11 +37,12 @@ class _AvatarCustomizerScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Customize Avatar',
+          l10n.isKhmer ? 'កែសម្រួលរូបតំណាង' : 'Customize Avatar',
           style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
             fontWeight: FontWeight.w800,
             fontSize: 20,
-            letterSpacing: -0.5,
+            letterSpacing: 0,
             color: theme.colorScheme.onSurface,
           ),
         ),
@@ -49,13 +52,17 @@ class _AvatarCustomizerScreenState
             child: TextButton.icon(
               onPressed: _onSaveAndApply,
               icon: const Icon(Icons.check_rounded, size: 18),
-              label: const Text('Save'),
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
-                textStyle: const TextStyle(
+              label: Text(
+                l10n.save,
+                style: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
+                  letterSpacing: 0,
                 ),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.primary,
               ),
             ),
           ),
@@ -138,13 +145,17 @@ class _AvatarCustomizerScreenState
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Live Preview · Auto-Saved',
+                        l10n.isKhmer
+                            ? 'មើលផ្ទាល់ · រក្សាទុកស្វ័យប្រវត្តិ'
+                            : 'Live Preview · Auto-Saved',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: isDark
                               ? const Color(0xFF94A3B8)
                               : const Color(0xFF64748B),
+                          letterSpacing: 0,
                         ),
                       ),
                     ],
@@ -174,6 +185,21 @@ class _AvatarCustomizerScreenState
                   ),
                   child: FluttermojiCustomizer(
                     autosave: true,
+                    attributeTitles: l10n.isKhmer
+                        ? const [
+                            'ម៉ូដសក់',
+                            'ពណ៌សក់',
+                            'ពុកចង្កា / ពុកមាត់',
+                            'ពណ៌ពុកចង្កា',
+                            'សម្លៀកបំពាក់',
+                            'ពណ៌សម្លៀកបំពាក់',
+                            'ភ្នែក',
+                            'ចិញ្ចើម',
+                            'មាត់',
+                            'ពណ៌សម្បុរ',
+                            'គ្រឿងតុបតែង',
+                          ]
+                        : null,
                     theme: FluttermojiThemeData(
                       boxDecoration: BoxDecoration(color: theme.cardColor),
                       primaryBgColor: isDark
@@ -183,9 +209,11 @@ class _AvatarCustomizerScreenState
                           ? const Color(0xFF1E293B)
                           : const Color(0xFFF1F5F9),
                       labelTextStyle: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: theme.colorScheme.onSurface,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
@@ -212,9 +240,16 @@ class _AvatarCustomizerScreenState
                 child: ElevatedButton.icon(
                   onPressed: _onSaveAndApply,
                   icon: const Icon(Icons.check_circle_rounded, size: 20),
-                  label: const Text(
-                    'Apply & Use This Avatar',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                  label: Text(
+                    l10n.isKhmer
+                        ? 'អនុវត្ត & ប្រើរូបតំណាងនេះ'
+                        : 'Apply & Use This Avatar',
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
@@ -237,18 +272,27 @@ class _AvatarCustomizerScreenState
     HapticFeedback.mediumImpact();
     await ref.read(userAvatarProvider.notifier).setFluttermojiAvatar();
     if (mounted) {
+      final isKm = context.l10n.isKhmer;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text('Custom Avatar saved and applied!'),
+              const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                isKm
+                    ? 'បានរក្សាទុក និងអនុវត្តរូបតំណាងថ្មីជោគជ័យ!'
+                    : 'Custom Avatar saved and applied!',
+                style: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  letterSpacing: 0,
+                ),
+              ),
             ],
           ),
           behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     }

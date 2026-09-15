@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class OrderSuccessScreen extends ConsumerWidget {
@@ -16,6 +18,7 @@ class OrderSuccessScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
     final isAuthenticated = ref.watch(authStateProvider).valueOrNull != null;
 
@@ -34,7 +37,7 @@ class OrderSuccessScreen extends ConsumerWidget {
               children: [
                 const Spacer(),
 
-                // Delivery Cart illustration container (matching mockup)
+                // Delivery Cart illustration container
                 Center(
                   child: Container(
                     width: 140,
@@ -72,12 +75,13 @@ class OrderSuccessScreen extends ConsumerWidget {
 
                 // Title
                 Text(
-                  'Order Placed Successfully',
+                  l10n.orderSuccess,
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
                     color: theme.colorScheme.onSurface,
-                    letterSpacing: -0.5,
+                    letterSpacing: 0,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -85,13 +89,19 @@ class OrderSuccessScreen extends ConsumerWidget {
 
                 // Subtitle
                 Text(
-                  isPayWay
-                      ? 'Your payment via ABA PayWay was confirmed. Your groceries are being packed with care and will be delivered shortly.'
-                      : 'Thanks for your order! Your groceries have been reserved and will be delivered to your address soon.',
+                  l10n.isKhmer
+                      ? (isPayWay
+                          ? 'ការទូទាត់តាម ABA PayWay ត្រូវបានបញ្ជាក់ជោគជ័យ។ ទំនិញរបស់អ្នកកំពុងត្រូវបានវេចខ្ចប់យ៉ាងយកចិត្តទុកដាក់ និងដឹកជញ្ជូនក្នុងពេលឆាប់ៗនេះ។'
+                          : 'សូមអរគុណសម្រាប់ការបញ្ជាទិញ! ទំនិញរបស់អ្នកត្រូវបានកក់ទុក និងកំពុងដឹកជញ្ជូនទៅកាន់អាសយដ្ឋានរបស់អ្នកក្នុងពេលឆាប់ៗ។')
+                      : (isPayWay
+                          ? 'Your payment via ABA PayWay was confirmed. Your groceries are being packed with care and will be delivered shortly.'
+                          : 'Thanks for your order! Your groceries have been reserved and will be delivered to your address soon.'),
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                     fontSize: 14,
                     height: 1.5,
+                    letterSpacing: 0,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -119,24 +129,75 @@ class OrderSuccessScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Order Reference', style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF64748B), fontSize: 13)),
-                          Text('#$orderId', style: TextStyle(fontWeight: FontWeight.w800, color: theme.colorScheme.primary, fontSize: 14)),
+                          Text(
+                            l10n.isKhmer ? 'លេខយោងបញ្ជាទិញ' : 'Order Reference',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                              fontSize: 13,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                          Text(
+                            '#$orderId',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontWeight: FontWeight.w800,
+                              color: theme.colorScheme.primary,
+                              fontSize: 14,
+                              letterSpacing: 0,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Payment Type', style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF64748B), fontSize: 13)),
-                          Text(isPayWay ? 'ABA PayWay' : 'Cash on Delivery', style: TextStyle(fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface, fontSize: 13)),
+                          Text(
+                            l10n.isKhmer ? 'ប្រភេទការទូទាត់' : 'Payment Type',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                              fontSize: 13,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                          Text(
+                            isPayWay ? l10n.abaPayWay : l10n.cashOnDelivery,
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontWeight: FontWeight.w700,
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 13,
+                              letterSpacing: 0,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Estimated Delivery', style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF64748B), fontSize: 13)),
-                          const Text('Today (30-45 mins)', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF10B981), fontSize: 13)),
+                          Text(
+                            l10n.isKhmer ? 'ពេលវេលាដឹកជញ្ជូន' : 'Estimated Delivery',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                              fontSize: 13,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                          Text(
+                            l10n.isKhmer ? 'ថ្ងៃនេះ (៣០–៤៥ នាទី)' : 'Today (30-45 mins)',
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF10B981),
+                              fontSize: 13,
+                              letterSpacing: 0,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -145,7 +206,7 @@ class OrderSuccessScreen extends ConsumerWidget {
 
                 const Spacer(),
 
-                // Primary Action Button: "Track Order" or "View Orders"
+                // Primary Action Button: "Track Order" or "Continue Shopping"
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -154,10 +215,14 @@ class OrderSuccessScreen extends ConsumerWidget {
                       if (isAuthenticated) {
                         context.go('/orders');
                       } else {
-                        // For guests, go home with feedback
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Order saved! Sign in anytime to see full order tracking history.'),
+                          SnackBar(
+                            content: Text(
+                              l10n.isKhmer
+                                  ? 'បានរក្សាទុកការបញ្ជាទិញ! ចូលគណនីគ្រប់ពេលដើម្បីតាមដានប្រវត្តិដឹកជញ្ជូន។'
+                                  : 'Order saved! Sign in anytime to see full order tracking history.',
+                              style: const TextStyle(fontFamily: AppTheme.fontFamily, letterSpacing: 0),
+                            ),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
@@ -170,8 +235,16 @@ class OrderSuccessScreen extends ConsumerWidget {
                       elevation: 0,
                     ),
                     child: Text(
-                      isAuthenticated ? 'Track Order' : 'Continue Shopping',
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.white),
+                      isAuthenticated
+                          ? (l10n.isKhmer ? 'តាមដានការបញ្ជាទិញ' : 'Track Order')
+                          : l10n.continueShopping,
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: Colors.white,
+                        letterSpacing: 0,
+                      ),
                     ),
                   ),
                 ),
@@ -182,11 +255,13 @@ class OrderSuccessScreen extends ConsumerWidget {
                   TextButton(
                     onPressed: () => context.go('/home'),
                     child: Text(
-                      'Back to Home',
+                      l10n.isKhmer ? 'ត្រឡប់ទៅទំព័រដើម' : 'Back to Home',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                        letterSpacing: 0,
                       ),
                     ),
                   ),

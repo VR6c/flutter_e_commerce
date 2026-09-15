@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/user_avatar.dart';
 import '../providers/user_avatar_provider.dart';
 
@@ -28,14 +30,15 @@ class AvatarOptionsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
     final avatarState = ref.watch(userAvatarProvider);
 
-    String statusLabel = 'Default Initials';
+    String statusLabel = l10n.isKhmer ? 'អក្សរកាត់ដើម' : 'Default Initials';
     if (avatarState.isPhoto) {
-      statusLabel = 'Uploaded Photo';
+      statusLabel = l10n.isKhmer ? 'រូបថតផ្ទាល់ខ្លួន' : 'Uploaded Photo';
     } else if (avatarState.isFluttermoji) {
-      statusLabel = 'Custom Avatar';
+      statusLabel = l10n.isKhmer ? 'រូបតំណាង' : 'Custom Avatar';
     }
 
     return SafeArea(
@@ -75,12 +78,15 @@ class AvatarOptionsSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Profile Picture & Avatar',
+                        l10n.isKhmer
+                            ? 'រូបភាពគណនី & តំណាង'
+                            : 'Profile Picture & Avatar',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.3,
+                          letterSpacing: 0,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -96,11 +102,15 @@ class AvatarOptionsSheet extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Active: $statusLabel',
+                          l10n.isKhmer
+                              ? 'កំពុងប្រើ: $statusLabel'
+                              : 'Active: $statusLabel',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: theme.colorScheme.primary,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -125,8 +135,10 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 const Color(0xFF6366F1),
                 const Color(0xFF8B5CF6),
               ],
-              title: 'Customize Avatar',
-              subtitle: 'Design hair, face, clothes, and accessories',
+              title: l10n.isKhmer ? 'កែសម្រួលរូបតំណាង' : 'Customize Avatar',
+              subtitle: l10n.isKhmer
+                  ? 'រចនាម៉ូដសក់ ផ្ទៃមុខ សម្លៀកបំពាក់...'
+                  : 'Design hair, face, clothes, and accessories',
               isHighlight: true,
               theme: theme,
               isDark: isDark,
@@ -145,8 +157,10 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 const Color(0xFF10B981),
                 const Color(0xFF059669),
               ],
-              title: 'Take Photo',
-              subtitle: 'Use camera to snap a new picture',
+              title: l10n.isKhmer ? 'ថតរូប' : 'Take Photo',
+              subtitle: l10n.isKhmer
+                  ? 'ប្រើកាមេរ៉ាដើម្បីថតរូបថ្មី'
+                  : 'Use camera to snap a new picture',
               theme: theme,
               isDark: isDark,
               onTap: () async {
@@ -156,10 +170,18 @@ class AvatarOptionsSheet extends ConsumerWidget {
                     .pickPhoto(ImageSource.camera);
                 if (context.mounted && success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Profile photo updated!'),
+                    SnackBar(
+                      content: Text(
+                        l10n.isKhmer
+                            ? 'បានធ្វើបច្ចុប្បន្នភាពរូបថតគណនី!'
+                            : 'Profile photo updated!',
+                        style: const TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          letterSpacing: 0,
+                        ),
+                      ),
                       behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 2),
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 }
@@ -175,8 +197,10 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 const Color(0xFF3B82F6),
                 const Color(0xFF1D4ED8),
               ],
-              title: 'Choose from Gallery',
-              subtitle: 'Select an image from your photos',
+              title: l10n.isKhmer ? 'ជ្រើសរើសពីរូបភាព' : 'Choose from Gallery',
+              subtitle: l10n.isKhmer
+                  ? 'ជ្រើសរើសរូបភាពពីវិចិត្រសាលរបស់អ្នក'
+                  : 'Select an image from your photos',
               theme: theme,
               isDark: isDark,
               onTap: () async {
@@ -186,10 +210,18 @@ class AvatarOptionsSheet extends ConsumerWidget {
                     .pickPhoto(ImageSource.gallery);
                 if (context.mounted && success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Profile photo updated!'),
+                    SnackBar(
+                      content: Text(
+                        l10n.isKhmer
+                            ? 'បានធ្វើបច្ចុប្បន្នភាពរូបថតគណនី!'
+                            : 'Profile photo updated!',
+                        style: const TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          letterSpacing: 0,
+                        ),
+                      ),
                       behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 2),
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 }
@@ -206,8 +238,12 @@ class AvatarOptionsSheet extends ConsumerWidget {
                   const Color(0xFFEF4444),
                   const Color(0xFFDC2626),
                 ],
-                title: 'Reset to Default Avatar',
-                subtitle: 'Remove photo or avatar and use initials',
+                title: l10n.isKhmer
+                    ? 'កំណត់រូបភាពដើមឡើងវិញ'
+                    : 'Reset to Default Avatar',
+                subtitle: l10n.isKhmer
+                    ? 'លុបរូបភាព ឬរូបតំណាងចេញ និងប្រើអក្សរកាត់'
+                    : 'Remove photo or avatar and use initials',
                 theme: theme,
                 isDark: isDark,
                 isDestructive: true,
@@ -216,10 +252,18 @@ class AvatarOptionsSheet extends ConsumerWidget {
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Reset to default initials'),
+                      SnackBar(
+                        content: Text(
+                          l10n.isKhmer
+                              ? 'បានកំណត់ទៅអក្សរកាត់ដើម'
+                              : 'Reset to default initials',
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
+                          ),
+                        ),
                         behavior: SnackBarBehavior.floating,
-                        duration: Duration(seconds: 2),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   }
@@ -288,21 +332,25 @@ class AvatarOptionsSheet extends ConsumerWidget {
                   Text(
                     title,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: isDestructive
                           ? const Color(0xFFEF4444)
                           : theme.colorScheme.onSurface,
+                      letterSpacing: 0,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 12,
                       color: isDark
                           ? const Color(0xFF94A3B8)
                           : const Color(0xFF64748B),
+                      letterSpacing: 0,
                     ),
                   ),
                 ],

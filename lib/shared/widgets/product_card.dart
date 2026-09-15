@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/utils/image_url_formatter.dart';
 import '../../features/products/models/product.dart';
@@ -304,10 +306,11 @@ class ProductCard extends ConsumerWidget {
                     Text(
                       product.name,
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: theme.colorScheme.onSurface,
-                        letterSpacing: -0.2,
+                        letterSpacing: context.l10n.isKhmer ? 0 : -0.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -317,13 +320,15 @@ class ProductCard extends ConsumerWidget {
                     Text(
                       product.shortDescription.isNotEmpty
                           ? product.shortDescription
-                          : product.category,
+                          : context.l10n.translateCategory(product.category),
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         color: isDark
                             ? Colors.grey[400]
                             : const Color(0xFF94A3B8),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
+                        letterSpacing: 0,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -387,16 +392,18 @@ class ProductCard extends ConsumerWidget {
                                       size: 18,
                                     ),
                                     const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        'Added ${product.name} to cart',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
+                                     Expanded(
+                                       child: Text(
+                                         context.l10n.isKhmer
+                                             ? 'បានបន្ថែម ${product.name} ទៅកន្ត្រក'
+                                             : 'Added ${product.name} to cart',
+                                         maxLines: 1,
+                                         overflow: TextOverflow.ellipsis,
+                                         style: const TextStyle(
+                                           fontWeight: FontWeight.w600,
+                                         ),
+                                       ),
+                                     ),
                                   ],
                                 ),
                                 behavior: SnackBarBehavior.floating,

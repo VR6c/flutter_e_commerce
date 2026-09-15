@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/api/app_exception.dart';
 import '../providers/auth_provider.dart';
 
@@ -98,29 +100,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Reset your password!',
+                context.l10n.isKhmer ? 'កំណត់ពាក្យសម្ងាត់ឡើងវិញ!' : 'Reset your password!',
                 style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.onSurface,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Please enter your phone number or email, we will send a verification code.',
-                style: TextStyle(
+              Text(
+                context.l10n.isKhmer
+                    ? 'សូមបញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែលរបស់អ្នក យើងនឹងផ្ញើលេខកូដផ្ទៀងផ្ទាត់។'
+                    : 'Please enter your phone number or email, we will send a verification code.',
+                style: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   fontSize: 13,
                   color: Color(0xFF64748B),
                   height: 1.5,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  hintText: 'Enter phone number or email',
-                  prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurface,
+                  letterSpacing: 0,
+                ),
+                decoration: InputDecoration(
+                  hintText: context.l10n.isKhmer
+                      ? 'បញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែល'
+                      : 'Enter phone number or email',
+                  hintStyle: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    letterSpacing: 0,
+                  ),
+                  prefixIcon: const Icon(Icons.phone_outlined, size: 20),
                 ),
               ),
               const SizedBox(height: 24),
@@ -133,7 +153,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Verification code sent to ${phoneController.text}',
+                          context.l10n.isKhmer
+                              ? 'លេខកូដផ្ទៀងផ្ទាត់ត្រូវបានផ្ញើទៅ ${phoneController.text}'
+                              : 'Verification code sent to ${phoneController.text}',
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
+                          ),
                         ),
                         behavior: SnackBarBehavior.floating,
                         backgroundColor: theme.colorScheme.primary,
@@ -146,9 +172,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'Send Verification Code',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  child: Text(
+                    context.l10n.isKhmer ? 'ផ្ញើលេខកូដផ្ទៀងផ្ទាត់' : 'Send Verification Code',
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ),
               ),
@@ -191,22 +221,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 20),
                 // Heading matching mockup
                 Text(
-                  'Welcome Back to\nour grocery shop',
+                  context.l10n.isKhmer
+                      ? 'សូមស្វាគមន៍មកកាន់\nហាងទំនិញរបស់យើង'
+                      : 'Welcome Back to\nour grocery shop',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: theme.colorScheme.onSurface,
-                    letterSpacing: -0.5,
+                    letterSpacing: 0,
                     height: 1.25,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to explore organic fresh foods and track your deliveries.',
+                  context.l10n.isKhmer
+                      ? 'ចូលគណនីដើម្បីស្វែងរកទំនិញស្រស់ៗ និងតាមដានការដឹកជញ្ជូនរបស់អ្នក។'
+                      : 'Sign in to explore organic fresh foods and track your deliveries.',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 13.5,
                     color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                     height: 1.5,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 36),
@@ -233,9 +270,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Text(
                             _errorMessage!,
                             style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               color: Color(0xFFEF4444),
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
+                              letterSpacing: 0,
                             ),
                           ),
                         ),
@@ -247,26 +286,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Email / Mobile Field
                 Text(
-                  'Email or Mobile',
+                  context.l10n.isKhmer ? 'អ៊ីមែល ឬលេខទូរស័ព្ទ' : 'Email or Mobile',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 14,
+                    letterSpacing: 0,
+                  ),
+                  decoration: InputDecoration(
                     hintText: 'user@example.com',
-                    prefixIcon: Icon(Icons.alternate_email_rounded, size: 20),
+                    hintStyle: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      letterSpacing: 0,
+                    ),
+                    prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty)
-                      return 'Field is required';
-                    if (!v.contains('@'))
-                      return 'Please enter a valid email address';
+                    if (v == null || v.trim().isEmpty) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបំពេញព័ត៌មាននេះ'
+                          : 'Field is required';
+                    }
+                    if (!v.contains('@')) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលដែលត្រឹមត្រូវ'
+                          : 'Please enter a valid email address';
+                    }
                     return null;
                   },
                 ),
@@ -274,19 +331,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Password Field
                 Text(
-                  'Password',
+                  context.l10n.isKhmer ? 'ពាក្យសម្ងាត់' : 'Password',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 14,
+                    letterSpacing: 0,
+                  ),
                   decoration: InputDecoration(
-                    hintText: 'Enter your password',
+                    hintText: context.l10n.isKhmer
+                        ? 'បញ្ចូលពាក្យសម្ងាត់របស់អ្នក'
+                        : 'Enter your password',
+                    hintStyle: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      letterSpacing: 0,
+                    ),
                     prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
                       size: 20,
@@ -304,9 +375,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Field is required';
-                    if (v.length < 6)
-                      return 'Password must be at least 6 characters';
+                    if (v == null || v.isEmpty) {
+                      return context.l10n.isKhmer
+                          ? 'សូមបំពេញព័ត៌មាននេះ'
+                          : 'Field is required';
+                    }
+                    if (v.length < 6) {
+                      return context.l10n.isKhmer
+                          ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ'
+                          : 'Password must be at least 6 characters';
+                    }
                     return null;
                   },
                 ),
@@ -318,11 +396,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: GestureDetector(
                     onTap: _showForgotPasswordSheet,
                     child: Text(
-                      'Forgot password?',
+                      context.l10n.isKhmer ? 'ភ្លេចពាក្យសម្ងាត់?' : 'Forgot password?',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),
@@ -351,18 +431,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Login',
-                                style: TextStyle(
+                                context.l10n.isKhmer ? 'ចូលគណនី' : 'Login',
+                                style: const TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
+                                  letterSpacing: 0,
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, size: 18),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
                             ],
                           ),
                   ),
@@ -378,19 +460,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: RichText(
                       text: TextSpan(
-                        text: "Don't have an Account? ",
+                        text: context.l10n.isKhmer
+                            ? 'មិនទាន់មានគណនីមែនទេ? '
+                            : "Don't have an Account? ",
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           color: isDark
                               ? Colors.grey[400]
                               : const Color(0xFF64748B),
                           fontSize: 14,
+                          letterSpacing: 0,
                         ),
                         children: [
                           TextSpan(
-                            text: 'Sign up',
+                            text: context.l10n.isKhmer ? 'ចុះឈ្មោះ' : 'Sign up',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w800,
+                              letterSpacing: 0,
                             ),
                           ),
                         ],

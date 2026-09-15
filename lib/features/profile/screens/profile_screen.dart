@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/locale_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/providers/theme_provider.dart';
 import '../../../shared/widgets/async_value_widget.dart';
@@ -66,6 +69,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.lightImpact();
     if (mounted) {
+      final l10n = context.l10n;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -76,7 +80,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text('$label copied to clipboard'),
+              Text(
+                l10n.isKhmer ? 'បានចម្លង $label' : '$label copied to clipboard',
+              ),
             ],
           ),
           behavior: SnackBarBehavior.floating,
@@ -124,6 +130,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final customerState = ref.watch(authStateProvider);
     final socialLinksState = ref.watch(socialMediaLinksProvider);
+    final currentLocale = ref.watch(localeProvider);
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -137,11 +145,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         title: Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(
-            'My Profile',
+            l10n.profileTitle,
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               fontWeight: FontWeight.w800,
               fontSize: 22,
-              letterSpacing: -0.5,
+              letterSpacing: l10n.isKhmer ? 0 : -0.5,
               color: theme.colorScheme.onSurface,
             ),
           ),
@@ -213,7 +222,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                     // Group 1: Shopping & Account (when authenticated)
                     if (customerState.valueOrNull != null) ...[
-                      _buildSectionHeader('SHOPPING & ACCOUNT', theme),
+                      _buildSectionHeader(l10n.shoppingAndAccount, theme),
                       _buildGroupContainer(
                         theme: theme,
                         isDark: isDark,
@@ -221,8 +230,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _buildMenuTile(
                             icon: Icons.receipt_long_rounded,
                             iconColor: const Color(0xFF4F46E5),
-                            title: 'My Orders',
-                            subtitle: 'Track live orders & view history',
+                            title: l10n.myOrders,
+                            subtitle: l10n.trackOrdersSub,
                             theme: theme,
                             onTap: () => context.push(AppRoutes.orders),
                           ),
@@ -230,8 +239,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _buildMenuTile(
                             icon: Icons.location_on_outlined,
                             iconColor: const Color(0xFFD97706),
-                            title: 'Delivery Addresses',
-                            subtitle: 'Manage saved shipping addresses',
+                            title: l10n.deliveryAddresses,
+                            subtitle: l10n.deliveryAddressesSub,
                             theme: theme,
                             onTap: () => _showAddressInfoSheet(context, theme),
                           ),
@@ -239,8 +248,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _buildMenuTile(
                             icon: Icons.credit_card_rounded,
                             iconColor: const Color(0xFF059669),
-                            title: 'Payment Methods',
-                            subtitle: 'Saved cards & PayWay options',
+                            title: l10n.paymentMethods,
+                            subtitle: l10n.paymentMethodsSub,
                             theme: theme,
                             onTap: () =>
                                 _showPaymentMethodsSheet(context, theme),
@@ -251,7 +260,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ],
 
                     // Group 2: App Preferences
-                    _buildSectionHeader('PREFERENCES', theme),
+                    _buildSectionHeader(l10n.settingsPref, theme),
                     _buildGroupContainer(
                       theme: theme,
                       isDark: isDark,
@@ -259,8 +268,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildMenuTile(
                           icon: Icons.auto_awesome_rounded,
                           iconColor: const Color(0xFF8B5CF6),
-                          title: 'TVR Assistant',
-                          subtitle: 'Smart shopping & generative AI settings',
+                          title: l10n.aiAssistant,
+                          subtitle: l10n.aiAssistantSub,
                           theme: theme,
                           onTap: () => context.push(AppRoutes.aiAssistant),
                         ),
@@ -272,8 +281,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildMenuTile(
                           icon: Icons.language_rounded,
                           iconColor: const Color(0xFF0284C7),
-                          title: 'Language & Currency',
-                          subtitle: 'English · USD (\$)',
+                          title: l10n.languageAndCurrency,
+                          subtitle: currentLocale.languageCode == 'km'
+                              ? l10n.langKhmerSub
+                              : l10n.langEnglishSub,
                           theme: theme,
                           trailing: Container(
                             padding: const EdgeInsets.symmetric(
@@ -287,7 +298,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              'EN / \$',
+                              currentLocale.languageCode == 'km'
+                                  ? 'KM / ៛'
+                                  : 'EN / \$',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -295,22 +308,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                             ),
                           ),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Currently set to English / USD'),
-                                behavior: SnackBarBehavior.floating,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
+                          onTap: () => _showLanguageSelectorSheet(
+                            context,
+                            theme,
+                            isDark,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
 
                     // Group 3: Support & About
-                    _buildSectionHeader('SUPPORT & LEGAL', theme),
+                    _buildSectionHeader(l10n.supportLegal, theme),
                     _buildGroupContainer(
                       theme: theme,
                       isDark: isDark,
@@ -318,8 +327,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildMenuTile(
                           icon: Icons.headset_mic_outlined,
                           iconColor: const Color(0xFF7C3AED),
-                          title: 'Help Center & Support',
-                          subtitle: '24/7 customer care & FAQs',
+                          title: l10n.helpCenterSupport,
+                          subtitle: l10n.helpCenterSupportSub,
                           theme: theme,
                           onTap: () => _showHelpSupportSheet(context, theme),
                         ),
@@ -327,8 +336,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildMenuTile(
                           icon: Icons.security_rounded,
                           iconColor: const Color(0xFF475569),
-                          title: 'Privacy & Terms',
-                          subtitle: 'Terms of service and privacy policy',
+                          title: l10n.privacyTerms,
+                          subtitle: l10n.privacyTermsSub,
                           theme: theme,
                           onTap: () => _showPrivacyTermsSheet(context, theme),
                         ),
@@ -337,7 +346,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 20),
 
                     // Group 4: Connect With Us
-                    _buildSectionHeader('CONNECT WITH US', theme),
+                    _buildSectionHeader(l10n.connectWithUs, theme),
                     _buildSocialCard(socialLinksState, theme, isDark),
                     const SizedBox(height: 24),
 
@@ -438,9 +447,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 child: Text(
                                   customer.name,
                                   style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
+                                    letterSpacing: context.l10n.isKhmer
+                                        ? 0
+                                        : -0.3,
                                     color: theme.colorScheme.onSurface,
                                   ),
                                   maxLines: 1,
@@ -457,8 +469,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.primary
-                                        .withValues(alpha: 0.1),
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -474,7 +487,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           GestureDetector(
                             onTap: () => _copyToClipboard(
                               customer.email,
-                              'Email address',
+                              context.l10n.isKhmer
+                                  ? 'អាសយដ្ឋានអ៊ីមែល'
+                                  : 'Email address',
                             ),
                             child: Row(
                               children: [
@@ -522,18 +537,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   ).withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.verified_rounded,
                                       color: Color(0xFF23AA49),
                                       size: 13,
                                     ),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      'Verified Member',
-                                      style: TextStyle(
+                                      context.l10n.verifiedMember,
+                                      style: const TextStyle(
                                         color: Color(0xFF23AA49),
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -600,7 +615,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Account Profile',
+                                context.l10n.accountProfile,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
@@ -637,7 +652,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Default Address',
+                                context.l10n.defaultAddress,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -706,17 +721,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Welcome to TVR',
+            context.l10n.welcomeToApp,
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
+              letterSpacing: context.l10n.isKhmer ? 0 : -0.3,
               color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            'Sign in to manage your orders, track deliveries, and unlock member perks.',
+            context.l10n.guestHeroSub,
             style: TextStyle(
               fontSize: 13,
               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -738,7 +754,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 _buildBenefitItem(
                   Icons.local_shipping_outlined,
-                  'Live Tracking',
+                  context.l10n.liveTracking,
                   theme,
                 ),
                 Container(
@@ -750,7 +766,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 _buildBenefitItem(
                   Icons.favorite_outline_rounded,
-                  'Synced Wishlist',
+                  context.l10n.syncedWishlist,
                   theme,
                 ),
                 Container(
@@ -762,7 +778,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 _buildBenefitItem(
                   Icons.percent_rounded,
-                  'Exclusive Deals',
+                  context.l10n.exclusiveDeals,
                   theme,
                 ),
               ],
@@ -787,9 +803,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Sign In',
-                      style: TextStyle(
+                    child: Text(
+                      context.l10n.logIn,
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -814,7 +830,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     child: Text(
-                      'Create Account',
+                      context.l10n.createAccount,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -858,8 +874,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   ) {
     return Consumer(
       builder: (context, ref, _) {
-        final ordersCount =
-            ref.watch(ordersProvider.select((s) => s.valueOrNull?.length ?? 0));
+        final ordersCount = ref.watch(
+          ordersProvider.select((s) => s.valueOrNull?.length ?? 0),
+        );
         final wishlistCount = ref.watch(wishlistCountProvider);
         final cartTotalQty = ref.watch(cartItemsCountProvider);
 
@@ -868,7 +885,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Expanded(
               child: _buildMetricCard(
                 count: ordersCount.toString(),
-                label: 'Orders',
+                label: context.l10n.ordersMetric,
                 icon: Icons.receipt_long_outlined,
                 iconColor: const Color(0xFF4F46E5),
                 theme: theme,
@@ -880,7 +897,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Expanded(
               child: _buildMetricCard(
                 count: wishlistCount.toString(),
-                label: 'Wishlist',
+                label: context.l10n.wishlistMetric,
                 icon: Icons.favorite_outline_rounded,
                 iconColor: const Color(0xFFE11D48),
                 theme: theme,
@@ -892,7 +909,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Expanded(
               child: _buildMetricCard(
                 count: cartTotalQty.toString(),
-                label: 'In Cart',
+                label: context.l10n.inCartMetric,
                 icon: Icons.shopping_bag_outlined,
                 iconColor: const Color(0xFF059669),
                 theme: theme,
@@ -1001,7 +1018,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Recent Orders',
+                context.l10n.recentOrders,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -1013,7 +1030,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'View All',
+                      context.l10n.viewAll,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -1037,28 +1054,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               _buildOrderStatusItem(
                 Icons.credit_card_outlined,
-                'To Pay',
+                context.l10n.toPay,
                 theme,
                 isDark,
                 onTap: () => context.push(AppRoutes.orders),
               ),
               _buildOrderStatusItem(
                 Icons.inventory_2_outlined,
-                'Processing',
+                context.l10n.processingStatus,
                 theme,
                 isDark,
                 onTap: () => context.push(AppRoutes.orders),
               ),
               _buildOrderStatusItem(
                 Icons.local_shipping_outlined,
-                'Shipped',
+                context.l10n.shippedStatus,
                 theme,
                 isDark,
                 onTap: () => context.push(AppRoutes.orders),
               ),
               _buildOrderStatusItem(
                 Icons.assignment_turned_in_outlined,
-                'Delivered',
+                context.l10n.deliveredStatus,
                 theme,
                 isDark,
                 onTap: () => context.push(AppRoutes.orders),
@@ -1254,7 +1271,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Dark Mode',
+                  context.l10n.darkMode,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -1263,7 +1280,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  isDark ? 'Sleek dark theme active' : 'Switch to dark theme',
+                  isDark
+                      ? context.l10n.darkModeActive
+                      : context.l10n.switchToDark,
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark
@@ -1311,7 +1330,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Push Notifications',
+                  context.l10n.pushNotifications,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -1321,8 +1340,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 2),
                 Text(
                   _notificationsEnabled
-                      ? 'Order updates & offers enabled'
-                      : 'Notifications are paused',
+                      ? context.l10n.notificationsEnabledSub
+                      : context.l10n.notificationsPausedSub,
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark
@@ -1343,7 +1362,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    val ? 'Notifications enabled' : 'Notifications disabled',
+                    val
+                        ? context.l10n.notificationsEnabledMsg
+                        : context.l10n.notificationsDisabledMsg,
                   ),
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 2),
@@ -1395,7 +1416,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  'No social links available right now',
+                  context.l10n.noSocialLinks,
                   style: TextStyle(
                     fontSize: 13,
                     color: isDark
@@ -1493,18 +1514,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFDC2626)),
                 ),
               )
-            : const Row(
+            : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.logout_rounded,
                     color: Color(0xFFDC2626),
                     size: 19,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'Sign Out',
-                    style: TextStyle(
+                    context.l10n.signOut,
+                    style: const TextStyle(
                       color: Color(0xFFDC2626),
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -1566,7 +1587,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 16),
 
                 Text(
-                  'Sign Out',
+                  context.l10n.signOut,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -1575,7 +1596,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Are you sure you want to sign out? You will need to log back in to access your orders and account settings.',
+                  context.l10n.signOutConfirmMsg,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -1605,7 +1626,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                           child: Text(
-                            'Cancel',
+                            context.l10n.cancel,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -1631,9 +1652,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Yes, Sign Out',
-                            style: TextStyle(
+                          child: Text(
+                            context.l10n.yesSignOut,
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -1660,6 +1681,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ThemeData theme,
   ) {
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     showModalBottomSheet(
       context: context,
@@ -1707,10 +1729,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Account Details',
+                      l10n.isKhmer ? 'ព័ត៌មានលម្អិតគណនី' : 'Account Details',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -1742,10 +1766,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           );
                         },
                         child: Text(
-                          'Change Avatar / Photo',
+                          l10n.isKhmer
+                              ? 'ប្ដូររូបតំណាង / រូបថត'
+                              : 'Change Avatar / Photo',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
                             color: theme.colorScheme.primary,
                           ),
                         ),
@@ -1754,22 +1782,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildInfoDetailRow('Full Name', customer.name, theme),
                 _buildInfoDetailRow(
-                  'Email Address',
+                  l10n.isKhmer ? 'ឈ្មោះពេញ' : 'Full Name',
+                  customer.name,
+                  theme,
+                ),
+                _buildInfoDetailRow(
+                  l10n.isKhmer ? 'អាសយដ្ឋានអ៊ីមែល' : 'Email Address',
                   customer.email,
                   theme,
                   canCopy: true,
                 ),
                 _buildInfoDetailRow(
-                  'Customer ID',
+                  l10n.isKhmer ? 'លេខសម្គាល់អតិថិជន' : 'Customer ID',
                   '#${customer.id}',
                   theme,
                   canCopy: true,
                 ),
                 _buildInfoDetailRow(
-                  'Status',
-                  customer.status.toUpperCase(),
+                  l10n.isKhmer ? 'ស្ថានភាព' : 'Status',
+                  l10n.isKhmer
+                      ? (customer.status.toLowerCase() == 'active'
+                            ? 'សកម្ម'
+                            : customer.status)
+                      : customer.status.toUpperCase(),
                   theme,
                   statusBadge: true,
                 ),
@@ -1792,10 +1828,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                           child: Text(
-                            'Close',
+                            l10n.isKhmer ? 'បិទ' : 'Close',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
+                              letterSpacing: 0,
                               color: theme.colorScheme.onSurface,
                             ),
                           ),
@@ -1816,11 +1854,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             size: 16,
                             color: Colors.white,
                           ),
-                          label: const Text(
-                            'Edit Info',
-                            style: TextStyle(
+                          label: Text(
+                            l10n.isKhmer ? 'កែសម្រួលព័ត៌មាន' : 'Edit Info',
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
+                              letterSpacing: 0,
                               color: Colors.white,
                             ),
                           ),
@@ -1849,6 +1889,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ThemeData theme,
   ) {
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final nameController = TextEditingController(text: customer.name);
     final emailController = TextEditingController(text: customer.email);
     final currentPasswordController = TextEditingController();
@@ -1906,8 +1947,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary
-                                    .withValues(alpha: 0.12),
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.12,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -1918,10 +1960,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Edit Profile',
+                              l10n.isKhmer
+                                  ? 'កែសម្រួលព័ត៌មានគណនី'
+                                  : 'Edit Profile',
                               style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
+                                letterSpacing: 0,
                                 color: theme.colorScheme.onSurface,
                               ),
                             ),
@@ -1932,12 +1978,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFDC2626)
-                                  .withValues(alpha: 0.1),
+                              color: const Color(
+                                0xFFDC2626,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFFDC2626)
-                                    .withValues(alpha: 0.3),
+                                color: const Color(
+                                  0xFFDC2626,
+                                ).withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -1951,10 +1999,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 Expanded(
                                   child: Text(
                                     errorMessage!,
-                                    style: const TextStyle(
+                                    style: TextStyle(
+                                      fontFamily: AppTheme.fontFamily,
                                       fontSize: 12,
-                                      color: Color(0xFFDC2626),
+                                      color: const Color(0xFFDC2626),
                                       fontWeight: FontWeight.w600,
+                                      letterSpacing: 0,
                                     ),
                                   ),
                                 ),
@@ -1982,10 +2032,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   customerName: customer.name,
                                 ),
                                 child: Text(
-                                  'Tap to change photo or avatar',
+                                  l10n.isKhmer
+                                      ? 'ចុចដើម្បីប្ដូររូបថត ឬរូបតំណាង'
+                                      : 'Tap to change photo or avatar',
                                   style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
+                                    letterSpacing: 0,
                                     color: theme.colorScheme.primary,
                                   ),
                                 ),
@@ -1995,36 +2049,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Full Name',
+                          l10n.isKhmer ? 'ឈ្មោះពេញ' : 'Full Name',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 6),
                         TextFormField(
                           controller: nameController,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
+                          ),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(
                               Icons.person_outline_rounded,
                               size: 20,
                             ),
-                            hintText: 'Enter your full name',
+                            hintText: l10n.isKhmer
+                                ? 'បញ្ចូលឈ្មោះពេញរបស់អ្នក'
+                                : 'Enter your full name',
+                            hintStyle: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
                           ),
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
-                              return 'Full name is required';
+                              return l10n.isKhmer
+                                  ? 'សូមបញ្ចូលឈ្មោះពេញ'
+                                  : 'Full name is required';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          'Email Address',
+                          l10n.isKhmer ? 'អាសយដ្ឋានអ៊ីមែល' : 'Email Address',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
@@ -2032,16 +2102,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         TextFormField(
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.email_outlined, size: 20),
-                            hintText: 'Enter your email address',
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
+                          ),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                              Icons.email_outlined,
+                              size: 20,
+                            ),
+                            hintText: l10n.isKhmer
+                                ? 'បញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នក'
+                                : 'Enter your email address',
+                            hintStyle: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
                           ),
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
-                              return 'Email is required';
+                              return l10n.isKhmer
+                                  ? 'សូមបញ្ចូលអ៊ីមែល'
+                                  : 'Email is required';
                             }
                             if (!val.contains('@') || !val.contains('.')) {
-                              return 'Please enter a valid email address';
+                              return l10n.isKhmer
+                                  ? 'សូមបញ្ចូលអ៊ីមែលឱ្យបានត្រឹមត្រូវ'
+                                  : 'Please enter a valid email address';
                             }
                             return null;
                           },
@@ -2068,10 +2155,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Change Password',
+                                  l10n.isKhmer
+                                      ? 'ប្តូរពាក្យសម្ងាត់'
+                                      : 'Change Password',
                                   style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
+                                    letterSpacing: 0,
                                     color: theme.colorScheme.onSurface,
                                   ),
                                 ),
@@ -2084,12 +2175,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           TextFormField(
                             controller: currentPasswordController,
                             obscureText: obscureCurrent,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
                             decoration: InputDecoration(
                               prefixIcon: const Icon(
                                 Icons.lock_outline_rounded,
                                 size: 20,
                               ),
-                              hintText: 'Current Password',
+                              hintText: l10n.isKhmer
+                                  ? 'ពាក្យសម្ងាត់បច្ចុប្បន្ន'
+                                  : 'Current Password',
+                              hintStyle: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                letterSpacing: 0,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   obscureCurrent
@@ -2107,7 +2208,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             validator: (val) {
                               if (changePassword &&
                                   (val == null || val.isEmpty)) {
-                                return 'Current password is required to change password';
+                                return l10n.isKhmer
+                                    ? 'សូមបញ្ចូលពាក្យសម្ងាត់បច្ចុប្បន្ន'
+                                    : 'Current password is required to change password';
                               }
                               return null;
                             },
@@ -2116,12 +2219,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           TextFormField(
                             controller: newPasswordController,
                             obscureText: obscureNew,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
                             decoration: InputDecoration(
                               prefixIcon: const Icon(
                                 Icons.lock_reset_rounded,
                                 size: 20,
                               ),
-                              hintText: 'New Password (min 6 characters)',
+                              hintText: l10n.isKhmer
+                                  ? 'ពាក្យសម្ងាត់ថ្មី (យ៉ាងតិច ៦ តួអក្សរ)'
+                                  : 'New Password (min 6 characters)',
+                              hintStyle: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                letterSpacing: 0,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   obscureNew
@@ -2139,7 +2252,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             validator: (val) {
                               if (changePassword) {
                                 if (val == null || val.length < 6) {
-                                  return 'New password must be at least 6 characters';
+                                  return l10n.isKhmer
+                                      ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ'
+                                      : 'New password must be at least 6 characters';
                                 }
                               }
                               return null;
@@ -2149,12 +2264,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           TextFormField(
                             controller: confirmPasswordController,
                             obscureText: obscureConfirm,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
                             decoration: InputDecoration(
                               prefixIcon: const Icon(
                                 Icons.lock_reset_rounded,
                                 size: 20,
                               ),
-                              hintText: 'Confirm New Password',
+                              hintText: l10n.isKhmer
+                                  ? 'ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់ថ្មី'
+                                  : 'Confirm New Password',
+                              hintStyle: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                letterSpacing: 0,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   obscureConfirm
@@ -2172,7 +2297,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             validator: (val) {
                               if (changePassword &&
                                   val != newPasswordController.text) {
-                                return 'Passwords do not match';
+                                return l10n.isKhmer
+                                    ? 'ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ'
+                                    : 'Passwords do not match';
                               }
                               return null;
                             },
@@ -2199,10 +2326,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                   ),
                                   child: Text(
-                                    'Cancel',
+                                    l10n.isKhmer ? 'បោះបង់' : 'Cancel',
                                     style: TextStyle(
+                                      fontFamily: AppTheme.fontFamily,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
+                                      letterSpacing: 0,
                                       color: theme.colorScheme.onSurface,
                                     ),
                                   ),
@@ -2237,18 +2366,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                                       .trim(),
                                                   currentPassword:
                                                       changePassword
-                                                          ? currentPasswordController
-                                                              .text
-                                                          : null,
+                                                      ? currentPasswordController
+                                                            .text
+                                                      : null,
                                                   newPassword: changePassword
                                                       ? newPasswordController
-                                                          .text
+                                                            .text
                                                       : null,
                                                   newPasswordConfirmation:
                                                       changePassword
-                                                          ? confirmPasswordController
-                                                              .text
-                                                          : null,
+                                                      ? confirmPasswordController
+                                                            .text
+                                                      : null,
                                                 );
                                             if (ctx.mounted) {
                                               Navigator.pop(ctx);
@@ -2257,27 +2386,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                               ScaffoldMessenger.of(
                                                 this.context,
                                               ).showSnackBar(
-                                                const SnackBar(
+                                                SnackBar(
                                                   content: Row(
                                                     children: [
-                                                      Icon(
+                                                      const Icon(
                                                         Icons
                                                             .check_circle_rounded,
                                                         color: Colors.white,
                                                         size: 18,
                                                       ),
-                                                      SizedBox(width: 8),
+                                                      const SizedBox(width: 8),
                                                       Text(
-                                                        'Profile updated successfully!',
+                                                        l10n.isKhmer
+                                                            ? 'បានកែសម្រួលព័ត៌មានគណនីជោគជ័យ!'
+                                                            : 'Profile updated successfully!',
+                                                        style: const TextStyle(
+                                                          fontFamily: AppTheme
+                                                              .fontFamily,
+                                                          letterSpacing: 0,
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
-                                                  backgroundColor: Color(
+                                                  backgroundColor: const Color(
                                                     0xFF23AA49,
                                                   ),
                                                   behavior:
                                                       SnackBarBehavior.floating,
-                                                  duration: Duration(
+                                                  duration: const Duration(
                                                     seconds: 3,
                                                   ),
                                                 ),
@@ -2288,17 +2424,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                               isSaving = false;
                                               errorMessage = e
                                                   .toString()
-                                                  .replaceAll(
-                                                    'Exception:',
-                                                    '',
-                                                  )
+                                                  .replaceAll('Exception:', '')
                                                   .trim();
                                             });
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        theme.colorScheme.primary,
+                                    backgroundColor: theme.colorScheme.primary,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -2315,11 +2447,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                                 ),
                                           ),
                                         )
-                                      : const Text(
-                                          'Save Changes',
-                                          style: TextStyle(
+                                      : Text(
+                                          l10n.isKhmer
+                                              ? 'រក្សាទុកការផ្លាស់ប្តូរ'
+                                              : 'Save Changes',
+                                          style: const TextStyle(
+                                            fontFamily: AppTheme.fontFamily,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w700,
+                                            letterSpacing: 0,
                                             color: Colors.white,
                                           ),
                                         ),
@@ -2357,7 +2493,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Text(
             label,
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               fontSize: 13,
+              letterSpacing: 0,
               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             ),
           ),
@@ -2371,8 +2509,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Text(
                 value,
                 style: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
                   color: Color(0xFF23AA49),
                 ),
               ),
@@ -2383,8 +2523,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Text(
                   value,
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
@@ -2408,6 +2550,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _showAddressInfoSheet(BuildContext context, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     showModalBottomSheet(
       context: context,
@@ -2449,10 +2592,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Delivery Address',
+                      l10n.isKhmer ? 'អាសយដ្ឋានដឹកជញ្ជូន' : 'Delivery Address',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -2482,10 +2627,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Home (Default Delivery)',
+                            l10n.isKhmer
+                                ? 'ផ្ទះ (អាសយដ្ឋានលំនាំដើម)'
+                                : 'Home (Default Delivery)',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
+                              letterSpacing: 0,
                               color: theme.colorScheme.onSurface,
                             ),
                           ),
@@ -2493,9 +2642,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Phnom Penh City, Cambodia\nStreet 271, Sangkat Boeung Tumpun',
+                        l10n.isKhmer
+                            ? 'រាជធានីភ្នំពេញ, កម្ពុជា\nផ្លូវ ២៧១, សង្កាត់បឹងទំពន់'
+                            : 'Phnom Penh City, Cambodia\nStreet 271, Sangkat Boeung Tumpun',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 13,
+                          letterSpacing: 0,
                           color: isDark
                               ? const Color(0xFF94A3B8)
                               : const Color(0xFF64748B),
@@ -2517,11 +2670,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Done',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.isKhmer ? 'រួចរាល់' : 'Done',
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                         color: Colors.white,
                       ),
                     ),
@@ -2537,6 +2692,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _showPaymentMethodsSheet(BuildContext context, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     showModalBottomSheet(
       context: context,
@@ -2578,10 +2734,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Payment Options',
+                      l10n.isKhmer ? 'ជម្រើសទូទាត់' : 'Payment Options',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -2591,7 +2749,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _buildPaymentOptionTile(
                   icon: Icons.qr_code_2_rounded,
                   title: 'ABA PayWay / KHQR',
-                  subtitle: 'Fast and secure contactless checkout',
+                  subtitle: l10n.isKhmer
+                      ? 'ការទូទាត់រហ័ស និងមានសុវត្ថិភាពខ្ពស់'
+                      : 'Fast and secure contactless checkout',
                   theme: theme,
                   isDark: isDark,
                   isDefault: true,
@@ -2599,8 +2759,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 10),
                 _buildPaymentOptionTile(
                   icon: Icons.money_rounded,
-                  title: 'Cash on Delivery (COD)',
-                  subtitle: 'Pay cash when items are delivered',
+                  title: l10n.isKhmer
+                      ? 'ទូទាត់ពេលទទួលទំនិញ (COD)'
+                      : 'Cash on Delivery (COD)',
+                  subtitle: l10n.isKhmer
+                      ? 'បង់ប្រាក់សុទ្ធនៅពេលទំនិញត្រូវបានដឹកជញ្ជូនដល់'
+                      : 'Pay cash when items are delivered',
                   theme: theme,
                   isDark: isDark,
                 ),
@@ -2616,11 +2780,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Done',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.isKhmer ? 'រួចរាល់' : 'Done',
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                         color: Colors.white,
                       ),
                     ),
@@ -2719,8 +2885,217 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  void _showLanguageSelectorSheet(
+    BuildContext context,
+    ThemeData theme,
+    bool isDark,
+  ) {
+    final currentLocale = ref.read(localeProvider);
+    final l10n = context.l10n;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.language_rounded,
+                        color: Color(0xFF0284C7),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      l10n.selectLanguage,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildLanguageOptionItem(
+                  theme: theme,
+                  isDark: isDark,
+                  title: 'ភាសាខ្មែរ (Khmer)',
+                  subtitle: 'ភាសាខ្មែរ · USD (\$)',
+                  flagEmoji: '🇰🇭',
+                  isSelected: currentLocale.languageCode == 'km',
+                  onTap: () {
+                    ref
+                        .read(localeProvider.notifier)
+                        .setLocale(const Locale('km'));
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.l10n.languageChanged),
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildLanguageOptionItem(
+                  theme: theme,
+                  isDark: isDark,
+                  title: 'English (US)',
+                  subtitle: 'English · USD (\$)',
+                  flagEmoji: '🇺🇸',
+                  isSelected: currentLocale.languageCode == 'en',
+                  onTap: () {
+                    ref
+                        .read(localeProvider.notifier)
+                        .setLocale(const Locale('en'));
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.l10n.languageChanged),
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLanguageOptionItem({
+    required ThemeData theme,
+    required bool isDark,
+    required String title,
+    required String subtitle,
+    required String flagEmoji,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final borderColor = isSelected
+        ? theme.colorScheme.primary
+        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
+    final bgColor = isSelected
+        ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08)
+        : (isDark ? const Color(0xFF131D38) : Colors.white);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: borderColor, width: isSelected ? 1.8 : 1.0),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(flagEmoji, style: const TextStyle(fontSize: 20)),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : (isDark
+                            ? const Color(0xFF475569)
+                            : const Color(0xFFCBD5E1)),
+                  width: 2,
+                ),
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : Colors.transparent,
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showHelpSupportSheet(BuildContext context, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final isKm = context.l10n.isKhmer;
 
     showModalBottomSheet(
       context: context,
@@ -2762,10 +3137,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Customer Support',
+                      isKm ? 'ផ្នែកបម្រើអតិថិជន' : 'Customer Support',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -2774,7 +3151,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 16),
                 _buildContactRow(
                   Icons.phone_in_talk_rounded,
-                  'Hotline Support',
+                  isKm ? 'ខ្សែទូរស័ព្ទទាន់ហេតុការណ៍' : 'Hotline Support',
                   '+855 (0) 23 999 888',
                   () => _launchUrl('tel:+85523999888'),
                   theme,
@@ -2783,7 +3160,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 10),
                 _buildContactRow(
                   Icons.email_outlined,
-                  'Support Email',
+                  isKm ? 'អ៊ីមែលជំនួយ' : 'Support Email',
                   'support@freshcart.store',
                   () => _launchUrl('mailto:support@freshcart.store'),
                   theme,
@@ -2792,7 +3169,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 10),
                 _buildContactRow(
                   Icons.chat_bubble_outline_rounded,
-                  'Live Chat Telegram',
+                  isKm ? 'ឆាតផ្ទាល់តាម Telegram' : 'Live Chat Telegram',
                   '@TVRSupport',
                   () => _launchUrl('https://t.me/reak6c'),
                   theme,
@@ -2810,11 +3187,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Close',
-                      style: TextStyle(
+                    child: Text(
+                      isKm ? 'បិទ' : 'Close',
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                         color: Colors.white,
                       ),
                     ),
@@ -2859,15 +3238,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Text(
                     title,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     detail,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 12,
+                      letterSpacing: 0,
                       color: isDark
                           ? const Color(0xFF94A3B8)
                           : const Color(0xFF64748B),
@@ -2889,6 +3272,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _showPrivacyTermsSheet(BuildContext context, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final isKm = context.l10n.isKhmer;
 
     showModalBottomSheet(
       context: context,
@@ -2933,10 +3317,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Privacy & Terms',
+                      isKm ? 'ឯកជនភាព & លក្ខខណ្ឌ' : 'Privacy & Terms',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
@@ -2944,10 +3330,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Your privacy and data security are our top priorities. All payment transactions are encrypted end-to-end via secure banking gateways. We do not store your raw credit card credentials.',
+                  isKm
+                      ? 'ឯកជនភាព និងសុវត្ថិភាពទិន្នន័យរបស់អ្នក គឺជាអាទិភាពចម្បងរបស់យើង។ រាល់ប្រតិបត្តិការទូទាត់ទាំងអស់ត្រូវបានការពារ និងអ៊ិនគ្រីបតាមប្រព័ន្ធសុវត្ថិភាពធនាគារកម្រិតខ្ពស់។ យើងមិនរក្សាទុកលេខសម្ងាត់កាតធនាគារផ្ទាល់ខ្លួនរបស់អ្នកឡើយ។'
+                      : 'Your privacy and data security are our top priorities. All payment transactions are encrypted end-to-end via secure banking gateways. We do not store your raw credit card credentials.',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 13,
                     height: 1.5,
+                    letterSpacing: 0,
                     color: isDark
                         ? const Color(0xFF94A3B8)
                         : const Color(0xFF64748B),
@@ -2955,10 +3345,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'By using the TVR app, you agree to our standard terms of service, fair usage policies, and consumer return guidelines.',
+                  isKm
+                      ? 'តាមរយៈការប្រើប្រាស់កម្មវិធី TVR អ្នកយល់ព្រមតាមលក្ខខណ្ឌប្រើប្រាស់ជាមូលដ្ឋាន គោលការណ៍នៃការប្រើប្រាស់សមរម្យ និងសិទ្ធិការពារអ្នកប្រើប្រាស់របស់យើង។'
+                      : 'By using the TVR app, you agree to our standard terms of service, fair usage policies, and consumer return guidelines.',
                   style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 13,
                     height: 1.5,
+                    letterSpacing: 0,
                     color: isDark
                         ? const Color(0xFF94A3B8)
                         : const Color(0xFF64748B),
@@ -2976,11 +3370,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'I Understand',
-                      style: TextStyle(
+                    child: Text(
+                      isKm ? 'ខ្ញុំយល់ព្រម' : 'I Understand',
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                         color: Colors.white,
                       ),
                     ),
@@ -2998,6 +3394,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildAppVersionFooter(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final isKm = context.l10n.isKhmer;
 
     return Center(
       child: Column(
@@ -3014,8 +3411,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 'TVR Mobile',
                 style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
                   color: isDark
                       ? const Color(0xFF64748B)
                       : const Color(0xFF94A3B8),
@@ -3025,9 +3424,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Version 1.0.0 (Build 2026.1) • All rights reserved',
+            isKm
+                ? 'ជំនាន់ 1.0.0 (Build 2026.1) • រក្សាសិទ្ធិគ្រប់យ៉ាង'
+                : 'Version 1.0.0 (Build 2026.1) • All rights reserved',
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               fontSize: 11,
+              letterSpacing: 0,
               color: isDark ? const Color(0xFF475569) : const Color(0xFFA1A1AA),
             ),
           ),

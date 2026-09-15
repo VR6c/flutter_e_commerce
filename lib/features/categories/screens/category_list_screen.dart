@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/models/sort_option.dart';
 import '../../../shared/widgets/async_value_widget.dart';
@@ -472,10 +473,12 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Sort Products',
+                    context.l10n.isKhmer ? 'តម្រៀបផលិតផល' : 'Sort Products',
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
+                      letterSpacing: 0,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
@@ -486,11 +489,13 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                         Navigator.pop(ctx);
                       },
                       child: Text(
-                        'Reset',
+                        context.l10n.isKhmer ? 'កំណត់ឡើងវិញ' : 'Reset',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
+                          letterSpacing: 0,
                         ),
                       ),
                     ),
@@ -527,8 +532,9 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                         const SizedBox(width: 14),
                         Expanded(
                           child: Text(
-                            option.label,
+                            option.localizedLabel(ctx),
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 15,
                               fontWeight: isSelected
                                   ? FontWeight.w700
@@ -536,6 +542,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                               color: isSelected
                                   ? theme.colorScheme.primary
                                   : theme.colorScheme.onSurface,
+                              letterSpacing: 0,
                             ),
                           ),
                         ),
@@ -610,11 +617,12 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
         title: Padding(
           padding: const EdgeInsets.only(left: 4.0),
           child: Text(
-            'All Products',
+            context.l10n.allProducts,
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               fontWeight: FontWeight.w800,
               fontSize: 23,
-              letterSpacing: -0.5,
+              letterSpacing: context.l10n.isKhmer ? 0 : -0.5,
               color: theme.colorScheme.onSurface,
             ),
           ),
@@ -695,7 +703,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                   color: theme.colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search all items...',
+                  hintText: context.l10n.searchPlaceholder,
                   hintStyle: TextStyle(
                     fontSize: 14,
                     color: isDark ? Colors.grey[500] : const Color(0xFF94A3B8),
@@ -736,7 +744,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                   child: Row(
                     children: [
                       _FilterChip(
-                        label: 'All Items',
+                        label: context.l10n.isKhmer ? 'ទាំងអស់' : 'All Items',
                         isSelected: _selectedCategorySlug == null,
                         onTap: () {
                           HapticFeedback.selectionClick();
@@ -771,7 +779,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
 
                         return _FilterChip(
                           key: chipKey,
-                          label: category.name,
+                          label: context.l10n.translateCategory(category.name),
                           isSelected: isSelected,
                           onTap: () {
                             HapticFeedback.selectionClick();
@@ -1057,9 +1065,11 @@ class _FilterChip extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               color: isSelected ? Colors.white : theme.colorScheme.onSurface,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
               fontSize: 12.5,
+              letterSpacing: 0,
             ),
           ),
         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../models/order.dart';
 
 class OrderDetailBottomSheet extends StatelessWidget {
@@ -19,7 +21,8 @@ class OrderDetailBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final statusInfo = _statusInfo(order.status);
+    final l10n = context.l10n;
+    final statusInfo = _statusInfo(order.status, l10n);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -59,16 +62,20 @@ class OrderDetailBottomSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Order #${order.id}',
+                            l10n.isKhmer ? 'ការបញ្ជាទិញ #${order.id}' : 'Order #${order.id}',
                             style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _formatDate(order.createdAt),
+                            _formatDate(order.createdAt, l10n),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.hintColor,
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
                             ),
                           ),
                         ],
@@ -88,17 +95,21 @@ class OrderDetailBottomSheet extends StatelessWidget {
                     // Items
                     _SectionHeader(
                       icon: Icons.shopping_bag_outlined,
-                      label: 'Items (${order.items.length})',
+                      label: l10n.isKhmer
+                          ? 'ទំនិញ (${order.items.length})'
+                          : 'Items (${order.items.length})',
                     ),
                     const SizedBox(height: 12),
                     if (order.items.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          'No item details available.',
+                          l10n.isKhmer ? 'មិនមានព័ត៌មានលម្អិតទំនិញទេ' : 'No item details available.',
                           style: TextStyle(
                             color: theme.hintColor,
                             fontSize: 13,
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
                           ),
                         ),
                       )
@@ -125,15 +136,15 @@ class OrderDetailBottomSheet extends StatelessWidget {
                       child: Column(
                         children: [
                           _PriceRow(
-                            label: 'Subtotal',
+                            label: l10n.subtotal,
                             value:
                                 '\$${(order.total + order.discountAmount).toStringAsFixed(2)}',
                             theme: theme,
                           ),
                           const SizedBox(height: 6),
                           _PriceRow(
-                            label: 'Shipping',
-                            value: 'FREE',
+                            label: l10n.deliveryFee,
+                            value: l10n.freeLabel,
                             isAccent: true,
                             theme: theme,
                           ),
@@ -141,8 +152,8 @@ class OrderDetailBottomSheet extends StatelessWidget {
                             const SizedBox(height: 6),
                             _PriceRow(
                               label: order.couponCode != null
-                                  ? 'Discount (${order.couponCode})'
-                                  : 'Discount',
+                                  ? '${l10n.discount} (${order.couponCode})'
+                                  : l10n.discount,
                               value:
                                   '-\$${order.discountAmount.toStringAsFixed(2)}',
                               isAccent: true,
@@ -151,7 +162,7 @@ class OrderDetailBottomSheet extends StatelessWidget {
                           ],
                           const Divider(height: 20),
                           _PriceRow(
-                            label: 'Total',
+                            label: l10n.total,
                             value: '\$${order.total.toStringAsFixed(2)}',
                             isBold: true,
                             theme: theme,
@@ -164,7 +175,7 @@ class OrderDetailBottomSheet extends StatelessWidget {
                     // Payment Method
                     _SectionHeader(
                       icon: Icons.payment_outlined,
-                      label: 'Payment Method',
+                      label: l10n.paymentMethod,
                     ),
                     const SizedBox(height: 12),
                     _PaymentMethodTile(gateway: order.gateway, theme: theme),
@@ -173,7 +184,7 @@ class OrderDetailBottomSheet extends StatelessWidget {
                     // Shipping Address
                     _SectionHeader(
                       icon: Icons.location_on_outlined,
-                      label: 'Shipping Address',
+                      label: l10n.shippingAddress,
                     ),
                     const SizedBox(height: 12),
                     _AddressTile(order: order, theme: theme),
@@ -188,42 +199,42 @@ class OrderDetailBottomSheet extends StatelessWidget {
     );
   }
 
-  Map<String, dynamic> _statusInfo(String status) {
+  Map<String, dynamic> _statusInfo(String status, AppLocalizations l10n) {
     switch (status.toLowerCase()) {
       case 'completed':
       case 'delivered':
         return {
           'color': const Color(0xFF059669),
           'icon': Icons.check_circle_rounded,
-          'label': 'Completed',
+          'label': l10n.isKhmer ? 'បានដឹកដល់' : 'Completed',
         };
       case 'processing':
         return {
           'color': const Color(0xFF4F46E5),
           'icon': Icons.sync_rounded,
-          'label': 'Processing',
+          'label': l10n.isKhmer ? 'កំពុងរៀបចំ' : 'Processing',
         };
       case 'cancelled':
       case 'canceled':
         return {
           'color': const Color(0xFFDC2626),
           'icon': Icons.cancel_rounded,
-          'label': 'Cancelled',
+          'label': l10n.isKhmer ? 'បានបោះបង់' : 'Cancelled',
         };
       case 'pending':
       default:
         return {
           'color': const Color(0xFFF59E0B),
           'icon': Icons.hourglass_top_rounded,
-          'label': 'Pending',
+          'label': l10n.isKhmer ? 'រង់ចាំ' : 'Pending',
         };
     }
   }
 
-  String _formatDate(String isoDate) {
+  String _formatDate(String isoDate, AppLocalizations l10n) {
     try {
       final dt = DateTime.parse(isoDate).toLocal();
-      final months = [
+      final monthsEn = [
         'Jan',
         'Feb',
         'Mar',
@@ -237,7 +248,22 @@ class OrderDetailBottomSheet extends StatelessWidget {
         'Nov',
         'Dec',
       ];
-      return '${dt.day} ${months[dt.month - 1]} ${dt.year}  •  ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      final monthsKm = [
+        'មករា',
+        'កុម្ភៈ',
+        'មីនា',
+        'មេសា',
+        'ឧសភា',
+        'មិថុនា',
+        'កក្កដា',
+        'សីហា',
+        'កញ្ញា',
+        'តុលា',
+        'វិច្ឆិកា',
+        'ធ្នូ',
+      ];
+      final monthName = l10n.isKhmer ? monthsKm[dt.month - 1] : monthsEn[dt.month - 1];
+      return '${dt.day} $monthName ${dt.year}  •  ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {
       return isoDate;
     }
@@ -268,12 +294,13 @@ class _SectionHeader extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            label.toUpperCase(),
+            label,
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+              fontFamily: AppTheme.fontFamily,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
               color: theme.colorScheme.primary,
-              letterSpacing: 0.8,
+              letterSpacing: 0,
             ),
           ),
         ],
@@ -307,9 +334,11 @@ class _StatusBadge extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
               color: color,
               fontWeight: FontWeight.w600,
               fontSize: 12,
+              letterSpacing: 0,
             ),
           ),
         ],
@@ -325,6 +354,7 @@ class _OrderItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -386,17 +416,24 @@ class _OrderItemTile extends StatelessWidget {
                 Text(
                   item.productName,
                   style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     color: Color(0xFF0F172A),
+                    letterSpacing: 0,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qty: ${item.quantity}',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  l10n.isKhmer ? 'ចំនួន: ${item.quantity}' : 'Qty: ${item.quantity}',
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    color: Colors.grey[500],
+                    fontSize: 12,
+                    letterSpacing: 0,
+                  ),
                 ),
               ],
             ),
@@ -405,9 +442,11 @@ class _OrderItemTile extends StatelessWidget {
           Text(
             '\$${(item.price * item.quantity).toStringAsFixed(2)}',
             style: const TextStyle(
+              fontFamily: AppTheme.fontFamily,
               fontWeight: FontWeight.w600,
               fontSize: 14,
               color: Color(0xFF0F172A),
+              letterSpacing: 0,
             ),
           ),
         ],
@@ -438,13 +477,16 @@ class _PriceRow extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodyMedium?.copyWith(
+            fontFamily: AppTheme.fontFamily,
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
             color: isBold ? null : theme.hintColor,
+            letterSpacing: 0,
           ),
         ),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
+            fontFamily: AppTheme.fontFamily,
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
             color: isAccent
                 ? const Color(0xFF059669)
@@ -452,6 +494,7 @@ class _PriceRow extends StatelessWidget {
                 ? theme.colorScheme.primary
                 : null,
             fontSize: isBold ? 16 : null,
+            letterSpacing: 0,
           ),
         ),
       ],
@@ -466,6 +509,7 @@ class _PaymentMethodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isAba =
         gateway.toLowerCase().contains('aba') ||
         gateway.toLowerCase().contains('payway');
@@ -504,10 +548,12 @@ class _PaymentMethodTile extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            isAba ? 'ABA PayWay' : 'Cash on Delivery',
+            isAba ? l10n.abaPayWay : l10n.cashOnDelivery,
             style: theme.textTheme.bodyMedium?.copyWith(
+              fontFamily: AppTheme.fontFamily,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF0F172A),
+              letterSpacing: 0,
             ),
           ),
         ],
@@ -557,9 +603,11 @@ class _AddressTile extends StatelessWidget {
                 child: Text(
                   line,
                   style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontSize: 14,
                     color: Color(0xFF334155),
                     height: 1.4,
+                    letterSpacing: 0,
                   ),
                 ),
               ),

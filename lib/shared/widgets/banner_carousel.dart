@@ -3,17 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../core/utils/image_url_formatter.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../core/theme/app_theme.dart';
 import '../../features/home/models/banner.dart';
 
 class BannerCarousel extends StatefulWidget {
   final List<BannerModel> banners;
   final ValueChanged<BannerModel>? onBannerTap;
 
-  const BannerCarousel({
-    super.key,
-    required this.banners,
-    this.onBannerTap,
-  });
+  const BannerCarousel({super.key, required this.banners, this.onBannerTap});
 
   @override
   State<BannerCarousel> createState() => _BannerCarouselState();
@@ -24,25 +22,50 @@ class _BannerCarouselState extends State<BannerCarousel> {
   final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(0);
   Timer? _timer;
 
-  String _getBannerBadge(BannerModel banner) {
+  String _getBannerBadge(BuildContext context, BannerModel banner) {
+    final isKhmer = context.l10n.isKhmer;
     final type = banner.type?.trim();
     if (type != null && type.isNotEmpty) {
       switch (type.toLowerCase()) {
         case 'promotion':
-          return 'PROMOTION';
+          return isKhmer ? 'ការផ្ដល់ជូនពិសេស' : 'PROMOTION';
         case 'sale':
-          return 'SPECIAL SALE';
+          return isKhmer ? 'ប្រូម៉ូសិនពិសេស' : 'SPECIAL SALE';
         case 'seasonal':
-          return 'SEASONAL';
+          return isKhmer ? 'រដូវកាលពិសេស' : 'SEASONAL';
         case 'featured':
-          return 'FEATURED';
+          return isKhmer ? 'ទំនិញពិសេស' : 'FEATURED';
         case 'announcement':
-          return 'ANNOUNCEMENT';
+          return isKhmer ? 'ដំណឹងពិសេស' : 'ANNOUNCEMENT';
         default:
           return type.toUpperCase();
       }
     }
-    return 'FRESH DEALS';
+    return isKhmer ? 'ការផ្ដល់ជូនពិសេស' : 'FRESH DEALS';
+  }
+
+  String _getLocalizedTitle(BuildContext context, String title) {
+    if (!context.l10n.isKhmer) return title;
+    final lower = title.toLowerCase();
+    if (lower.contains('summer sale')) return 'ការបញ្ចុះតម្លៃរដូវក្តៅ';
+    if (lower.contains('flash sale')) return 'ការបញ្ចុះតម្លៃរហ័ស';
+    if (lower.contains('special sale') || lower.contains('special deals')) {
+      return 'ការផ្ដល់ជូនពិសេស';
+    }
+    if (lower.contains('fresh')) return 'ទំនិញគុណភាពល្អៗ';
+    return title;
+  }
+
+  String _getLocalizedDesc(BuildContext context, String desc) {
+    if (!context.l10n.isKhmer) return desc;
+    final lower = desc.toLowerCase();
+    if (lower.contains('50% off') || lower.contains('selected fashion')) {
+      return 'បញ្ចុះតម្លៃរហូតដល់ 50% លើទំនិញពេញនិយម';
+    }
+    if (lower.contains('free delivery') || lower.contains('free shipping')) {
+      return 'ដឹកជញ្ជូនឥតគិតថ្លៃសម្រាប់ការបញ្ជាទិញដំបូង';
+    }
+    return desc;
   }
 
   Color _getBannerBadgeColor(BannerModel banner, Color primary) {
@@ -93,8 +116,12 @@ class _BannerCarouselState extends State<BannerCarousel> {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
-    final highlightColor = isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC);
+    final baseColor = isDark
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFE2E8F0);
+    final highlightColor = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFF8FAFC);
     final placeholderColor = isDark ? const Color(0xFF0F172A) : Colors.white;
 
     return RepaintBoundary(
@@ -117,7 +144,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                     color: theme.cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.04),
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.3 : 0.04,
+                        ),
                         blurRadius: 14,
                         offset: const Offset(0, 4),
                       ),
@@ -153,14 +182,26 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                 child: Container(color: placeholderColor),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                child: Icon(Icons.shopping_bag_outlined, size: 40, color: theme.hintColor),
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF1F5F9),
+                                child: Icon(
+                                  Icons.shopping_bag_outlined,
+                                  size: 40,
+                                  color: theme.hintColor,
+                                ),
                               ),
                             );
                           }
                           return Container(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                            child: Icon(Icons.shopping_bag_outlined, size: 40, color: theme.hintColor),
+                            color: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFF1F5F9),
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 40,
+                              color: theme.hintColor,
+                            ),
                           );
                         },
                       ),
@@ -186,46 +227,60 @@ class _BannerCarouselState extends State<BannerCarousel> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: _getBannerBadgeColor(banner, theme.colorScheme.primary),
+                                color: _getBannerBadgeColor(
+                                  banner,
+                                  theme.colorScheme.primary,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: _getBannerBadgeColor(banner, theme.colorScheme.primary).withValues(alpha: 0.35),
+                                    color: _getBannerBadgeColor(
+                                      banner,
+                                      theme.colorScheme.primary,
+                                    ).withValues(alpha: 0.35),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
                               child: Text(
-                                _getBannerBadge(banner),
-                                style: const TextStyle(
+                                _getBannerBadge(context, banner),
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   color: Colors.white,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
+                                  letterSpacing: context.l10n.isKhmer ? 0 : 0.5,
                                 ),
                               ),
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              banner.title,
-                              style: const TextStyle(
+                              _getLocalizedTitle(context, banner.title),
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                letterSpacing: -0.3,
+                                letterSpacing: context.l10n.isKhmer ? 0 : -0.3,
                               ),
                             ),
-                            if (banner.description != null && banner.description!.isNotEmpty) ...[
+                            if (banner.description != null &&
+                                banner.description!.isNotEmpty) ...[
                               const SizedBox(height: 3),
                               Text(
-                                banner.description!,
+                                _getLocalizedDesc(context, banner.description!),
                                 style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
+                                  letterSpacing: 0,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -241,7 +296,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                             child: InkWell(
                               onTap: () => widget.onBannerTap!(banner),
                               splashColor: Colors.white.withValues(alpha: 0.15),
-                              highlightColor: Colors.white.withValues(alpha: 0.08),
+                              highlightColor: Colors.white.withValues(
+                                alpha: 0.08,
+                              ),
                             ),
                           ),
                         ),
@@ -268,7 +325,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                       borderRadius: BorderRadius.circular(4),
                       color: currentPage == index
                           ? theme.colorScheme.primary
-                          : (isDark ? Colors.grey[700] : const Color(0xFFCBD5E1)),
+                          : (isDark
+                                ? Colors.grey[700]
+                                : const Color(0xFFCBD5E1)),
                     ),
                   ),
                 ),
@@ -288,8 +347,12 @@ class BannerCarouselShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
-    final highlightColor = isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC);
+    final baseColor = isDark
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFE2E8F0);
+    final highlightColor = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFF8FAFC);
     final placeholderColor = isDark ? const Color(0xFF0F172A) : Colors.white;
 
     return RepaintBoundary(

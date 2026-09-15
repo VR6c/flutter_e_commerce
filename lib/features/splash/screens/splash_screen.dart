@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/splash_state.dart';
@@ -243,8 +244,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             Text(
                               'TVR',
                               style: theme.textTheme.headlineMedium?.copyWith(
+                                fontFamily: AppTheme.fontFamily,
                                 fontWeight: FontWeight.w800,
-                                letterSpacing: -0.8,
+                                letterSpacing: 0,
                                 color: isDark
                                     ? AppTheme.darkOnSurface
                                     : AppTheme.lightOnSurface,
@@ -252,13 +254,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Fresh groceries & essentials delivered',
+                              context.l10n.isKhmer
+                                  ? 'ទំនិញស្រស់ៗ និងគ្រឿងឧបភោគបរិភោគដឹកជញ្ជូនរហ័ស'
+                                  : 'Fresh groceries & essentials delivered',
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: AppTheme.fontFamily,
                                 color: isDark
                                     ? AppTheme.darkSubtext
                                     : AppTheme.lightSubtext,
                                 fontWeight: FontWeight.w500,
+                                letterSpacing: 0,
                               ),
                             ),
                           ],
@@ -283,8 +289,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          'v1.0.0 • Fast & Secure Delivery',
+                          context.l10n.isKhmer
+                              ? 'v1.0.0 • ដឹកជញ្ជូនរហ័ស & សុវត្ថិភាព'
+                              : 'v1.0.0 • Fast & Secure Delivery',
                           style: theme.textTheme.bodySmall?.copyWith(
+                            fontFamily: AppTheme.fontFamily,
                             color:
                                 (isDark
                                         ? AppTheme.darkSubtext
@@ -292,7 +301,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                     .withValues(alpha: 0.6),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            letterSpacing: 0.2,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -310,6 +319,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget _buildLoadingIndicator(BuildContext context, SplashState state) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isKhmer = context.l10n.isKhmer;
+
+    String displayMessage = state.message;
+    if (isKhmer) {
+      if (state.message.contains('Wait') || state.message.contains('minute')) {
+        displayMessage = 'សូមរង់ចាំបន្តិច...';
+      } else if (state.message.contains('Starting')) {
+        displayMessage = 'កំពុងចាប់ផ្ដើម TVR...';
+      } else if (state.message.contains('Ready')) {
+        displayMessage = 'រួចរាល់!';
+      }
+    }
 
     return FadeTransition(
       opacity: _contentFadeAnimation,
@@ -335,12 +356,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: Text(
-              state.message,
-              key: ValueKey<String>(state.message),
+              displayMessage,
+              key: ValueKey<String>(displayMessage),
               style: theme.textTheme.bodySmall?.copyWith(
+                fontFamily: AppTheme.fontFamily,
                 color: isDark ? AppTheme.darkSubtext : AppTheme.lightSubtext,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
+                letterSpacing: 0,
               ),
             ),
           ),
@@ -351,6 +374,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Widget _buildErrorWidget(BuildContext context, SplashState state) {
     final theme = Theme.of(context);
+    final isKhmer = context.l10n.isKhmer;
+
+    final String errorText = isKhmer
+        ? 'មិនអាចចាប់ផ្ដើមកម្មវិធីបានទេ។ សូមព្យាយាមម្តងទៀត។'
+        : (state.errorMessage ?? 'Initialization encountered an issue.');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -375,10 +403,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  state.errorMessage ?? 'Initialization encountered an issue.',
+                  errorText,
                   style: theme.textTheme.bodySmall?.copyWith(
+                    fontFamily: AppTheme.fontFamily,
                     color: theme.colorScheme.error,
                     fontWeight: FontWeight.w600,
+                    letterSpacing: 0,
                   ),
                 ),
               ),
@@ -393,7 +423,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ref.read(splashProvider.notifier).retry();
                 },
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Try Again'),
+                label: Text(
+                  isKhmer ? 'ព្យាយាមម្តងទៀត' : 'Try Again',
+                  style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    letterSpacing: 0,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   foregroundColor: Colors.white,
@@ -420,7 +456,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Continue as Guest'),
+                child: Text(
+                  isKhmer ? 'បន្តជាភ្ញៀវ' : 'Continue as Guest',
+                  style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    letterSpacing: 0,
+                  ),
+                ),
               ),
             ],
           ),

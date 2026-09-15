@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/models/sort_option.dart';
 import '../../../shared/widgets/cart_icon_badge.dart';
@@ -256,9 +258,11 @@ class _CategoryProductsScreenState
               ),
               const SizedBox(height: 20),
               Text(
-                'Sort Products',
+                context.l10n.isKhmer ? 'តម្រៀបផលិតផល' : 'Sort Products',
                 style: theme.textTheme.titleMedium?.copyWith(
+                  fontFamily: AppTheme.fontFamily,
                   fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: 16),
@@ -302,14 +306,16 @@ class _CategoryProductsScreenState
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          opt.label,
+                          opt.localizedLabel(context),
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontWeight: isSelected
                                 ? FontWeight.w700
                                 : FontWeight.normal,
                             color: isSelected
                                 ? theme.colorScheme.primary
                                 : theme.colorScheme.onSurface,
+                            letterSpacing: 0,
                           ),
                         ),
                         const Spacer(),
@@ -363,11 +369,13 @@ class _CategoryProductsScreenState
           ),
         ),
         title: Text(
-          widget.categoryName,
+          context.l10n.translateCategory(widget.categoryName),
           style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
             fontWeight: FontWeight.w800,
             fontSize: 20,
             color: theme.colorScheme.onSurface,
+            letterSpacing: 0,
           ),
         ),
         centerTitle: true,
@@ -421,16 +429,22 @@ class _CategoryProductsScreenState
                       controller: _searchController,
                       onChanged: _onSearchChanged,
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         color: theme.colorScheme.onSurface,
                         fontSize: 14,
+                        letterSpacing: 0,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Search in ${widget.categoryName}...',
+                        hintText: context.l10n.isKhmer
+                            ? 'ស្វែងរកក្នុង ${context.l10n.translateCategory(widget.categoryName)}...'
+                            : 'Search in ${widget.categoryName}...',
                         hintStyle: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           color: isDark
                               ? Colors.grey[500]
                               : const Color(0xFF94A3B8),
                           fontSize: 13,
+                          letterSpacing: 0,
                         ),
                         prefixIcon: Icon(
                           Icons.search_rounded,
@@ -544,11 +558,19 @@ class _CategoryProductsScreenState
                                         child: EmptyStateWidget(
                                           icon: Icons.inventory_2_outlined,
                                           title: _searchQuery.isNotEmpty
-                                              ? 'No results for "$_searchQuery"'
-                                              : 'No Products Found',
+                                              ? (context.l10n.isKhmer
+                                                  ? 'គ្មានលទ្ធផលសម្រាប់ "$_searchQuery"'
+                                                  : 'No results for "$_searchQuery"')
+                                              : (context.l10n.isKhmer
+                                                  ? 'មិនមានផលិតផលទេ'
+                                                  : 'No Products Found'),
                                           message: _searchQuery.isNotEmpty
-                                              ? 'Try a different search term.'
-                                              : 'No products are available in this category yet.',
+                                              ? (context.l10n.isKhmer
+                                                  ? 'សូមសាកល្បងស្វែងរកពាក្យផ្សេង។'
+                                                  : 'Try a different search term.')
+                                              : (context.l10n.isKhmer
+                                                  ? 'មិនទាន់មានផលិតផលនៅក្នុងប្រភេទនេះនៅឡើយទេ។'
+                                                  : 'No products are available in this category yet.'),
                                         ),
                                       ),
                                     ),

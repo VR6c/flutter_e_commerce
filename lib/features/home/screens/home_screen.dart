@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/sort_option.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/banner_carousel.dart';
@@ -560,6 +562,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
 
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
     final activeFiltersCount = (_sortBy != SortOption.none ? 1 : 0) +
         (_selectedCategorySlug != null ? 1 : 0) +
@@ -594,9 +597,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Text(
                     customer != null
-                        ? 'Hi, ${customer.name.split(' ').first} 👋'
-                        : 'Welcome to FreshMart 👋',
+                        ? (l10n.isKhmer
+                            ? 'សួស្តី, ${customer.name.split(' ').first} 👋'
+                            : 'Hi, ${customer.name.split(' ').first} 👋')
+                        : (l10n.isKhmer
+                            ? 'សូមស្វាគមន៍មកកាន់ TVR 👋'
+                            : 'Welcome to TVR 👋'),
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: isDark
@@ -631,13 +639,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               if (selected != null) {
                                 final streetPart =
                                     selected.street.split(',').first.trim();
+                                String labelText = selected.label;
+                                if (l10n.isKhmer) {
+                                  final lower = labelText.toLowerCase().trim();
+                                  if (lower == 'home') labelText = 'ផ្ទះ';
+                                  if (lower == 'work') labelText = 'កន្លែងធ្វើការ';
+                                  if (lower == 'office') labelText = 'ការិយាល័យ';
+                                }
                                 displayText = streetPart.isNotEmpty
-                                    ? '${selected.label} · $streetPart'
-                                    : selected.label;
+                                    ? '$labelText · $streetPart'
+                                    : labelText;
                               } else if (customer != null) {
-                                displayText = 'Home · ${customer.name}';
+                                displayText = l10n.isKhmer
+                                    ? 'ផ្ទះ · ${customer.name}'
+                                    : 'Home · ${customer.name}';
                               } else {
-                                displayText = 'Select Location';
+                                displayText = l10n.selectLocation;
                               }
 
                               return Text(
@@ -860,7 +877,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'Search fruits, vegetables, groceries...',
+                              hintText: l10n.searchPlaceholder,
                               hintStyle: TextStyle(
                                 color: isDark
                                     ? Colors.grey[500]
@@ -1097,8 +1114,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Clear All',
+                                    l10n.isKhmer ? 'សម្អាតទាំងអស់' : 'Clear All',
                                     style: TextStyle(
+                                      fontFamily: AppTheme.fontFamily,
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w700,
                                       color: isDark
@@ -1167,7 +1185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           _buildPerkItem(
                             icon: Icons.bolt_rounded,
-                            label: 'Fast Delivery',
+                            label: l10n.fastDelivery,
                             iconColor: const Color(0xFFF59E0B),
                             theme: theme,
                             isDark: isDark,
@@ -1181,7 +1199,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           _buildPerkItem(
                             icon: Icons.eco_rounded,
-                            label: '100% Organic',
+                            label: l10n.organic100,
                             iconColor: theme.colorScheme.primary,
                             theme: theme,
                             isDark: isDark,
@@ -1195,7 +1213,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           _buildPerkItem(
                             icon: Icons.verified_user_rounded,
-                            label: 'Best Prices',
+                            label: l10n.bestPrices,
                             iconColor: const Color(0xFF10B981),
                             theme: theme,
                             isDark: isDark,
@@ -1215,11 +1233,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Categories',
+                          l10n.categories,
                           style: theme.textTheme.titleMedium?.copyWith(
+                            fontFamily: AppTheme.fontFamily,
                             fontWeight: FontWeight.w800,
                             fontSize: 17,
-                            letterSpacing: -0.2,
+                            letterSpacing: l10n.isKhmer ? 0 : -0.2,
                           ),
                         ),
                         InkWell(
@@ -1237,7 +1256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'See All',
+                                  l10n.seeAll,
                                   style: TextStyle(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w700,
@@ -1373,8 +1392,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             ),
                                             const SizedBox(height: 7),
                                             Text(
-                                              'All Items',
+                                              l10n.allItems,
                                               style: TextStyle(
+                                                fontFamily: AppTheme.fontFamily,
                                                 color: isAllSelected
                                                     ? theme.colorScheme.primary
                                                     : (isDark
@@ -1386,6 +1406,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                     ? FontWeight.w700
                                                     : FontWeight.w600,
                                                 fontSize: 12,
+                                                letterSpacing: 0,
                                               ),
                                             ),
                                           ],
@@ -1500,15 +1521,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             ),
                                             const SizedBox(height: 7),
                                             Text(
-                                              category.name,
+                                              l10n.translateCategory(category.name),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
+                                                fontFamily: AppTheme.fontFamily,
                                                 fontWeight: isSelected
                                                     ? FontWeight.w700
                                                     : FontWeight.w600,
                                                 fontSize: 12,
+                                                letterSpacing: 0,
                                                 color: isSelected
                                                     ? theme.colorScheme.primary
                                                     : (isDark
@@ -1552,20 +1575,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             _searchQuery.isNotEmpty
-                                ? 'Search Results'
+                                ? (l10n.isKhmer ? 'លទ្ធផលស្វែងរក' : 'Search Results')
                                 : (_selectedCategorySlug != null
-                                    ? 'Category Items'
-                                    : 'Our Best Items'),
+                                    ? (l10n.isKhmer ? 'ទំនិញតាមប្រភេទ' : 'Category Items')
+                                    : (l10n.isKhmer ? 'ទំនិញលក់ដាច់បំផុត' : 'Our Best Items')),
                             style: theme.textTheme.titleMedium?.copyWith(
+                              fontFamily: AppTheme.fontFamily,
                               fontWeight: FontWeight.w800,
                               fontSize: 17,
-                              letterSpacing: -0.2,
+                              letterSpacing: l10n.isKhmer ? 0 : -0.2,
                             ),
                           ),
                           if (_searchQuery.isNotEmpty)
                             Text(
-                              'Showing matches for "$_searchQuery"',
+                              l10n.isKhmer
+                                  ? 'បង្ហាញលទ្ធផលសម្រាប់ "$_searchQuery"'
+                                  : 'Showing matches for "$_searchQuery"',
                               style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
                                 fontSize: 12,
                                 color: isDark
                                     ? Colors.grey[400]
@@ -1890,8 +1917,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Text(
           label,
           style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
             fontSize: 11.5,
             fontWeight: FontWeight.w700,
+            letterSpacing: 0,
             color: isDark ? Colors.grey[300] : const Color(0xFF334155),
           ),
         ),

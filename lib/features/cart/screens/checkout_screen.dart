@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/api/providers.dart';
 import '../../../core/api/app_exception.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -905,7 +907,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
           ),
         ),
         title: Text(
-          widget.isGuest ? 'Guest Checkout' : 'Checkout',
+          widget.isGuest
+              ? (context.l10n.isKhmer ? 'គិតលុយ (ភ្ញៀវ)' : 'Guest Checkout')
+              : context.l10n.checkoutTitle,
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 20,
@@ -945,8 +949,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Delivery Address',
+                        context.l10n.shippingAddress,
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
                           color: theme.colorScheme.onSurface,
@@ -977,8 +982,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            'Change',
+                            context.l10n.isKhmer ? 'ផ្លាស់ប្តូរ' : 'Change',
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               color: theme.colorScheme.primary,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -1026,8 +1032,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                               Text(
                                 _addressController.text.isNotEmpty
                                     ? _addressController.text
-                                    : 'Select delivery address',
+                                    : (context.l10n.isKhmer
+                                        ? 'ជ្រើសរើសអាសយដ្ឋានដឹកជញ្ជូន'
+                                        : 'Select delivery address'),
                                 style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 13.5,
                                   color: theme.colorScheme.onSurface,
@@ -1037,6 +1046,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                               Text(
                                 '${_cityController.text}, ${_countryController.text}',
                                 style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
                                   color: isDark
                                       ? Colors.grey[400]
                                       : const Color(0xFF94A3B8),
@@ -1059,12 +1069,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _addressController,
-                    decoration: const InputDecoration(
-                      hintText: 'Detailed street address',
-                      prefixIcon: Icon(Icons.home_outlined, size: 18),
+                    style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.isKhmer
+                          ? 'អាសយដ្ឋានលម្អិត'
+                          : 'Detailed street address',
+                      prefixIcon: const Icon(Icons.home_outlined, size: 18),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Address is required'
+                        ? (context.l10n.isKhmer ? 'សូមបញ្ចូលអាសយដ្ឋាន' : 'Address is required')
                         : null,
                   ),
                 ],
@@ -1089,8 +1102,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Contact Information',
+                    context.l10n.isKhmer ? 'ព័ត៌មានទំនាក់ទំនង' : 'Contact Information',
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                       color: theme.colorScheme.onSurface,
@@ -1102,11 +1116,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       Expanded(
                         child: TextFormField(
                           controller: _firstNameController,
-                          decoration: const InputDecoration(
-                            hintText: 'First Name',
+                          style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                          decoration: InputDecoration(
+                            hintText: context.l10n.firstName,
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required'
+                              ? (context.l10n.isKhmer ? 'ចាំបាច់' : 'Required')
                               : null,
                         ),
                       ),
@@ -1114,11 +1129,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       Expanded(
                         child: TextFormField(
                           controller: _lastNameController,
-                          decoration: const InputDecoration(
-                            hintText: 'Last Name',
+                          style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                          decoration: InputDecoration(
+                            hintText: context.l10n.lastName,
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required'
+                              ? (context.l10n.isKhmer ? 'ចាំបាច់' : 'Required')
                               : null,
                         ),
                       ),
@@ -1128,24 +1144,26 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      hintText: 'Phone Number',
-                      prefixIcon: Icon(Icons.phone_outlined, size: 18),
+                    style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.phoneNumber,
+                      prefixIcon: const Icon(Icons.phone_outlined, size: 18),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Phone is required'
+                        ? (context.l10n.isKhmer ? 'សូមបញ្ចូលលេខទូរស័ព្ទ' : 'Phone is required')
                         : null,
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined, size: 18),
+                    style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.emailAddress,
+                      prefixIcon: const Icon(Icons.email_outlined, size: 18),
                     ),
                     validator: (v) => (v == null || !v.contains('@'))
-                        ? 'Valid email required'
+                        ? (context.l10n.isKhmer ? 'អ៊ីមែលមិនត្រឹមត្រូវ' : 'Valid email required')
                         : null,
                   ),
                 ],
@@ -1170,8 +1188,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Payment Method',
+                    context.l10n.paymentMethod,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                       color: theme.colorScheme.onSurface,
@@ -1193,7 +1212,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       Expanded(
                         child: _paymentPill(
                           id: 'card',
-                          title: 'Credit Card',
+                          title: context.l10n.isKhmer ? 'កាតធនាគារ' : 'Credit Card',
                           icon: Icons.credit_card_rounded,
                           theme: theme,
                           isDark: isDark,
@@ -1203,7 +1222,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       Expanded(
                         child: _paymentPill(
                           id: 'cod',
-                          title: 'Cash on Del.',
+                          title: context.l10n.isKhmer ? 'សាច់ប្រាក់' : 'Cash on Del.',
                           icon: Icons.payments_outlined,
                           theme: theme,
                           isDark: isDark,
@@ -1214,23 +1233,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                   if (_selectedGateway == 'card') ...[
                     const SizedBox(height: 16),
                     TextFormField(
-                      decoration: const InputDecoration(
-                        hintText: 'Card Number',
-                        prefixIcon: Icon(Icons.credit_card_rounded, size: 18),
+                      style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                      decoration: InputDecoration(
+                        hintText: context.l10n.isKhmer ? 'លេខកាត' : 'Card Number',
+                        prefixIcon: const Icon(Icons.credit_card_rounded, size: 18),
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Row(
+                    Row(
                       children: [
                         Expanded(
                           child: TextField(
-                            decoration: InputDecoration(hintText: 'MM/YY'),
+                            style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                            decoration: InputDecoration(
+                              hintText: context.l10n.isKhmer ? 'ខែ/ឆ្នាំ' : 'MM/YY',
+                            ),
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
-                            decoration: InputDecoration(hintText: 'CVV'),
+                            style: const TextStyle(fontFamily: AppTheme.fontFamily),
+                            decoration: const InputDecoration(hintText: 'CVV'),
                           ),
                         ),
                       ],
@@ -1246,9 +1270,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Save card for future payments',
+                          context.l10n.isKhmer
+                              ? 'រក្សាទុកកាតសម្រាប់ការទូទាត់លើកក្រោយ'
+                              : 'Save card for future payments',
                           style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontSize: 12,
+                            letterSpacing: 0,
                             color: isDark
                                 ? Colors.grey[400]
                                 : const Color(0xFF64748B),
@@ -1278,7 +1306,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
               child: Column(
                 children: [
                   _priceRow(
-                    'Subtotal',
+                    context.l10n.subtotal,
                     '\$${totalAmount.toStringAsFixed(2)}',
                     theme,
                     isDark,
@@ -1286,7 +1314,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                   const SizedBox(height: 8),
                   if (couponState.isApplied) ...[
                     _priceRow(
-                      'Coupon Discount',
+                      context.l10n.discount,
                       '-\$${couponState.discountAmount.toStringAsFixed(2)}',
                       theme,
                       isDark,
@@ -1295,8 +1323,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                     const SizedBox(height: 8),
                   ],
                   _priceRow(
-                    'Delivery',
-                    'FREE',
+                    context.l10n.deliveryFee,
+                    context.l10n.isKhmer ? 'ឥតគិតថ្លៃ' : 'FREE',
                     theme,
                     isDark,
                     valueColor: theme.colorScheme.primary,
@@ -1306,7 +1334,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                     child: Divider(height: 1),
                   ),
                   _priceRow(
-                    'Total Amount',
+                    context.l10n.total,
                     '\$${finalTotal.toStringAsFixed(2)}',
                     theme,
                     isDark,
@@ -1362,10 +1390,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       ),
                     )
                   : Text(
-                      'Pay Now · \$${finalTotal.toStringAsFixed(2)}',
+                      context.l10n.isKhmer
+                          ? 'ទូទាត់ឥឡូវនេះ · \$${finalTotal.toStringAsFixed(2)}'
+                          : 'Pay Now · \$${finalTotal.toStringAsFixed(2)}',
                       style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
+                        letterSpacing: 0,
                       ),
                     ),
             ),

@@ -1,36 +1,35 @@
 class GeminiConfig {
   GeminiConfig._();
 
-  /// Default active model for conversational grocery shopping assistance.
-  static const String defaultModel = 'gemini-3.1-pro-preview';
-
-  /// Alternative high-speed / fallback models
-  static const String fastModel = 'gemini-3.1-pro-preview-customtools';
-
-  /// Candidate models to try in order of capability and availability
-  static const List<String> candidateModels = [
-    'gemini-3.1-pro-preview',
-    'gemini-3.1-pro-preview-customtools',
-    'gemini-2.5-flash',
-  ];
-
-  /// Base URL for the Google Gemini Generative Language REST API.
-  static const String baseUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models';
-
-  /// Secure storage key for persisting the user's Gemini API key.
-  static const String storageKey = 'gemini_api_key';
-
   /// OpenRouter API Endpoint
   static const String openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
 
-  /// Default free router for OpenRouter
-  static const String openRouterFreeModel = 'openrouter/free';
+  /// Default active model for conversational shopping assistance on OpenRouter.
+  static const String defaultModel = 'google/gemini-2.0-flash-exp:free';
 
-  /// Default API key fallback (can be configured by user via in-app settings).
-  static const String fallbackApiKey = '';
+  /// Candidate models to try in order of capability, availability, and quota.
+  static const List<String> candidateModels = [
+    'google/gemini-2.0-flash-exp:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'deepseek/deepseek-chat:free',
+    'openrouter/free',
+    'google/gemini-2.5-flash',
+  ];
 
-  /// Google AI Studio URL for obtaining an API key.
-  static const String getApiKeyUrl = 'https://aistudio.google.com/app/apikey';
+  /// OpenRouter API Key configured directly in code.
+  /// Set your API key here in code, or inject at build-time using:
+  /// flutter build ipa --dart-define=OPENROUTER_API_KEY=your_key
+  static const String openRouterApiKey = String.fromEnvironment(
+    'OPENROUTER_API_KEY',
+    defaultValue:
+        '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', // <-- Paste your OpenRouter API Key here (sk-or-v1-...)
+  );
+
+  /// Key aliases for backward compatibility across existing providers
+  static const String apiKey = openRouterApiKey;
+  static const String fallbackApiKey = openRouterApiKey;
+
+  /// OpenRouter dashboard URL for managing API keys
+  static const String getApiKeyUrl = 'https://openrouter.ai/keys';
 }

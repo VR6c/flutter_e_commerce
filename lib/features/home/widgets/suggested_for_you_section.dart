@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/product_card.dart';
 import '../../products/models/product.dart';
@@ -86,17 +88,20 @@ class SuggestedForYouSection extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Suggested For You',
+                            context.l10n.suggestedForYou,
                             style: theme.textTheme.titleMedium?.copyWith(
+                              fontFamily: AppTheme.fontFamily,
                               fontWeight: FontWeight.w800,
                               fontSize: 16.5,
-                              letterSpacing: -0.2,
+                              letterSpacing: 0,
                             ),
                           ),
                           Text(
-                            'Personalized based on top ratings',
+                            context.l10n.suggestedForYouSub,
                             style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
                               fontSize: 11.5,
+                              letterSpacing: 0,
                               color: isDark
                                   ? Colors.grey[400]
                                   : const Color(0xFF64748B),
@@ -124,11 +129,13 @@ class SuggestedForYouSection extends ConsumerWidget {
                       ),
                     ),
                     child: Text(
-                      'AI Picked',
+                      context.l10n.aiPicked,
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         color: theme.colorScheme.primary,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                       ),
                     ),
                   ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/product_card.dart';
 import '../models/product.dart';
@@ -83,21 +85,24 @@ class RelatedProductsSection extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'You May Also Like',
+                        context.l10n.youMayAlsoLike,
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
                           color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.2,
+                          letterSpacing: 0,
                         ),
                       ),
                     ],
                   ),
                   Text(
-                    'Similar Items',
+                    context.l10n.similarItems,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
+                      letterSpacing: 0,
                       color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                     ),
                   ),

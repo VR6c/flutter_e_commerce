@@ -56,51 +56,8 @@ class GeminiService {
     return buffer.toString();
   }
 
-  List<String>? _cachedAvailableModels;
-
-  /// Queries Google AI Studio to discover which models are enabled for this API key
-  Future<List<String>> fetchAvailableModels(String cleanKey) async {
-    if (_cachedAvailableModels != null && _cachedAvailableModels!.isNotEmpty) {
-      return _cachedAvailableModels!;
-    }
-    final url =
-        'https://generativelanguage.googleapis.com/v1beta/models?key=$cleanKey';
-    try {
-      final response = await _dio.get(
-        url,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': cleanKey,
-          },
-        ),
-      );
-
-      final data = response.data;
-      if (data is Map && data['models'] is List) {
-        final list = (data['models'] as List)
-            .whereType<Map>()
-            .where((m) {
-              final methods = m['supportedGenerationMethods'] as List<dynamic>?;
-              return methods != null && methods.contains('generateContent');
-            })
-            .map((m) => m['name']?.toString().replaceFirst('models/', '') ?? '')
-            .where((name) => name.isNotEmpty)
-            .toList();
-
-        if (list.isNotEmpty) {
-          _cachedAvailableModels = list;
-          debugPrint('Fetched available Gemini models for key: $list');
-          return list;
-        }
-      }
-    } catch (e) {
-      debugPrint('Could not list models: $e');
-    }
-    return [];
-  }
-
-  /// Sends the conversation history to the Gemini API and returns the assistant's reply.
+  /// Sends conversation to OpenRouter and returns the assistant's reply.
+  /// If no key is set or services are unreachable, provides intelligent store assistance.
   Future<String> generateResponse({
     required String apiKey,
     required List<ChatMessage> conversationHistory,
@@ -120,335 +77,21 @@ class GeminiService {
       );
     }
 
-    // If OpenRouter API key is used, route through OpenRouter completions
-    if (cleanKey.startsWith('sk-or-')) {
-      return _generateOpenRouterResponse(
-        apiKey: cleanKey,
-        conversationHistory: conversationHistory,
-        availableProducts: availableProducts,
-        availableCategories: availableCategories,
-        onModelResolved: onModelResolved,
-      );
-    }
-
-    // Discover models available to this specific key from Google AI Studio
-    final discoveredModels = await fetchAvailableModels(cleanKey);
-
-    final modelsToTry = <String>[];
-    if (discoveredModels.isNotEmpty) {
-      // Prioritize Flash models first (highest free tier quota & RPM)
-      final flashModels =
-          discoveredModels.where((m) => m.toLowerCase().contains('flash')).toList();
-      modelsToTry.addAll(flashModels);
-      modelsToTry.addAll(
-        discoveredModels.where((m) => !m.toLowerCase().contains('flash')),
-      );
-    } else {
-      modelsToTry.addAll([
-        model,
-        ...GeminiConfig.candidateModels.where((m) => m != model),
-      ]);
-    }
-
-    DioException? lastDioException;
-    String? lastErrorMessage;
-
-    for (final candidate in modelsToTry) {
-      try {
-        final result = await _callModelEndpoint(
-          candidate,
-          cleanKey,
-          conversationHistory,
-          availableProducts,
-          availableCategories,
-        );
-        onModelResolved?.call(candidate);
-        return result;
-      } on DioException catch (dioErr) {
-        lastDioException = dioErr;
-        final statusCode = dioErr.response?.statusCode;
-        final responseBody = dioErr.response?.data;
-        String? msg;
-        if (responseBody is Map && responseBody['error'] is Map) {
-          msg = responseBody['error']['message']?.toString();
-        }
-
-        // If 404 or model not found or no longer available, try the next candidate model
-        final isModelError = statusCode == 404 ||
-            (msg != null &&
-                (msg.contains('not found') ||
-                    msg.contains('no longer available') ||
-                    msg.contains('not supported')));
-
-        if (isModelError) {
-          debugPrint(
-            'Model $candidate unavailable ($statusCode: $msg), falling back to next candidate model...',
-          );
-          continue;
-        }
-
-        // For auth errors (401, 403), quota limits (429), or syntax errors, throw immediately
-        _handleDioException(dioErr);
-      } catch (e) {
-        lastErrorMessage = e.toString();
-        if (lastErrorMessage.contains('not found') ||
-            lastErrorMessage.contains('no longer available') ||
-            lastErrorMessage.contains('not supported')) {
-          continue;
-        }
-        rethrow;
-      }
-    }
-
-    if (lastDioException != null) {
-      _handleDioException(lastDioException);
-    }
-
-    throw Exception(lastErrorMessage ?? 'Unable to connect to Gemini models.');
-  }
-
-  Future<String> _callModelEndpoint(
-    String model,
-    String cleanKey,
-    List<ChatMessage> conversationHistory,
-    List<Product> availableProducts,
-    List<Category> availableCategories,
-  ) async {
-    final url = '${GeminiConfig.baseUrl}/$model:generateContent?key=$cleanKey';
-
-    final systemPrompt = _buildSystemInstruction(
-      products: availableProducts,
-      categories: availableCategories,
-    );
-
-    // Format previous messages into Gemini contents array
-    final relevantHistory = conversationHistory
-        .where((m) => !m.isError && m.text.trim().isNotEmpty)
-        .toList();
-
-    final startIndex =
-        relevantHistory.length > 10 ? relevantHistory.length - 10 : 0;
-    final recentMessages = relevantHistory.sublist(startIndex);
-
-    final contents = recentMessages.map((msg) {
-      return {
-        'role': msg.isUser ? 'user' : 'model',
-        'parts': [
-          {'text': msg.text}
-        ],
-      };
-    }).toList();
-
-    if (contents.isEmpty || contents.last['role'] != 'user') {
-      contents.add({
-        'role': 'user',
-        'parts': [
-          {'text': conversationHistory.last.text}
-        ],
-      });
-    }
-
-    final payload = {
-      'system_instruction': {
-        'parts': [
-          {'text': systemPrompt}
-        ]
-      },
-      'contents': contents,
-      'generationConfig': {
-        'temperature': 0.7,
-        'maxOutputTokens': 4096,
-      },
-    };
-
-    Response<dynamic>? response;
-    for (int attempt = 1; attempt <= 2; attempt++) {
-      try {
-        response = await _dio.post(
-          url,
-          data: payload,
-          options: Options(
-            headers: {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': cleanKey,
-            },
-          ),
-        );
-        break;
-      } on DioException catch (dioErr) {
-        if (dioErr.response?.statusCode == 429 && attempt < 2) {
-          debugPrint(
-            'Rate limit 429 received. Waiting 4 seconds before automatic retry...',
-          );
-          await Future.delayed(const Duration(seconds: 4));
-          continue;
-        }
-        rethrow;
-      }
-    }
-
-    final data = response?.data;
-    if (data is Map<String, dynamic>) {
-      final candidates = data['candidates'] as List<dynamic>?;
-      if (candidates != null && candidates.isNotEmpty) {
-        final firstCandidate = candidates.first as Map<String, dynamic>;
-        final content = firstCandidate['content'] as Map<String, dynamic>?;
-        final parts = content?['parts'] as List<dynamic>?;
-        if (parts != null && parts.isNotEmpty) {
-          final textParts = parts
-              .where((p) =>
-                  p is Map &&
-                  p['thought'] != true &&
-                  p['text'] != null &&
-                  p['text'].toString().trim().isNotEmpty)
-              .map((p) => (p as Map)['text'].toString().trim())
-              .toList();
-
-          if (textParts.isNotEmpty) {
-            return textParts.join('\n\n');
-          }
-
-          final firstPart = parts.first as Map<String, dynamic>;
-          final text = firstPart['text'] as String?;
-          if (text != null && text.trim().isNotEmpty) {
-            return text.trim();
-          }
-        }
-      }
-    }
-
-
-    throw Exception('Unexpected empty response received from Gemini.');
-  }
-
-  Never _handleDioException(DioException dioErr) {
-    debugPrint(
-      'Gemini API DioException: ${dioErr.response?.statusCode} - ${dioErr.message}',
-    );
-    final statusCode = dioErr.response?.statusCode;
-    final responseBody = dioErr.response?.data;
-
-    if (statusCode == 400) {
-      throw Exception(
-        'Request error (400): Unable to process request. Please check your Gemini API key.',
-      );
-    } else if (statusCode == 401 || statusCode == 403) {
-      throw Exception(
-        'Authentication error ($statusCode): Invalid Gemini API key. Please configure a valid key in settings.',
-      );
-    } else if (statusCode == 429) {
-      throw Exception(
-        'Gemini rate limit exceeded. Google AI Studio Free Tier has a limit of requests per minute. Please wait 15-30 seconds and tap Retry.',
-      );
-    } else if (dioErr.type == DioExceptionType.connectionTimeout ||
-        dioErr.type == DioExceptionType.receiveTimeout) {
-      throw Exception(
-        'Connection timed out while contacting Gemini. Please verify your internet connection.',
-      );
-    } else if (responseBody is Map && responseBody['error']?['message'] != null) {
-      final msg = responseBody['error']['message'] as String;
-      throw Exception('Gemini Error: $msg');
-    }
-
-    throw Exception(
-      'Unable to connect to Gemini (${statusCode ?? 'network'}). Please check your connection.',
+    return _generateOpenRouterResponse(
+      apiKey: cleanKey,
+      conversationHistory: conversationHistory,
+      preferredModel: model,
+      availableProducts: availableProducts,
+      availableCategories: availableCategories,
+      onModelResolved: onModelResolved,
     );
   }
 
-
-  /// Extracts product IDs mentioned in the AI response or matches store product names
-  List<int> extractProductRecommendations(
-    String aiResponse,
-    List<Product> catalog,
-  ) {
-    if (catalog.isEmpty) return const [];
-
-    final matchedIds = <int>{};
-
-    // 1. Check for explicit pattern: [Product: <ID>] or [Product: <ID> - <Name>]
-    final explicitRegex = RegExp(r'\[Product:\s*(\d+)[^\]]*\]', caseSensitive: false);
-    for (final match in explicitRegex.allMatches(aiResponse)) {
-      final idStr = match.group(1);
-      if (idStr != null) {
-        final parsedId = int.tryParse(idStr);
-        if (parsedId != null && catalog.any((p) => p.id == parsedId)) {
-          matchedIds.add(parsedId);
-        }
-      }
-    }
-
-    // 2. If no explicit tags, match product names directly (case-insensitive substring)
-    if (matchedIds.isEmpty) {
-      final lowerResponse = aiResponse.toLowerCase();
-      for (final product in catalog) {
-        final lowerName = product.name.toLowerCase();
-        // Avoid matching very short generic words
-        if (lowerName.length >= 4 && lowerResponse.contains(lowerName)) {
-          matchedIds.add(product.id);
-          if (matchedIds.length >= 4) break; // Limit to 4 cards for optimal UI
-        }
-      }
-    }
-
-    return matchedIds.toList();
-  }
-
-  /// Provides intelligent offline assistance when no API key is supplied yet
-  String _generateOfflineFallback(
-    String userQuery,
-    List<Product> products,
-    List<Category> categories,
-  ) {
-    final lower = userQuery.toLowerCase();
-
-    if (lower.contains('delivery') || lower.contains('ship') || lower.contains('time')) {
-      return 'TVR Store offers standard delivery within 30 to 45 minutes across the city.\n\n'
-          'Key Delivery Details:\n'
-          '- Free delivery on orders over \$25\n'
-          '- Standard delivery fee: \$1.50\n'
-          '- Real-time delivery tracking available in your Orders tab';
-    }
-
-    if (lower.contains('pay') || lower.contains('card') || lower.contains('cash') || lower.contains('aba')) {
-      return 'TVR Store accepts multiple secure payment options:\n\n'
-          '- ABA PayWay (QR code & instant bank app checkout)\n'
-          '- Credit / Debit Cards (Visa, Mastercard)\n'
-          '- Cash on Delivery (pay when your items arrive)';
-    }
-
-    if (lower.contains('deal') || lower.contains('discount') || lower.contains('sale') || lower.contains('cheap')) {
-      final discounted = products.where((p) => p.hasDiscount).take(3).toList();
-      if (discounted.isNotEmpty) {
-        final buffer = StringBuffer('Here are current deals available at TVR Store:\n\n');
-        for (final p in discounted) {
-          buffer.writeln('- [Product: ${p.id}] - ${p.name}: \$${p.effectivePrice.toStringAsFixed(2)} (Save ${p.discountPercentage}%)');
-        }
-        return buffer.toString();
-      }
-      return 'You can check our daily discounts right from the Home page banners and Featured Deals section.';
-    }
-
-    if (lower.contains('fruit') || lower.contains('vegetable') || lower.contains('produce') || lower.contains('food') || lower.contains('recipe')) {
-      final sample = products.take(3).toList();
-      final buffer = StringBuffer('TVR Store does not carry groceries or fresh food. We specialize in electronics, fashion, and accessories.\n\nHere are some of our featured catalog items:\n\n');
-      for (final p in sample) {
-        buffer.writeln('- [Product: ${p.id}] - ${p.name}: \$${p.effectivePrice.toStringAsFixed(2)}');
-      }
-      buffer.writeln('\nTap any product card below to view details or add it directly to your cart.');
-      return buffer.toString();
-    }
-
-    return 'Welcome to TVR Assistant!\n\n'
-        'To connect with generative AI for real-time answers and smart recommendations:\n'
-        '1. Tap the Settings icon in the top right corner.\n'
-        '2. Enter your API key (available from Google AI Studio or OpenRouter).\n\n'
-        'In the meantime, feel free to ask about our delivery terms, payment methods, or browse our catalog!';
-  }
-
-  /// Sends conversation to OpenRouter using free models with automatic fallback
+  /// Sends conversation to OpenRouter with automatic candidate model fallback
   Future<String> _generateOpenRouterResponse({
     required String apiKey,
     required List<ChatMessage> conversationHistory,
+    String preferredModel = GeminiConfig.defaultModel,
     List<Product> availableProducts = const [],
     List<Category> availableCategories = const [],
     void Function(String resolvedModel)? onModelResolved,
@@ -486,16 +129,12 @@ class GeminiService {
       });
     }
 
-    final freeCandidateModels = [
-      'openrouter/free',
-      'google/gemini-2.0-flash-exp:free',
-      'meta-llama/llama-3.3-70b-instruct:free',
-      'deepseek/deepseek-chat:free',
+    final modelsToTry = <String>[
+      preferredModel,
+      ...GeminiConfig.candidateModels.where((m) => m != preferredModel),
     ];
 
-    DioException? lastError;
-
-    for (final candidate in freeCandidateModels) {
+    for (final candidate in modelsToTry) {
       try {
         final payload = {
           'model': candidate,
@@ -539,10 +178,15 @@ class GeminiService {
           }
         }
       } on DioException catch (e) {
-        lastError = e;
         debugPrint('OpenRouter ($candidate) error: ${e.response?.statusCode} - ${e.message}');
         if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
-          throw Exception('Invalid OpenRouter API key. Please check your key in settings.');
+          // If the key is invalid or unauthorized, fall back gracefully to store assistant
+          debugPrint('OpenRouter unauthorized/invalid key, falling back to store assistant');
+          return _generateOfflineFallback(
+            conversationHistory.last.text,
+            availableProducts,
+            availableCategories,
+          );
         }
         continue;
       } catch (e) {
@@ -551,13 +195,134 @@ class GeminiService {
       }
     }
 
-    if (lastError != null) {
-      throw Exception(
-        'OpenRouter error (${lastError.response?.statusCode ?? 'network'}). Please try again.',
-      );
+    // If OpenRouter calls failed or timed out, gracefully answer using local catalog
+    debugPrint('All OpenRouter candidates exhausted, using catalog fallback');
+    return _generateOfflineFallback(
+      conversationHistory.last.text,
+      availableProducts,
+      availableCategories,
+    );
+  }
+
+  /// Extracts product IDs mentioned in the AI response or matches store product names
+  List<int> extractProductRecommendations(
+    String aiResponse,
+    List<Product> catalog,
+  ) {
+    if (catalog.isEmpty) return const [];
+
+    final matchedIds = <int>{};
+
+    // 1. Check for explicit pattern: [Product: <ID>] or [Product: <ID> - <Name>]
+    final explicitRegex = RegExp(r'\[Product:\s*(\d+)[^\]]*\]', caseSensitive: false);
+    for (final match in explicitRegex.allMatches(aiResponse)) {
+      final idStr = match.group(1);
+      if (idStr != null) {
+        final parsedId = int.tryParse(idStr);
+        if (parsedId != null && catalog.any((p) => p.id == parsedId)) {
+          matchedIds.add(parsedId);
+        }
+      }
     }
 
-    throw Exception('Unable to get response from OpenRouter free models.');
+    // 2. If no explicit tags, match product names directly (case-insensitive substring)
+    if (matchedIds.isEmpty) {
+      final lowerResponse = aiResponse.toLowerCase();
+      for (final product in catalog) {
+        final lowerName = product.name.toLowerCase();
+        // Avoid matching very short generic words
+        if (lowerName.length >= 4 && lowerResponse.contains(lowerName)) {
+          matchedIds.add(product.id);
+          if (matchedIds.length >= 4) break; // Limit to 4 cards for optimal UI
+        }
+      }
+    }
+
+    return matchedIds.toList();
+  }
+
+  /// Provides intelligent offline assistance when no API key is supplied or service is offline
+  String _generateOfflineFallback(
+    String userQuery,
+    List<Product> products,
+    List<Category> categories,
+  ) {
+    final lower = userQuery.toLowerCase();
+
+    // 1. Delivery & Shipping
+    if (lower.contains('delivery') || lower.contains('ship') || lower.contains('time')) {
+      return 'TVR Store offers standard delivery within 30 to 45 minutes across the city.\n\n'
+          'Key Delivery Details:\n'
+          '- Free delivery on orders over \$25\n'
+          '- Standard delivery fee: \$1.50\n'
+          '- Real-time delivery tracking available in your Orders tab';
+    }
+
+    // 2. Payments & Checkout
+    if (lower.contains('pay') || lower.contains('card') || lower.contains('cash') || lower.contains('aba')) {
+      return 'TVR Store accepts multiple secure payment options:\n\n'
+          '- ABA PayWay (QR code & instant bank app checkout)\n'
+          '- Credit / Debit Cards (Visa, Mastercard)\n'
+          '- Cash on Delivery (pay when your items arrive)';
+    }
+
+    // 3. Deals & Discounts
+    if (lower.contains('deal') || lower.contains('discount') || lower.contains('sale') || lower.contains('cheap')) {
+      final discounted = products.where((p) => p.hasDiscount).take(3).toList();
+      if (discounted.isNotEmpty) {
+        final buffer = StringBuffer('Here are current deals available at TVR Store:\n\n');
+        for (final p in discounted) {
+          buffer.writeln('- [Product: ${p.id}] - ${p.name}: \$${p.effectivePrice.toStringAsFixed(2)} (Save ${p.discountPercentage}%)');
+        }
+        return buffer.toString();
+      }
+      return 'You can check our daily discounts right from the Home page banners and Featured Deals section.';
+    }
+
+    // 4. Categories, Products, and Catalog
+    if (lower.contains('categor') ||
+        lower.contains('item') ||
+        lower.contains('product') ||
+        lower.contains('available') ||
+        lower.contains('catalog') ||
+        lower.contains('what do you have') ||
+        lower.contains('browse') ||
+        lower.contains('store')) {
+      final buffer = StringBuffer('Welcome to TVR Store! Here is what we have available in our catalog:\n\n');
+      if (categories.isNotEmpty) {
+        buffer.writeln('📂 Available Categories:');
+        for (final c in categories) {
+          buffer.writeln('• ${c.name}');
+        }
+        buffer.writeln();
+      }
+      if (products.isNotEmpty) {
+        buffer.writeln('🛍️ Featured Products:');
+        for (final p in products.take(4)) {
+          buffer.writeln('- [Product: ${p.id}] - ${p.name}: \$${p.effectivePrice.toStringAsFixed(2)}');
+        }
+        buffer.writeln('\nYou can tap any product card below to view details or add items to your cart.');
+      }
+      return buffer.toString();
+    }
+
+    // 5. Groceries / Food inquiry
+    if (lower.contains('fruit') || lower.contains('vegetable') || lower.contains('produce') || lower.contains('food') || lower.contains('recipe')) {
+      final sample = products.take(3).toList();
+      final buffer = StringBuffer('TVR Store specializes in electronics, fashion, and accessories rather than fresh food.\n\nHere are some of our popular products:\n\n');
+      for (final p in sample) {
+        buffer.writeln('- [Product: ${p.id}] - ${p.name}: \$${p.effectivePrice.toStringAsFixed(2)}');
+      }
+      buffer.writeln('\nTap any product card below to view details or add it directly to your cart.');
+      return buffer.toString();
+    }
+
+    // 6. Default friendly assistant introduction
+    return 'Hello! I am TVR Assistant, your shopping assistant.\n\n'
+        'I can help you with:\n'
+        '• Exploring product categories and catalog items\n'
+        '• Finding current sales and special discounts\n'
+        '• Checking delivery options and payment methods\n\n'
+        'What can I help you find today?';
   }
 }
-

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/async_value_widget.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../providers/brand_provider.dart';
@@ -15,6 +17,7 @@ class BrandListScreen extends ConsumerWidget {
     final brandsState = ref.watch(brandsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isKhmer = context.l10n.isKhmer;
     final baseColor = isDark ? Colors.grey[900]! : Colors.grey[300]!;
     final highlightColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
     final placeholderColor = isDark ? Colors.black : Colors.white;
@@ -32,9 +35,13 @@ class BrandListScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text(
-          'Brands',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: Text(
+          isKhmer ? 'ម៉ាកយីហោ' : 'Brands',
+          style: const TextStyle(
+            fontFamily: AppTheme.fontFamily,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0,
+          ),
         ),
         centerTitle: true,
       ),
@@ -70,10 +77,12 @@ class BrandListScreen extends ConsumerWidget {
           ),
           data: (brands) {
             if (brands.isEmpty) {
-              return const EmptyStateWidget(
+              return EmptyStateWidget(
                 icon: Icons.branding_watermark_outlined,
-                title: 'No Brands Found',
-                message: 'No brands are registered at this time.',
+                title: isKhmer ? 'មិនមានម៉ាកយីហោទេ' : 'No Brands Found',
+                message: isKhmer
+                    ? 'មិនទាន់មានម៉ាកយីហោត្រូវបានចុះបញ្ជីនៅពេលនេះទេ។'
+                    : 'No brands are registered at this time.',
               );
             }
             return GridView.builder(

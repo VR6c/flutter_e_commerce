@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/theme/app_theme.dart';
 import '../providers/wishlist_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
@@ -59,7 +61,7 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'My Favorite List',
+          context.l10n.wishlistTitle,
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 20,
@@ -76,25 +78,40 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
               ),
               tooltip: 'Clear all',
               onPressed: () {
+                final l10n = context.l10n;
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    title: const Text(
-                      'Clear Wishlist?',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                    title: Text(
+                      l10n.isKhmer ? 'សម្អាតបញ្ជីចង់បាន?' : 'Clear Wishlist?',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontFamily: AppTheme.fontFamily,
+                        letterSpacing: 0,
+                      ),
                     ),
-                    content: const Text(
-                      'Do you want to remove all favorite items?',
+                    content: Text(
+                      l10n.isKhmer
+                          ? 'តើអ្នកពិតជាចង់លុបទំនិញទាំងអស់ចេញពីបញ្ជីចង់បានមែនទេ?'
+                          : 'Do you want to remove all favorite items?',
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        letterSpacing: 0,
+                      ),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
                         child: Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.grey[600]),
+                          l10n.cancel,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
+                          ),
                         ),
                       ),
                       ElevatedButton(
@@ -105,11 +122,13 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),
                         ),
-                        child: const Text(
-                          'Clear',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.clear,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
+                            fontFamily: AppTheme.fontFamily,
+                            letterSpacing: 0,
                           ),
                         ),
                       ),
@@ -250,12 +269,14 @@ class _WishlistItem extends ConsumerWidget {
                       Text(
                         product.shortDescription.isNotEmpty
                             ? product.shortDescription
-                            : product.category,
+                            : context.l10n.translateCategory(product.category),
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           color: isDark
                               ? Colors.grey[400]
                               : const Color(0xFF94A3B8),
                           fontSize: 12,
+                          letterSpacing: 0,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -402,21 +423,26 @@ class _EmptyWishlist extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Your Wishlist is Empty',
+              context.l10n.isKhmer ? 'បញ្ជីចង់បានរបស់អ្នកទទេ' : 'Your Wishlist is Empty',
               style: TextStyle(
-                fontSize: 22,
+                fontFamily: AppTheme.fontFamily,
+                fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: theme.colorScheme.onSurface,
-                letterSpacing: -0.5,
+                letterSpacing: 0,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Save your favorite grocery items and easily add them to your cart later.',
+              context.l10n.isKhmer
+                  ? 'រក្សាទុកទំនិញដែលអ្នកចូលចិត្ត និងបន្ថែមទៅកន្ត្រកនៅពេលក្រោយយ៉ាងងាយស្រួល។'
+                  : 'Save your favorite items and easily add them to your cart later.',
               style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
                 color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                 fontSize: 14,
                 height: 1.5,
+                letterSpacing: 0,
               ),
               textAlign: TextAlign.center,
             ),
@@ -432,12 +458,14 @@ class _EmptyWishlist extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Explore Products',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.isKhmer ? 'ស្វែងរកទំនិញ' : 'Explore Products',
+                  style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: Colors.white,
+                    letterSpacing: 0,
                   ),
                 ),
               ),
@@ -460,9 +488,13 @@ class _GuestWishlist extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'My Favorite List',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        title: Text(
+          context.l10n.wishlistTitle,
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            fontFamily: AppTheme.fontFamily,
+            letterSpacing: 0,
+          ),
         ),
         centerTitle: true,
       ),
@@ -489,20 +521,28 @@ class _GuestWishlist extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Sign In to view Wishlist',
+                context.l10n.isKhmer
+                    ? 'ចូលគណនីដើម្បីមើលបញ្ជីចង់បាន'
+                    : 'Sign In to view Wishlist',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.onSurface,
+                  letterSpacing: 0,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Sign in to sync your favorite groceries across all your devices.',
+                context.l10n.isKhmer
+                    ? 'ចូលគណនីដើម្បីរក្សាទុកទំនិញដែលអ្នកចូលចិត្តនៅលើគ្រប់ឧបករណ៍របស់អ្នក។'
+                    : 'Sign in to sync your favorite items across all your devices.',
                 style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
                   color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                   fontSize: 14,
                   height: 1.5,
+                  letterSpacing: 0,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -519,11 +559,13 @@ class _GuestWishlist extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'Sign In',
-                    style: TextStyle(
+                  child: Text(
+                    context.l10n.logIn,
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
+                      letterSpacing: 0,
                     ),
                   ),
                 ),

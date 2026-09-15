@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/sort_option.dart';
 import '../../categories/models/category.dart';
 import '../../categories/providers/category_provider.dart';
@@ -224,11 +226,12 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
             child: Row(
               children: [
                 Text(
-                  'Sort & Filter',
+                  context.l10n.isKhmer ? 'តម្រៀប & តម្រង' : 'Sort & Filter',
                   style: theme.textTheme.titleMedium?.copyWith(
+                    fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w800,
                     fontSize: 19,
-                    letterSpacing: -0.3,
+                    letterSpacing: 0,
                   ),
                 ),
                 if (activeCount > 0) ...[
@@ -246,8 +249,11 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                       ),
                     ),
                     child: Text(
-                      '$activeCount Active',
+                      context.l10n.isKhmer
+                          ? '$activeCount កំពុងប្រើ'
+                          : '$activeCount Active',
                       style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: primary,
@@ -265,8 +271,9 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                         vertical: 4,
                       ),
                       child: Text(
-                        'Reset All',
+                        context.l10n.isKhmer ? 'កំណត់ឡើងវិញ' : 'Reset All',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: primary,
@@ -309,7 +316,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   // 1. Sort By Section
                   _buildSectionHeader(
                     icon: Icons.swap_vert_rounded,
-                    title: 'Sort By',
+                    title: context.l10n.sortBy,
                     theme: theme,
                   ),
                   const SizedBox(height: 12),
@@ -323,7 +330,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   if (categories.isNotEmpty) ...[
                     _buildSectionHeader(
                       icon: Icons.grid_view_rounded,
-                      title: 'Categories',
+                      title: context.l10n.categories,
                       theme: theme,
                     ),
                     const SizedBox(height: 12),
@@ -336,7 +343,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   // 3. Price Range Section
                   _buildSectionHeader(
                     icon: Icons.attach_money_rounded,
-                    title: 'Price Range',
+                    title: context.l10n.isKhmer ? 'កម្រិតតម្លៃ' : 'Price Range',
                     theme: theme,
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(
@@ -349,9 +356,10 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                       ),
                       child: Text(
                         _draftPriceRange == null
-                            ? 'All Prices'
+                            ? (context.l10n.isKhmer ? 'តម្លៃទាំងអស់' : 'All Prices')
                             : '\$${currentSliderRange.start.round()} – \$${currentSliderRange.end.round()}',
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: primary,
@@ -374,7 +382,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   // 4. Rating Section
                   _buildSectionHeader(
                     icon: Icons.star_rounded,
-                    title: 'Customer Rating',
+                    title: context.l10n.isKhmer ? 'ការវាយតម្លៃ' : 'Customer Rating',
                     iconColor: Colors.amber[600],
                     theme: theme,
                   ),
@@ -426,8 +434,9 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                         ),
                       ),
                       child: Text(
-                        'Reset',
+                        context.l10n.reset,
                         style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: isDark ? Colors.white : Colors.black87,
@@ -462,9 +471,14 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                         const SizedBox(width: 8),
                         Text(
                           matchesCount > 0
-                              ? 'Apply ($matchesCount Products)'
-                              : 'No Products Match',
+                              ? (context.l10n.isKhmer
+                                  ? 'អនុវត្ត ($matchesCount មុខ)'
+                                  : 'Apply ($matchesCount Products)')
+                              : (context.l10n.isKhmer
+                                  ? 'គ្មានទំនិញត្រូវគ្នាទេ'
+                                  : 'No Products Match'),
                           style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
                             fontWeight: FontWeight.w700,
                             fontSize: 14.5,
                           ),
@@ -514,30 +528,31 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
   }
 
   Widget _buildSortOptions(ThemeData theme, bool isDark, Color primary) {
+    final isKm = context.l10n.isKhmer;
     final sortItems = [
       (
         SortOption.none,
-        'Default (Recommended)',
+        isKm ? 'លំនាំដើម (ណែនាំ)' : 'Default (Recommended)',
         Icons.auto_awesome_rounded,
       ),
       (
         SortOption.priceAsc,
-        'Price: Low to High',
+        isKm ? 'តម្លៃ: ពីទាបទៅខ្ពស់' : 'Price: Low to High',
         Icons.arrow_downward_rounded,
       ),
       (
         SortOption.priceDesc,
-        'Price: High to Low',
+        isKm ? 'តម្លៃ: ពីខ្ពស់ទៅទាប' : 'Price: High to Low',
         Icons.arrow_upward_rounded,
       ),
       (
         SortOption.rating,
-        'Top Rated',
+        isKm ? 'ការវាយតម្លៃខ្ពស់' : 'Top Rated',
         Icons.star_rounded,
       ),
       (
         SortOption.nameAsc,
-        'Name: A – Z',
+        isKm ? 'ឈ្មោះ: A – Z' : 'Name: A – Z',
         Icons.sort_by_alpha_rounded,
       ),
     ];
@@ -600,9 +615,11 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   Text(
                     label,
                     style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
                       fontWeight:
                           isSelected ? FontWeight.w700 : FontWeight.w500,
                       fontSize: 14,
+                      letterSpacing: 0,
                       color: isSelected
                           ? primary
                           : theme.colorScheme.onSurface,
@@ -654,7 +671,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
       children: [
         // All Categories Chip
         _buildChipItem(
-          label: 'All Items',
+          label: context.l10n.allItems,
           isSelected: _draftCategorySlug == null,
           onTap: () {
             HapticFeedback.selectionClick();
@@ -668,7 +685,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
         ...categories.map((cat) {
           final isSelected = _draftCategorySlug == cat.slug;
           return _buildChipItem(
-            label: cat.name,
+            label: context.l10n.translateCategory(cat.name),
             imageUrl: cat.imageUrl,
             isSelected: isSelected,
             onTap: () {
@@ -739,8 +756,10 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
             Text(
               label,
               style: TextStyle(
+                fontFamily: AppTheme.fontFamily,
                 fontSize: 12.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                letterSpacing: 0,
                 color: isSelected ? Colors.white : theme.colorScheme.onSurface,
               ),
             ),
@@ -757,7 +776,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
     Color primary,
   ) {
     final quickTiers = [
-      ('All', null),
+      (context.l10n.isKhmer ? 'ទាំងអស់' : 'All', null),
       ('Under \$10', const RangeValues(0.0, 10.0)),
       ('\$10 – \$25', const RangeValues(10.0, 25.0)),
       ('\$25 – \$50', const RangeValues(25.0, 50.0)),
@@ -884,12 +903,13 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
   }
 
   Widget _buildRatingChips(ThemeData theme, bool isDark, Color primary) {
+    final isKm = context.l10n.isKhmer;
     final ratings = [
-      ('Any', null),
-      ('4.5★ & up', 4.5),
-      ('4.0★ & up', 4.0),
-      ('3.5★ & up', 3.5),
-      ('3.0★ & up', 3.0),
+      (isKm ? 'ទាំងអស់' : 'Any', null),
+      (isKm ? '4.5★ ឡើងទៅ' : '4.5★ & up', 4.5),
+      (isKm ? '4.0★ ឡើងទៅ' : '4.0★ & up', 4.0),
+      (isKm ? '3.5★ ឡើងទៅ' : '3.5★ & up', 3.5),
+      (isKm ? '3.0★ ឡើងទៅ' : '3.0★ & up', 3.0),
     ];
 
     return Wrap(
