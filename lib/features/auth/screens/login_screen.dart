@@ -5,6 +5,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/api/app_exception.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_success_dialog.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   final String returnTo;
@@ -25,6 +26,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ref.read(authStateProvider).valueOrNull != null) {
+        context.go(widget.returnTo);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -39,21 +50,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
+    final dialog = AuthSuccessDialog.show(
+      context,
+      initialMessage: context.l10n.signingIn,
+    );
+
     try {
       await ref
           .read(authStateProvider.notifier)
           .login(_emailController.text.trim(), _passwordController.text);
+
+      if (!mounted) {
+        dialog.dismiss();
+        return;
+      }
+
+      final customer = ref.read(authStateProvider).valueOrNull;
+      if (customer == null) {
+        dialog.dismiss();
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = context.l10n.isKhmer
+              ? 'ការចូលគណនីបានបរាជ័យ។ សូមពិនិត្យមើលអ៊ីមែល ឬពាក្យសម្ងាត់របស់អ្នក។'
+              : 'Login failed. Please verify your credentials.';
+        });
+        return;
+      }
+
+      final displayName = customer.name;
+      dialog.showSuccess(displayName);
+
+      // Display animated success checkmark & welcome greeting for 1.2s
+      await Future.delayed(const Duration(milliseconds: 1200));
+
       if (!mounted) return;
+      dialog.dismiss();
       context.go(widget.returnTo);
     } on AppException catch (e) {
+      dialog.dismiss();
       if (!mounted) return;
       setState(() {
         _errorMessage = e.message;
       });
     } catch (e) {
+      dialog.dismiss();
       if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
       setState(() {
-        _errorMessage = 'Invalid email or password. Please try again.';
+        _errorMessage = msg.isNotEmpty
+            ? msg
+            : (context.l10n.isKhmer
+                ? 'អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ។'
+                : 'Invalid email or password. Please try again.');
       });
     } finally {
       if (mounted) {

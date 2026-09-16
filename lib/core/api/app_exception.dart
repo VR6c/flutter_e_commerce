@@ -65,9 +65,13 @@ class AppException implements Exception {
         rawErrors = data['errors'] as Map<String, dynamic>;
       }
       message =
+          data['detail']?.toString() ??
           data['message']?.toString() ??
           data['error']?.toString() ??
-          'Server error occurred';
+          data['title']?.toString() ??
+          (statusCode == 401
+              ? 'Invalid email or password. Please try again.'
+              : 'Server error occurred');
     } else if (data is String && data.isNotEmpty) {
       message = data;
     }
@@ -76,7 +80,10 @@ class AppException implements Exception {
       case 400:
         return BadRequestException(message: message, errors: rawErrors);
       case 401:
-        return UnauthorizedException(message: message, errors: rawErrors);
+        final authMsg = (message.isEmpty || message == 'Server error occurred')
+            ? 'Invalid email or password. Please try again.'
+            : message;
+        return UnauthorizedException(message: authMsg, errors: rawErrors);
       case 403:
         return ForbiddenException(message: message, errors: rawErrors);
       case 404:

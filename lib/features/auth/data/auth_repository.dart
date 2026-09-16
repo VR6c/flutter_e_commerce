@@ -42,8 +42,11 @@ class AuthRepository {
     final response = await _apiClient.get('/customer/profile');
     final data = response.data;
     if (data is Map<String, dynamic>) {
-      final customerData = data['data'] ?? data['customer'] ?? data;
-      return Customer.fromJson(customerData as Map<String, dynamic>);
+      final customerData = Map<String, dynamic>.from(
+        (data['data'] ?? data['customer'] ?? data) as Map,
+      );
+      customerData['status'] ??= 'active';
+      return Customer.fromJson(customerData);
     }
     throw Exception('Invalid profile response');
   }

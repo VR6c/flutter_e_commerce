@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/api/app_exception.dart';
+import '../../../core/router/app_routes.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -27,6 +28,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ref.read(authStateProvider).valueOrNull != null) {
+        context.go(widget.returnTo);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -43,17 +54,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _errorMessage = null;
     });
 
+    final enteredName = _nameController.text.trim();
+
     try {
       await ref
           .read(authStateProvider.notifier)
           .register(
-            name: _nameController.text.trim(),
+            name: enteredName,
             email: _emailController.text.trim(),
             password: _passwordController.text,
             passwordConfirmation: _confirmPasswordController.text,
           );
       if (!mounted) return;
-      context.go(widget.returnTo);
+
+      final customer = ref.read(authStateProvider).valueOrNull;
+      final displayName =
+          customer?.name.isNotEmpty == true ? customer!.name : enteredName;
+
+      context.go(
+        AppRoutes.authSuccess,
+        extra: {
+          'userName': displayName,
+          'returnTo': widget.returnTo,
+        },
+      );
     } on AppException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -61,8 +85,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       });
     } catch (e) {
       if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
       setState(() {
-        _errorMessage = 'Registration failed. Please verify your info.';
+        _errorMessage = msg.isNotEmpty
+            ? msg
+            : 'Registration failed. Please verify your info.';
       });
     } finally {
       if (mounted) {

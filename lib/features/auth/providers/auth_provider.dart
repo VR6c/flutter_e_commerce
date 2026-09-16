@@ -44,10 +44,20 @@ class AuthState extends _$AuthState {
           accessToken: tokenStr,
           refreshToken: tokenStr,
         );
+        final customerData = response['data']?['customer'] ?? response['customer'];
+        if (customerData is Map) {
+          final map = Map<String, dynamic>.from(customerData);
+          map['status'] ??= 'active';
+          return Customer.fromJson(map);
+        }
         return await _authRepository.getProfile();
       }
       throw Exception('Login failed: Token not found in response');
     });
+
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   Future<void> register({
@@ -71,10 +81,20 @@ class AuthState extends _$AuthState {
           accessToken: tokenStr,
           refreshToken: tokenStr,
         );
+        final customerData = response['data']?['customer'] ?? response['customer'];
+        if (customerData is Map) {
+          final map = Map<String, dynamic>.from(customerData);
+          map['status'] ??= 'active';
+          return Customer.fromJson(map);
+        }
         return await _authRepository.getProfile();
       }
       throw Exception('Registration failed: Token not found in response');
     });
+
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   Future<Customer> updateProfile({

@@ -793,7 +793,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: SizedBox(
                   height: 46,
                   child: ElevatedButton(
-                    onPressed: () => context.push(AppRoutes.login),
+                    onPressed: () => context.push(
+                      AppRoutes.login,
+                      extra: {'returnTo': AppRoutes.profile},
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.white,
@@ -818,7 +821,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: SizedBox(
                   height: 46,
                   child: OutlinedButton(
-                    onPressed: () => context.push(AppRoutes.register),
+                    onPressed: () => context.push(
+                      AppRoutes.register,
+                      extra: {'returnTo': AppRoutes.profile},
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                         color: theme.colorScheme.primary,

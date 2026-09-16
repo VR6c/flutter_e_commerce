@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'app_routes.dart';
-import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/auth/screens/auth_success_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/categories/screens/category_list_screen.dart';
 import '../../features/categories/screens/category_products_screen.dart';
@@ -22,21 +22,11 @@ import '../../features/splash/screens/splash_screen.dart';
 import '../../features/profile/screens/avatar_customizer_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
-
   return GoRouter(
     initialLocation: AppRoutes.home,
     redirect: (context, state) {
-      final isAuthenticated = authState.valueOrNull != null;
-      final loc = state.matchedLocation;
-
-      // If logged in and lands on login or register → go home
-      if (isAuthenticated &&
-          (loc == AppRoutes.login || loc == AppRoutes.register)) {
-        return AppRoutes.home;
-      }
-
-      // All other routes are freely accessible (guest-friendly)
+      // Screen-level guards handle redirecting authenticated users on mount.
+      // All other routes are freely accessible (guest-friendly).
       return null;
     },
     routes: [
@@ -62,6 +52,32 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final returnTo = extra?['returnTo'] as String? ?? AppRoutes.home;
           return RegisterScreen(returnTo: returnTo);
+        },
+      ),
+      GoRoute(
+        name: AppRoutes.authSuccessName,
+        path: AppRoutes.authSuccess,
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final userName = extra?['userName'] as String? ?? '';
+          final returnTo = extra?['returnTo'] as String? ?? AppRoutes.home;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AuthSuccessScreen(
+              userName: userName,
+              returnTo: returnTo,
+            ),
+            transitionDuration: const Duration(milliseconds: 350),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                ),
+                child: child,
+              );
+            },
+          );
         },
       ),
       GoRoute(

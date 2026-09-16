@@ -11,6 +11,9 @@ class AppRoutes {
   static const register = '/register';
   static const registerName = 'register';
 
+  static const authSuccess = '/auth-success';
+  static const authSuccessName = 'auth-success';
+
   // Bottom Navigation Branches (StatefulShellRoute)
   static const home = '/home';
   static const homeName = 'home';

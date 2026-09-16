@@ -128,6 +128,21 @@ class AppLocalizations {
       'pay_with_aba': 'Pay with ABA PAYWAY',
       'scan_qr_aba': 'Scan QR with ABA Mobile to complete your payment',
 
+      // Auth Success & Feedback
+      'account_created_title': 'Account Created Successfully!',
+      'account_ready_sub':
+          'Your account is ready. Discover fresh produce, organic vegetables, and daily essentials with swift delivery!',
+      'perk_delivery_title': 'Express Delivery',
+      'perk_delivery_sub': '30–45 mins straight to your doorstep',
+      'perk_fresh_title': '100% Organic & Fresh',
+      'perk_fresh_sub': 'Carefully handpicked daily from top local farms',
+      'perk_deals_title': 'Member-Only Deals',
+      'perk_deals_sub': 'Enjoy exclusive discounts and loyalty points',
+      'signing_in': 'Signing in...',
+      'welcome_back': 'Welcome back!',
+      'welcome_user': 'Welcome, {name}!',
+      'redirecting_in': 'Redirecting in {seconds}s...',
+
       // Orders
       'orders_title': 'Order History',
       'no_orders': 'No orders yet',
@@ -335,6 +350,21 @@ class AppLocalizations {
       'pay_with_aba': 'ទូទាត់ជាមួយ ABA PAYWAY',
       'scan_qr_aba': 'ស្កេន QR តាមរយៈ ABA Mobile ដើម្បីបញ្ចប់ការទូទាត់',
 
+      // Auth Success & Feedback
+      'account_created_title': 'បង្កើតគណនីបានជោគជ័យ!',
+      'account_ready_sub':
+          'គណនីរបស់អ្នករួចរាល់ហើយ។ សូមរីករាយជាមួយទំនិញ និងសម្ភារៈប្រើប្រាស់ប្រចាំថ្ងៃជាមួយការដឹកជញ្ជូនរហ័ស!',
+      'perk_delivery_title': 'ដឹកជញ្ជូនរហ័សទាន់ចិត្ត',
+      'perk_delivery_sub': '៣០–៤៥ នាទីដឹកដល់មុខផ្ទះរបស់អ្នក',
+      'perk_fresh_title': 'ផលិតផលថ្មីៗ ១០០%',
+      'perk_fresh_sub': 'ជ្រើសរើសយ៉ាងយកចិត្តទុកដាក់ពីផលិតផលល្អៗជារៀងរាល់ថ្ងៃ',
+      'perk_deals_title': 'ប្រូម៉ូសិនពិសេសសម្រាប់សមាជិក',
+      'perk_deals_sub': 'ទទួលបានការបញ្ចុះតម្លៃ និងពិន្ទុសន្សំបន្ថែម',
+      'signing_in': 'កំពុងចូលគណនី...',
+      'welcome_back': 'សូមស្វាគមន៍មកវិញ!',
+      'welcome_user': 'សូមស្វាគមន៍, {name}!',
+      'redirecting_in': 'កំពុងនាំទៅកាន់ទំព័រក្នុងរយៈពេល {seconds}វិនាទី...',
+
       // Orders
       'orders_title': 'ប្រវត្តិការបញ្ជាទិញ',
       'no_orders': 'មិនទាន់មានការបញ្ជាទិញទេ',
@@ -512,6 +542,22 @@ class AppLocalizations {
   String get orderSuccess => text('order_success');
   String get orderSuccessMsg => text('order_success_msg');
   String get continueShopping => text('continue_shopping');
+
+  // Auth Success Getters
+  String get accountCreatedTitle => text('account_created_title');
+  String get accountReadySub => text('account_ready_sub');
+  String get perkDeliveryTitle => text('perk_delivery_title');
+  String get perkDeliverySub => text('perk_delivery_sub');
+  String get perkFreshTitle => text('perk_fresh_title');
+  String get perkFreshSub => text('perk_fresh_sub');
+  String get perkDealsTitle => text('perk_deals_title');
+  String get perkDealsSub => text('perk_deals_sub');
+  String get signingIn => text('signing_in');
+  String get welcomeBack => text('welcome_back');
+  String welcomeUser(String name) =>
+      text('welcome_user').replaceAll('{name}', name);
+  String redirectingIn(int seconds) =>
+      text('redirecting_in').replaceAll('{seconds}', seconds.toString());
 
   String get ordersTitle => text('orders_title');
   String get orderHistory => text('orders_title');
