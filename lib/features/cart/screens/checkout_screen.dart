@@ -58,6 +58,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
   String? _activeQrImage;
   String? _activeDeeplink;
   bool _isCheckingStatus = false;
+  bool _isManualChecking = false;
   bool _isModalOpen = false;
   void Function(void Function())? _modalSetState;
   int _pollingRemainingSeconds = 120;
@@ -262,6 +263,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
         timer.cancel();
         _isPollingTimedOut = true;
         _isCheckingStatus = false;
+        _isManualChecking = false;
         _modalSetState?.call(() {});
         if (mounted) setState(() {});
       }
@@ -274,9 +276,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     }
 
     _isCheckingStatus = true;
-    _modalSetState?.call(() {});
-    if (!silent && mounted) {
-      setState(() {});
+    if (!silent) {
+      _isManualChecking = true;
+      _modalSetState?.call(() {});
+      if (mounted) setState(() {});
     }
 
     try {
@@ -311,9 +314,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
       // Silently ignore transient network errors during polling
     } finally {
       _isCheckingStatus = false;
-      _modalSetState?.call(() {});
-      if (!silent && mounted) {
-        setState(() {});
+      if (!silent) {
+        _isManualChecking = false;
+        _modalSetState?.call(() {});
+        if (mounted) setState(() {});
       }
     }
   }
@@ -326,6 +330,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     _activeQrImage = null;
     _activeDeeplink = null;
     _isCheckingStatus = false;
+    _isManualChecking = false;
     _pollingRemainingSeconds = 120;
     _isPollingTimedOut = false;
     _modalSetState = null;
@@ -382,30 +387,39 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       const Divider(),
                       const SizedBox(height: 24),
                       if (!_isPollingTimedOut) ...[
-                        Container(
-                          width: 76,
-                          height: 76,
-                          decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF005C8A).withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Stack(
+                        // Single centralized loading indicator with wallet icon
+                        SizedBox(
+                          width: 84,
+                          height: 84,
+                          child: Stack(
                             alignment: Alignment.center,
                             children: [
                               SizedBox(
-                                width: 46,
-                                height: 46,
+                                width: 84,
+                                height: 84,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 3.5,
                                   valueColor:
-                                      AlwaysStoppedAnimation(Color(0xFF005C8A)),
+                                      const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF005C8A),
+                                  ),
+                                  backgroundColor: const Color(0xFF005C8A)
+                                      .withValues(alpha: 0.12),
                                 ),
                               ),
-                              Icon(
-                                Icons.account_balance_wallet_rounded,
-                                size: 24,
-                                color: Color(0xFF005C8A),
+                              Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF005C8A)
+                                      .withValues(alpha: 0.09),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.account_balance_wallet_rounded,
+                                  size: 28,
+                                  color: Color(0xFF005C8A),
+                                ),
                               ),
                             ],
                           ),
@@ -442,18 +456,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation(Color(0xFF005C8A)),
-                                ),
+                              const Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: Color(0xFF005C8A),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 6),
                               Text(
-                                'Checking status... (${_formatRemainingTime(_pollingRemainingSeconds)})',
+                                'Auto-checking status (${_formatRemainingTime(_pollingRemainingSeconds)})',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -468,31 +478,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                           width: double.infinity,
                           height: 48,
                           child: ElevatedButton.icon(
-                            onPressed: _isCheckingStatus
+                            onPressed: _isManualChecking
                                 ? null
                                 : () async {
                                     await _checkPaymentStatus(silent: false);
                                   },
-                            icon: _isCheckingStatus
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.refresh_rounded, size: 18),
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
                             label: Text(
-                              _isCheckingStatus
+                              _isManualChecking
                                   ? 'Checking...'
                                   : 'Check Status Now',
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF005C8A),
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: const Color(0xFF005C8A)
+                                  .withValues(alpha: 0.65),
+                              disabledForegroundColor: Colors.white70,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
+                              elevation: 0,
                             ),
                           ),
                         ),
@@ -715,16 +721,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (!_isPollingTimedOut) ...[
-                            const SizedBox(
-                              width: 10,
-                              height: 10,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                valueColor:
-                                    AlwaysStoppedAnimation(Color(0xFF005C8A)),
-                              ),
+                            const Icon(
+                              Icons.access_time_rounded,
+                              size: 13,
+                              color: Color(0xFF005C8A),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 5),
                             Text(
                               'Checking payment status... (${_formatRemainingTime(_pollingRemainingSeconds)})',
                               style: const TextStyle(
