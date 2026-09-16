@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../../../core/utils/image_url_formatter.dart';
@@ -91,8 +93,54 @@ class OrderRepository {
     return null;
   }
 
-  String getReceiptUrl(int id) {
+  String getReceiptUrl(dynamic id) {
     final baseUrl = _apiClient.dio.options.baseUrl;
     return '$baseUrl${ApiEndpoints.orderReceipt(id)}';
+  }
+
+  Future<Uint8List> fetchReceiptBytes(dynamic id) async {
+    final response = await _apiClient.dio.get<List<int>>(
+      ApiEndpoints.orderReceipt(id),
+      options: Options(
+        responseType: ResponseType.bytes,
+        headers: {
+          'Accept': 'application/pdf, text/html, */*',
+        },
+      ),
+    );
+    final data = response.data;
+    if (data is Uint8List) {
+      return data;
+    } else if (data is List<int>) {
+      return Uint8List.fromList(data);
+    }
+    throw Exception('Failed to load receipt PDF data.');
+  }
+
+  Future<String> fetchReceiptHtml(dynamic id) async {
+    final response = await _apiClient.get<String>(
+      ApiEndpoints.orderReceipt(id),
+      options: Options(
+        responseType: ResponseType.plain,
+        headers: {
+          'Accept': 'text/html, application/xhtml+xml, */*',
+        },
+      ),
+    );
+    return response.data ?? '';
+  }
+
+  Future<String?> getDownloadReceiptUrl(dynamic orderId, {String? existingUrl}) async {
+    if (existingUrl != null && existingUrl.isNotEmpty) {
+      return existingUrl;
+    }
+    final id = int.tryParse(orderId.toString());
+    if (id != null) {
+      final order = await fetchOrderDetail(id);
+      if (order?.receiptUrl != null && order!.receiptUrl!.isNotEmpty) {
+        return order.receiptUrl;
+      }
+    }
+    return getReceiptUrl(orderId);
   }
 }

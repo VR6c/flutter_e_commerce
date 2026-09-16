@@ -111,13 +111,13 @@ class AppException implements Exception {
   static String _getTimeoutMessage(DioExceptionType type) {
     switch (type) {
       case DioExceptionType.connectionTimeout:
-        return 'Connection timeout with API server';
+        return 'Connection timed out. Please check your internet connection.';
       case DioExceptionType.sendTimeout:
-        return 'Send timeout in connection with API server';
+        return 'Request timed out while sending data. Please try again.';
       case DioExceptionType.receiveTimeout:
-        return 'Receive timeout in connection with API server';
+        return 'The server took too long to respond. Please try again.';
       default:
-        return 'Network request timed out';
+        return 'Network request timed out. Please try again.';
     }
   }
 

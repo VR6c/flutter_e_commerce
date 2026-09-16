@@ -36,6 +36,8 @@ mixin _$Order {
   String? get phone => throw _privateConstructorUsedError;
   @JsonKey(name: 'email')
   String? get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'receipt_url')
+  String? get receiptUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'address')
   String? get address => throw _privateConstructorUsedError;
   @JsonKey(name: 'city')
@@ -72,6 +74,7 @@ abstract class $OrderCopyWith<$Res> {
     @JsonKey(name: 'last_name') String lastName,
     @JsonKey(name: 'phone') String? phone,
     @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'receipt_url') String? receiptUrl,
     @JsonKey(name: 'address') String? address,
     @JsonKey(name: 'city') String? city,
     @JsonKey(name: 'country') String? country,
@@ -105,6 +108,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? lastName = null,
     Object? phone = freezed,
     Object? email = freezed,
+    Object? receiptUrl = freezed,
     Object? address = freezed,
     Object? city = freezed,
     Object? country = freezed,
@@ -149,6 +153,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
             email: freezed == email
                 ? _value.email
                 : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            receiptUrl: freezed == receiptUrl
+                ? _value.receiptUrl
+                : receiptUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
             address: freezed == address
                 ? _value.address
@@ -198,6 +206,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     @JsonKey(name: 'last_name') String lastName,
     @JsonKey(name: 'phone') String? phone,
     @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'receipt_url') String? receiptUrl,
     @JsonKey(name: 'address') String? address,
     @JsonKey(name: 'city') String? city,
     @JsonKey(name: 'country') String? country,
@@ -230,6 +239,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? lastName = null,
     Object? phone = freezed,
     Object? email = freezed,
+    Object? receiptUrl = freezed,
     Object? address = freezed,
     Object? city = freezed,
     Object? country = freezed,
@@ -275,6 +285,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.email
             : email // ignore: cast_nullable_to_non_nullable
                   as String?,
+        receiptUrl: freezed == receiptUrl
+            ? _value.receiptUrl
+            : receiptUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
         address: freezed == address
             ? _value.address
             : address // ignore: cast_nullable_to_non_nullable
@@ -317,6 +331,7 @@ class _$OrderImpl implements _Order {
     @JsonKey(name: 'last_name') required this.lastName,
     @JsonKey(name: 'phone') this.phone,
     @JsonKey(name: 'email') this.email,
+    @JsonKey(name: 'receipt_url') this.receiptUrl,
     @JsonKey(name: 'address') this.address,
     @JsonKey(name: 'city') this.city,
     @JsonKey(name: 'country') this.country,
@@ -353,6 +368,9 @@ class _$OrderImpl implements _Order {
   @JsonKey(name: 'email')
   final String? email;
   @override
+  @JsonKey(name: 'receipt_url')
+  final String? receiptUrl;
+  @override
   @JsonKey(name: 'address')
   final String? address;
   @override
@@ -378,7 +396,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, status: $status, total: $total, couponCode: $couponCode, discountAmount: $discountAmount, firstName: $firstName, lastName: $lastName, phone: $phone, email: $email, address: $address, city: $city, country: $country, gateway: $gateway, items: $items, createdAt: $createdAt)';
+    return 'Order(id: $id, status: $status, total: $total, couponCode: $couponCode, discountAmount: $discountAmount, firstName: $firstName, lastName: $lastName, phone: $phone, email: $email, receiptUrl: $receiptUrl, address: $address, city: $city, country: $country, gateway: $gateway, items: $items, createdAt: $createdAt)';
   }
 
   @override
@@ -399,6 +417,8 @@ class _$OrderImpl implements _Order {
                 other.lastName == lastName) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.receiptUrl, receiptUrl) ||
+                other.receiptUrl == receiptUrl) &&
             (identical(other.address, address) || other.address == address) &&
             (identical(other.city, city) || other.city == city) &&
             (identical(other.country, country) || other.country == country) &&
@@ -421,6 +441,7 @@ class _$OrderImpl implements _Order {
     lastName,
     phone,
     email,
+    receiptUrl,
     address,
     city,
     country,
@@ -454,6 +475,7 @@ abstract class _Order implements Order {
     @JsonKey(name: 'last_name') required final String lastName,
     @JsonKey(name: 'phone') final String? phone,
     @JsonKey(name: 'email') final String? email,
+    @JsonKey(name: 'receipt_url') final String? receiptUrl,
     @JsonKey(name: 'address') final String? address,
     @JsonKey(name: 'city') final String? city,
     @JsonKey(name: 'country') final String? country,
@@ -488,6 +510,9 @@ abstract class _Order implements Order {
   @override
   @JsonKey(name: 'email')
   String? get email;
+  @override
+  @JsonKey(name: 'receipt_url')
+  String? get receiptUrl;
   @override
   @JsonKey(name: 'address')
   String? get address;

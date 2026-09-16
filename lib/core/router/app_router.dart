@@ -16,6 +16,7 @@ import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/cart/screens/cart_screen.dart';
 import '../../features/cart/screens/checkout_screen.dart';
 import '../../features/orders/screens/order_history_screen.dart';
+import '../../features/orders/screens/receipt_viewer_screen.dart';
 import '../../features/cart/screens/order_success_screen.dart';
 import '../../features/wishlist/screens/wishlist_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
@@ -173,6 +174,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return OrderSuccessScreen(
             orderId: orderId,
             isPayWay: isPayWay,
+          );
+        },
+      ),
+      GoRoute(
+        name: AppRoutes.orderReceiptName,
+        path: AppRoutes.orderReceipt,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final orderId = extra?['orderId'] ??
+              state.uri.queryParameters['orderId'] ??
+              '';
+          final receiptUrl = extra?['receiptUrl'] as String? ??
+              state.uri.queryParameters['receiptUrl'];
+          return ReceiptViewerScreen(
+            orderId: orderId,
+            receiptUrl: receiptUrl,
           );
         },
       ),

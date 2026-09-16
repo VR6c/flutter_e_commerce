@@ -155,6 +155,12 @@ class AppLocalizations {
       'order_id': 'Order ID',
       'order_date': 'Order Date',
       'items': 'Items',
+      'view_receipt': 'View',
+      'download_receipt': 'Download',
+      'order_receipt': 'Receipt',
+      'downloading_receipt': 'Downloading receipt...',
+      'receipt_downloaded': 'Receipt downloaded successfully',
+      'could_not_open_receipt': 'Could not open receipt.',
 
       // Wishlist
       'wishlist_title': 'My Wishlist',
@@ -377,6 +383,12 @@ class AppLocalizations {
       'order_id': 'លេខសម្គាល់ការបញ្ជាទិញ',
       'order_date': 'កាលបរិច្ឆេទបញ្ជាទិញ',
       'items': 'ទំនិញ',
+      'view_receipt': 'មើលវិក្កយបត្រ',
+      'download_receipt': 'ទាញយកវិក្កយបត្រ',
+      'order_receipt': 'វិក្កយបត្របញ្ជាទិញ',
+      'downloading_receipt': 'កំពុងទាញយកវិក្កយបត្រ...',
+      'receipt_downloaded': 'បានទាញយកវិក្កយបត្រដោយជោគជ័យ',
+      'could_not_open_receipt': 'មិនអាចបើកវិក្កយបត្របានទេ',
 
       // Wishlist
       'wishlist_title': 'បញ្ជីចង់បាន',
@@ -563,6 +575,12 @@ class AppLocalizations {
   String get orderHistory => text('orders_title');
   String get noOrders => text('no_orders');
   String get noOrdersSub => text('no_orders_sub');
+  String get viewReceipt => text('view_receipt');
+  String get downloadReceipt => text('download_receipt');
+  String get orderReceipt => text('order_receipt');
+  String get downloadingReceipt => text('downloading_receipt');
+  String get receiptDownloaded => text('receipt_downloaded');
+  String get couldNotOpenReceipt => text('could_not_open_receipt');
   String get wishlistTitle => text('wishlist_title');
   String get emptyWishlist => text('empty_wishlist');
 

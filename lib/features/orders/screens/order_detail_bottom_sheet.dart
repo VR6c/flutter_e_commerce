@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/order.dart';
+import '../services/receipt_service.dart';
+import 'receipt_viewer_screen.dart';
 
 class OrderDetailBottomSheet extends StatelessWidget {
   final Order order;
@@ -188,6 +191,15 @@ class OrderDetailBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     _AddressTile(order: order, theme: theme),
+                    const SizedBox(height: 24),
+
+                    // Order Receipt
+                    _SectionHeader(
+                      icon: Icons.receipt_long_outlined,
+                      label: l10n.orderReceipt,
+                    ),
+                    const SizedBox(height: 12),
+                    _ReceiptActionCard(order: order, theme: theme),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -613,6 +625,206 @@ class _AddressTile extends StatelessWidget {
               ),
             )
             .toList(),
+      ),
+    );
+  }
+}
+
+class _ReceiptActionCard extends ConsumerStatefulWidget {
+  final Order order;
+  final ThemeData theme;
+
+  const _ReceiptActionCard({required this.order, required this.theme});
+
+  @override
+  ConsumerState<_ReceiptActionCard> createState() => _ReceiptActionCardState();
+}
+
+class _ReceiptActionCardState extends ConsumerState<_ReceiptActionCard> {
+  bool _isDownloading = false;
+
+  Future<void> _handleDownload(BuildContext context, AppLocalizations l10n) async {
+    if (_isDownloading) return;
+    setState(() => _isDownloading = true);
+
+    try {
+      final file = await ReceiptService.downloadReceipt(
+        context: context,
+        ref: ref,
+        orderId: widget.order.id,
+      );
+      if (file != null && mounted) {
+        ReceiptService.showFileDetailsBottomSheet(
+          context,
+          orderId: widget.order.id,
+          file: file,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isDownloading = false);
+      }
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: widget.theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.receipt_long_rounded,
+                  color: widget.theme.colorScheme.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.isKhmer
+                          ? 'វិក្កយបត្រផ្លូវការ #${widget.order.id}'
+                          : 'Official Receipt #${widget.order.id}',
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.isKhmer
+                          ? 'មើលវិក្កយបត្រលើអេក្រង់ ឬទាញយកជាឯកសារ'
+                          : 'Preview on screen or download as file',
+                      style: TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              // View Receipt Button
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ReceiptViewerScreen.show(
+                        context,
+                        orderId: widget.order.id,
+                        receiptUrl: widget.order.receiptUrl,
+                      );
+                    },
+                    icon: const Icon(Icons.visibility_outlined, size: 16),
+                    label: Text(
+                      l10n.viewReceipt,
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: widget.theme.colorScheme.primary,
+                      side: BorderSide(
+                        color: widget.theme.colorScheme.primary.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Download Receipt Button
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: ElevatedButton.icon(
+                    onPressed: _isDownloading
+                        ? null
+                        : () => _handleDownload(context, l10n),
+                    icon: _isDownloading
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.file_download_outlined,
+                            size: 18,
+                          ),
+                    label: Text(
+                      _isDownloading
+                          ? (l10n.isKhmer ? 'កំពុងទាញ...' : 'Downloading...')
+                          : l10n.downloadReceipt,
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: Colors.white,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: widget.theme.colorScheme.primary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

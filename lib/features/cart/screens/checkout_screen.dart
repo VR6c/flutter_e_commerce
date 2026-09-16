@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/api/providers.dart';
 import '../../../core/api/app_exception.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -164,7 +165,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
 
     try {
       final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.post('/checkout', data: payload);
+      final response = await apiClient.post(
+        ApiEndpoints.checkout,
+        data: payload,
+        options: Options(
+          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 90),
+        ),
+      );
       final data = response.data;
 
       if (data is Map<String, dynamic> && data['status'] == true) {
@@ -195,7 +203,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
         _showErrorSnackbar('Failed to create order. Please try again.');
       }
     } on AppException catch (e) {
-      _showErrorSnackbar(e.message);
+      if (e is TimeoutException) {
+        _showErrorSnackbar(
+          'Order processing took longer than expected. Please check your Orders or try again.',
+        );
+      } else {
+        _showErrorSnackbar(e.message);
+      }
     } catch (e) {
       _showErrorSnackbar('An unexpected error occurred during checkout.');
     } finally {
@@ -285,7 +299,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     try {
       final apiClient = ref.read(apiClientProvider);
       final response = await apiClient.get<Map<String, dynamic>>(
-        '/checkout/payment-status',
+        ApiEndpoints.checkoutPaymentStatus,
         queryParameters: {
           'tran_id': _activeTranId,
           'order_id': _activeOrderId.toString(),

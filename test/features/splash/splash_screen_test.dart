@@ -113,10 +113,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
 
       expect(find.text('TVR'), findsOneWidget);
-      expect(
-        find.text('Fresh groceries & essentials delivered'),
-        findsOneWidget,
-      );
+      expect(find.text('Great quality and quick shipping'), findsOneWidget);
       expect(find.textContaining('v1.0.0'), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);
       expect(find.byType(LinearProgressIndicator), findsOneWidget);

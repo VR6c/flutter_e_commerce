@@ -50,6 +50,9 @@ class AppRoutes {
   static const orderSuccess = '/order-success';
   static const orderSuccessName = 'order-success';
 
+  static const orderReceipt = '/order-receipt';
+  static const orderReceiptName = 'order-receipt';
+
   // Profile & Customization
   static const avatarCustomizer = '/avatar-customizer';
   static const avatarCustomizerName = 'avatar-customizer';

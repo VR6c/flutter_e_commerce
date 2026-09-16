@@ -16,6 +16,7 @@ class Order with _$Order {
     @JsonKey(name: 'last_name') required String lastName,
     @JsonKey(name: 'phone') String? phone,
     @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'receipt_url') String? receiptUrl,
     @JsonKey(name: 'address') String? address,
     @JsonKey(name: 'city') String? city,
     @JsonKey(name: 'country') String? country,

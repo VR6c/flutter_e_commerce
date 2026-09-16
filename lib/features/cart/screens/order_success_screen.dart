@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../orders/screens/receipt_viewer_screen.dart';
+import '../../orders/services/receipt_service.dart';
 
 class OrderSuccessScreen extends ConsumerWidget {
   final dynamic orderId;
@@ -203,6 +205,162 @@ class OrderSuccessScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                // Receipt Action Buttons
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF1F5F9),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.receipt_long_rounded,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.orderReceipt,
+                                  style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                    color: theme.colorScheme.onSurface,
+                                    letterSpacing: 0,
+                                  ),
+                                ),
+                                Text(
+                                  l10n.isKhmer
+                                      ? 'វិក្កយបត្រផ្លូវការសម្រាប់បញ្ជាទិញនេះ'
+                                      : 'Official invoice for this order',
+                                  style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : const Color(0xFF64748B),
+                                    fontSize: 11,
+                                    letterSpacing: 0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          // View Receipt Button
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  ReceiptViewerScreen.show(
+                                    context,
+                                    orderId: orderId,
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.visibility_outlined,
+                                  size: 16,
+                                ),
+                                label: Text(
+                                  l10n.viewReceipt,
+                                  style: const TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    letterSpacing: 0,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.primary,
+                                  side: BorderSide(
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          // Download Receipt Button
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _handleDownloadReceipt(
+                                  context,
+                                  ref,
+                                  l10n,
+                                ),
+                                icon: const Icon(
+                                  Icons.file_download_outlined,
+                                  size: 16,
+                                ),
+                                label: Text(
+                                  l10n.downloadReceipt,
+                                  style: const TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    letterSpacing: 0,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: isDark
+                                      ? Colors.white
+                                      : const Color(0xFF0F172A),
+                                  side: BorderSide(
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFCBD5E1),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
 
                 const Spacer(),
 
@@ -272,5 +430,24 @@ class OrderSuccessScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleDownloadReceipt(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    final file = await ReceiptService.downloadReceipt(
+      context: context,
+      ref: ref,
+      orderId: orderId,
+    );
+    if (file != null && context.mounted) {
+      ReceiptService.showFileDetailsBottomSheet(
+        context,
+        orderId: orderId,
+        file: file,
+      );
+    }
   }
 }

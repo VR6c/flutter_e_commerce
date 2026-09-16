@@ -23,6 +23,10 @@ class ApiEndpoints {
   static const String coupons = '/coupons';
   static const String socialMediaLinks = '/social-media-links';
 
+  // Checkout
+  static const String checkout = '/checkout';
+  static const String checkoutPaymentStatus = '/checkout/payment-status';
+
   // Orders
   static const String orders = '/orders';
   static String orderDetail(dynamic id) => '/orders/$id';

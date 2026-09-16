@@ -9,7 +9,7 @@ import 'interceptors/logging_interceptor.dart';
 class DioClient {
   DioClient._();
 
-  static const Duration defaultTimeout = Duration(seconds: 25);
+  static const Duration defaultTimeout = Duration(seconds: 45);
   static const Duration refreshTimeout = Duration(seconds: 15);
 
   static Dio createDio({

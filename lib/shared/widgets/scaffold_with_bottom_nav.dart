@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,7 +67,7 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
           Container(
             height: 64 + bottomInset,
             padding: EdgeInsets.only(
-              bottom: bottomInset > 0 ? bottomInset - 4 : 0,
+              bottom: math.max(0.0, bottomInset - 4),
             ),
             decoration: BoxDecoration(
               color: barBg,
