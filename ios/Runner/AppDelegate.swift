@@ -9,26 +9,21 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
-    if let registrar = self.registrar(forPlugin: "FileSharePlugin") {
-      AppDelegate.registerShareChannel(with: registrar)
-    }
-    return result
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-    let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "FileSharePlugin")
-    AppDelegate.registerShareChannel(with: registrar)
+    AppDelegate.registerShareChannel(with: engineBridge.applicationRegistrar.messenger())
   }
 
-  private static func registerShareChannel(with registrar: FlutterPluginRegistrar) {
+  private static func registerShareChannel(with messenger: FlutterBinaryMessenger) {
     guard !isChannelRegistered else { return }
     isChannelRegistered = true
 
     let shareChannel = FlutterMethodChannel(
       name: "com.tvr.ecommerce/file_share",
-      binaryMessenger: registrar.messenger()
+      binaryMessenger: messenger
     )
     shareChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
       if call.method == "shareFile" {
