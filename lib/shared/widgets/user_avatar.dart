@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermoji/fluttermoji.dart';
 
+import '../../core/utils/app_image_cache.dart';
 import '../../features/profile/providers/user_avatar_provider.dart';
 
 class UserAvatar extends ConsumerWidget {
@@ -33,23 +34,38 @@ class UserAvatar extends ConsumerWidget {
 
     Widget avatarContent;
 
-    if (avatarState.isPhoto && avatarState.photoPath != null) {
-      final file = File(avatarState.photoPath!);
+    if (avatarState.isPhoto) {
       final cacheDim = (radius * 4).round().clamp(100, 320);
-      avatarContent = ClipOval(
-        child: Image.file(
-          file,
-          width: radius * 2,
-          height: radius * 2,
-          cacheWidth: cacheDim,
-          cacheHeight: cacheDim,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildFallbackInitials(
-            theme,
-            initials,
+      if (avatarState.photoPath != null &&
+          File(avatarState.photoPath!).existsSync()) {
+        avatarContent = ClipOval(
+          child: Image.file(
+            File(avatarState.photoPath!),
+            width: radius * 2,
+            height: radius * 2,
+            cacheWidth: cacheDim,
+            cacheHeight: cacheDim,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildFallbackInitials(theme, initials),
           ),
-        ),
-      );
+        );
+      } else if (avatarState.photoUrl != null &&
+          avatarState.photoUrl!.isNotEmpty) {
+        avatarContent = ClipOval(
+          child: AppCachedImage(
+            imageUrl: avatarState.photoUrl!,
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.cover,
+            memCacheWidth: AppImageCache.thumbnailWidth,
+            memCacheHeight: AppImageCache.thumbnailWidth,
+            errorWidget: _buildFallbackInitials(theme, initials),
+          ),
+        );
+      } else {
+        avatarContent = _buildFallbackInitials(theme, initials);
+      }
     } else if (avatarState.isFluttermoji) {
       avatarContent = ClipOval(
         child: Container(
@@ -64,6 +80,33 @@ class UserAvatar extends ConsumerWidget {
       );
     } else {
       avatarContent = _buildFallbackInitials(theme, initials);
+    }
+
+    if (avatarState.isUploading) {
+      avatarContent = Stack(
+        alignment: Alignment.center,
+        children: [
+          avatarContent,
+          Container(
+            width: radius * 2,
+            height: radius * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black.withValues(alpha: 0.35),
+            ),
+            child: Center(
+              child: SizedBox(
+                width: (radius * 0.7).clamp(16.0, 32.0),
+                height: (radius * 0.7).clamp(16.0, 32.0),
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
     }
 
     Widget avatarWidget = avatarContent;

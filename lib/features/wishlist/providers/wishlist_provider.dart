@@ -44,6 +44,11 @@ class Wishlist extends _$Wishlist {
   // ── Remote API Sync ────────────────────────────────────────────────────────
 
   Future<void> _syncWithApi(int userId) async {
+    final initialCustomer = ref.read(authStateProvider).valueOrNull;
+    if (initialCustomer == null || initialCustomer.id != userId) {
+      return;
+    }
+
     _syncCancelToken?.cancel('New sync started');
     final cancelToken = CancelToken();
     _syncCancelToken = cancelToken;

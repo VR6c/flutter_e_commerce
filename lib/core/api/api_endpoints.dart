@@ -7,6 +7,7 @@ class ApiEndpoints {
   static const String login = '/customer/login';
   static const String register = '/customer/register';
   static const String profile = '/customer/profile';
+  static const String avatar = '/customer/avatar';
   static const String logout = '/customer/logout';
   static const String refreshToken = '/customer/refresh';
 

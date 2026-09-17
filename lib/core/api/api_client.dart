@@ -60,6 +60,10 @@ class ApiClient {
   }) async {
     try {
       final reqOptions = (options ?? Options()).copyWith(method: method);
+      if (data is FormData) {
+        reqOptions.headers?.remove('Content-Type');
+        reqOptions.contentType = null;
+      }
       if (fromJson != null) {
         final response = await dio.request<dynamic>(
           path,

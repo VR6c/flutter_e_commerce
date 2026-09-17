@@ -1,7 +1,11 @@
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermoji/fluttermoji.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/user_avatar_provider.dart';
@@ -16,6 +20,7 @@ class AvatarCustomizerScreen extends ConsumerStatefulWidget {
 
 class _AvatarCustomizerScreenState
     extends ConsumerState<AvatarCustomizerScreen> {
+  final GlobalKey _avatarBoundaryKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -118,14 +123,17 @@ class _AvatarCustomizerScreenState
                         color: isDark ? const Color(0xFF131D38) : Colors.white,
                       ),
                       padding: const EdgeInsets.all(4),
-                      child: ClipOval(
-                        child: Container(
-                          color: isDark
-                              ? const Color(0xFF1E293B)
-                              : const Color(0xFFF1F5F9),
-                          child: FluttermojiCircleAvatar(
-                            radius: 60,
-                            backgroundColor: Colors.transparent,
+                      child: RepaintBoundary(
+                        key: _avatarBoundaryKey,
+                        child: ClipOval(
+                          child: Container(
+                            color: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFF1F5F9),
+                            child: FluttermojiCircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.transparent,
+                            ),
                           ),
                         ),
                       ),
@@ -270,7 +278,31 @@ class _AvatarCustomizerScreenState
 
   Future<void> _onSaveAndApply() async {
     HapticFeedback.mediumImpact();
-    await ref.read(userAvatarProvider.notifier).setFluttermojiAvatar();
+
+    File? imageFile;
+    try {
+      final boundary = _avatarBoundaryKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary != null) {
+        final image = await boundary.toImage(pixelRatio: 3.0);
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (byteData != null) {
+          final tempDir = await getTemporaryDirectory();
+          final file = File(
+            '${tempDir.path}/avatar_${DateTime.now().millisecondsSinceEpoch}.png',
+          );
+          await file.writeAsBytes(byteData.buffer.asUint8List());
+          imageFile = file;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error rasterizing fluttermoji avatar: $e');
+    }
+
+    await ref
+        .read(userAvatarProvider.notifier)
+        .setFluttermojiAvatar(imageFile: imageFile);
+
     if (mounted) {
       final isKm = context.l10n.isKhmer;
       Navigator.pop(context);
@@ -283,7 +315,7 @@ class _AvatarCustomizerScreenState
               Text(
                 isKm
                     ? 'បានរក្សាទុក និងអនុវត្តរូបតំណាងថ្មីជោគជ័យ!'
-                    : 'Custom Avatar saved and applied!',
+                    : 'Custom avatar saved and synced!',
                 style: const TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   letterSpacing: 0,

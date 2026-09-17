@@ -171,15 +171,24 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 if (context.mounted && success) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        l10n.isKhmer
-                            ? 'បានធ្វើបច្ចុប្បន្នភាពរូបថតគណនី!'
-                            : 'Profile photo updated!',
-                        style: const TextStyle(
-                          fontFamily: AppTheme.fontFamily,
-                          letterSpacing: 0,
-                        ),
+                      content: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.avatarUploadSuccess,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                        ],
                       ),
+                      backgroundColor: const Color(0xFF23AA49),
                       behavior: SnackBarBehavior.floating,
                       duration: const Duration(seconds: 2),
                     ),
@@ -211,15 +220,24 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 if (context.mounted && success) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        l10n.isKhmer
-                            ? 'បានធ្វើបច្ចុប្បន្នភាពរូបថតគណនី!'
-                            : 'Profile photo updated!',
-                        style: const TextStyle(
-                          fontFamily: AppTheme.fontFamily,
-                          letterSpacing: 0,
-                        ),
+                      content: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.avatarUploadSuccess,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                        ],
                       ),
+                      backgroundColor: const Color(0xFF23AA49),
                       behavior: SnackBarBehavior.floating,
                       duration: const Duration(seconds: 2),
                     ),
@@ -253,14 +271,22 @@ class AvatarOptionsSheet extends ConsumerWidget {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(
-                          l10n.isKhmer
-                              ? 'បានកំណត់ទៅអក្សរកាត់ដើម'
-                              : 'Reset to default initials',
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontFamily,
-                            letterSpacing: 0,
-                          ),
+                        content: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.avatarRemoved,
+                              style: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ],
                         ),
                         behavior: SnackBarBehavior.floating,
                         duration: const Duration(seconds: 2),

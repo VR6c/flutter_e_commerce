@@ -1,4 +1,13 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
 part of 'customer.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
 
 T _$identity<T>(T value) => value;
 
@@ -16,6 +25,12 @@ mixin _$Customer {
   String get name => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'profile_image')
+  String? get profileImage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'avatar_url')
+  String? get avatarUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'avatar_type')
+  String? get avatarType => throw _privateConstructorUsedError;
 
   /// Serializes this Customer to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -32,7 +47,15 @@ abstract class $CustomerCopyWith<$Res> {
   factory $CustomerCopyWith(Customer value, $Res Function(Customer) then) =
       _$CustomerCopyWithImpl<$Res, Customer>;
   @useResult
-  $Res call({int id, String name, String email, String status});
+  $Res call({
+    int id,
+    String name,
+    String email,
+    String status,
+    @JsonKey(name: 'profile_image') String? profileImage,
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
+    @JsonKey(name: 'avatar_type') String? avatarType,
+  });
 }
 
 /// @nodoc
@@ -54,6 +77,9 @@ class _$CustomerCopyWithImpl<$Res, $Val extends Customer>
     Object? name = null,
     Object? email = null,
     Object? status = null,
+    Object? profileImage = freezed,
+    Object? avatarUrl = freezed,
+    Object? avatarType = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -73,6 +99,18 @@ class _$CustomerCopyWithImpl<$Res, $Val extends Customer>
                 ? _value.status
                 : status // ignore: cast_nullable_to_non_nullable
                       as String,
+            profileImage: freezed == profileImage
+                ? _value.profileImage
+                : profileImage // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            avatarUrl: freezed == avatarUrl
+                ? _value.avatarUrl
+                : avatarUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            avatarType: freezed == avatarType
+                ? _value.avatarType
+                : avatarType // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -88,7 +126,15 @@ abstract class _$$CustomerImplCopyWith<$Res>
   ) = __$$CustomerImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, String name, String email, String status});
+  $Res call({
+    int id,
+    String name,
+    String email,
+    String status,
+    @JsonKey(name: 'profile_image') String? profileImage,
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
+    @JsonKey(name: 'avatar_type') String? avatarType,
+  });
 }
 
 /// @nodoc
@@ -109,6 +155,9 @@ class __$$CustomerImplCopyWithImpl<$Res>
     Object? name = null,
     Object? email = null,
     Object? status = null,
+    Object? profileImage = freezed,
+    Object? avatarUrl = freezed,
+    Object? avatarType = freezed,
   }) {
     return _then(
       _$CustomerImpl(
@@ -128,6 +177,18 @@ class __$$CustomerImplCopyWithImpl<$Res>
             ? _value.status
             : status // ignore: cast_nullable_to_non_nullable
                   as String,
+        profileImage: freezed == profileImage
+            ? _value.profileImage
+            : profileImage // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        avatarUrl: freezed == avatarUrl
+            ? _value.avatarUrl
+            : avatarUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        avatarType: freezed == avatarType
+            ? _value.avatarType
+            : avatarType // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -141,6 +202,9 @@ class _$CustomerImpl implements _Customer {
     required this.name,
     required this.email,
     required this.status,
+    @JsonKey(name: 'profile_image') this.profileImage,
+    @JsonKey(name: 'avatar_url') this.avatarUrl,
+    @JsonKey(name: 'avatar_type') this.avatarType,
   });
 
   factory _$CustomerImpl.fromJson(Map<String, dynamic> json) =>
@@ -154,10 +218,19 @@ class _$CustomerImpl implements _Customer {
   final String email;
   @override
   final String status;
+  @override
+  @JsonKey(name: 'profile_image')
+  final String? profileImage;
+  @override
+  @JsonKey(name: 'avatar_url')
+  final String? avatarUrl;
+  @override
+  @JsonKey(name: 'avatar_type')
+  final String? avatarType;
 
   @override
   String toString() {
-    return 'Customer(id: $id, name: $name, email: $email, status: $status)';
+    return 'Customer(id: $id, name: $name, email: $email, status: $status, profileImage: $profileImage, avatarUrl: $avatarUrl, avatarType: $avatarType)';
   }
 
   @override
@@ -168,12 +241,27 @@ class _$CustomerImpl implements _Customer {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.profileImage, profileImage) ||
+                other.profileImage == profileImage) &&
+            (identical(other.avatarUrl, avatarUrl) ||
+                other.avatarUrl == avatarUrl) &&
+            (identical(other.avatarType, avatarType) ||
+                other.avatarType == avatarType));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, email, status);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    email,
+    status,
+    profileImage,
+    avatarUrl,
+    avatarType,
+  );
 
   /// Create a copy of Customer
   /// with the given fields replaced by the non-null parameter values.
@@ -195,6 +283,9 @@ abstract class _Customer implements Customer {
     required final String name,
     required final String email,
     required final String status,
+    @JsonKey(name: 'profile_image') final String? profileImage,
+    @JsonKey(name: 'avatar_url') final String? avatarUrl,
+    @JsonKey(name: 'avatar_type') final String? avatarType,
   }) = _$CustomerImpl;
 
   factory _Customer.fromJson(Map<String, dynamic> json) =
@@ -208,6 +299,15 @@ abstract class _Customer implements Customer {
   String get email;
   @override
   String get status;
+  @override
+  @JsonKey(name: 'profile_image')
+  String? get profileImage;
+  @override
+  @JsonKey(name: 'avatar_url')
+  String? get avatarUrl;
+  @override
+  @JsonKey(name: 'avatar_type')
+  String? get avatarType;
 
   /// Create a copy of Customer
   /// with the given fields replaced by the non-null parameter values.

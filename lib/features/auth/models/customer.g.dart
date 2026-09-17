@@ -6,6 +6,9 @@ _$CustomerImpl _$$CustomerImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       email: json['email'] as String,
       status: json['status'] as String,
+      profileImage: json['profile_image'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+      avatarType: json['avatar_type'] as String?,
     );
 
 Map<String, dynamic> _$$CustomerImplToJson(_$CustomerImpl instance) =>
@@ -14,4 +17,7 @@ Map<String, dynamic> _$$CustomerImplToJson(_$CustomerImpl instance) =>
       'name': instance.name,
       'email': instance.email,
       'status': instance.status,
+      'profile_image': instance.profileImage,
+      'avatar_url': instance.avatarUrl,
+      'avatar_type': instance.avatarType,
     };

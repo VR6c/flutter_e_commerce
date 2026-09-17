@@ -25,9 +25,9 @@ class DioClient {
         sendTimeout: defaultTimeout,
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
           'Accept-Encoding': 'gzip, deflate',
         },
+        contentType: 'application/json',
       ),
     );
 
@@ -56,8 +56,8 @@ class DioClient {
         sendTimeout: refreshTimeout,
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
         },
+        contentType: 'application/json',
       ),
     );
 

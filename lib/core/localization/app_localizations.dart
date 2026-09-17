@@ -236,6 +236,10 @@ class AppLocalizations {
       'exclusive_deals': 'Exclusive Deals',
       'account_details': 'Account Details',
       'change_avatar_photo': 'Change Avatar / Photo',
+      'uploading_avatar': 'Uploading avatar...',
+      'avatar_upload_success': 'Avatar updated successfully!',
+      'avatar_upload_failed': 'Failed to upload avatar',
+      'avatar_removed': 'Avatar removed',
       'email_address': 'Email address',
       'copy_email_success': 'Email address copied to clipboard',
       'payment_options': 'Payment Options',
@@ -464,6 +468,10 @@ class AppLocalizations {
       'exclusive_deals': 'ការផ្ដល់ជូនពិសេស',
       'account_details': 'ព័ត៌មានលម្អិតគណនី',
       'change_avatar_photo': 'ផ្លាស់ប្តូររូបភាពគណនី',
+      'uploading_avatar': 'កំពុងផ្ទុកឡើងរូបភាព...',
+      'avatar_upload_success': 'បានធ្វើបច្ចុប្បន្នភាពរូបថតគណនីជោគជ័យ!',
+      'avatar_upload_failed': 'បរាជ័យក្នុងការផ្ទុកឡើងរូបភាព',
+      'avatar_removed': 'បានលុបរូបភាពគណនីរួចរាល់',
       'email_address': 'អាសយដ្ឋានអ៊ីមែល',
       'copy_email_success': 'បានចម្លងអាសយដ្ឋានអ៊ីមែល',
       'payment_options': 'ជម្រើសទូទាត់ប្រាក់',
@@ -646,6 +654,10 @@ class AppLocalizations {
   String get exclusiveDeals => text('exclusive_deals');
   String get accountDetails => text('account_details');
   String get changeAvatarPhoto => text('change_avatar_photo');
+  String get uploadingAvatar => text('uploading_avatar');
+  String get avatarUploadSuccess => text('avatar_upload_success');
+  String get avatarUploadFailed => text('avatar_upload_failed');
+  String get avatarRemoved => text('avatar_removed');
   String get emailAddress => text('email_address');
   String get copyEmailSuccess => text('copy_email_success');
   String get paymentOptions => text('payment_options');

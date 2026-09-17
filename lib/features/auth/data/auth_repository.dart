@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
+
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../models/customer.dart';
 
 class AuthRepository {
@@ -11,7 +15,7 @@ class AuthRepository {
     required String password,
   }) async {
     final response = await _apiClient.post(
-      '/customer/login',
+      ApiEndpoints.login,
       data: {
         'email': email,
         'password': password,
@@ -27,7 +31,7 @@ class AuthRepository {
     required String passwordConfirmation,
   }) async {
     final response = await _apiClient.post(
-      '/customer/register',
+      ApiEndpoints.register,
       data: {
         'name': name,
         'email': email,
@@ -39,7 +43,7 @@ class AuthRepository {
   }
 
   Future<Customer> getProfile() async {
-    final response = await _apiClient.get('/customer/profile');
+    final response = await _apiClient.get(ApiEndpoints.profile);
     final data = response.data;
     if (data is Map<String, dynamic>) {
       final customerData = Map<String, dynamic>.from(
@@ -68,7 +72,7 @@ class AuthRepository {
       payload['new_password_confirmation'] = newPasswordConfirmation;
     }
     final response = await _apiClient.put(
-      '/customer/profile',
+      ApiEndpoints.profile,
       data: payload,
     );
     final data = response.data;
@@ -82,7 +86,48 @@ class AuthRepository {
     throw Exception('Invalid profile update response');
   }
 
+  Future<Customer> uploadAvatar({
+    required File imageFile,
+    String avatarType = 'photo',
+  }) async {
+    final fileName = imageFile.path.split(Platform.pathSeparator).last;
+    final formData = FormData.fromMap({
+      'avatar': await MultipartFile.fromFile(
+        imageFile.path,
+        filename: fileName,
+      ),
+      'avatar_type': avatarType,
+    });
+
+    final response = await _apiClient.post(
+      ApiEndpoints.avatar,
+      data: formData,
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      final customerData = Map<String, dynamic>.from(
+        (data['data'] ?? data['customer'] ?? data) as Map,
+      );
+      customerData['status'] ??= 'active';
+      return Customer.fromJson(customerData);
+    }
+    throw Exception('Invalid avatar upload response');
+  }
+
+  Future<Customer> deleteAvatar() async {
+    final response = await _apiClient.delete(ApiEndpoints.avatar);
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      final customerData = Map<String, dynamic>.from(
+        (data['data'] ?? data['customer'] ?? data) as Map,
+      );
+      customerData['status'] ??= 'active';
+      return Customer.fromJson(customerData);
+    }
+    throw Exception('Invalid delete avatar response');
+  }
+
   Future<void> logout() async {
-    await _apiClient.post('/customer/logout');
+    await _apiClient.post(ApiEndpoints.logout);
   }
 }

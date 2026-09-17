@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/api/providers.dart';
 import '../../../core/storage/secure_storage_service.dart';
@@ -111,6 +112,21 @@ class AuthState extends _$AuthState {
       newPassword: newPassword,
       newPasswordConfirmation: newPasswordConfirmation,
     );
+    state = AsyncValue.data(updatedCustomer);
+    return updatedCustomer;
+  }
+
+  Future<Customer> uploadAvatar(File imageFile, {String avatarType = 'photo'}) async {
+    final updatedCustomer = await _authRepository.uploadAvatar(
+      imageFile: imageFile,
+      avatarType: avatarType,
+    );
+    state = AsyncValue.data(updatedCustomer);
+    return updatedCustomer;
+  }
+
+  Future<Customer> deleteAvatar() async {
+    final updatedCustomer = await _authRepository.deleteAvatar();
     state = AsyncValue.data(updatedCustomer);
     return updatedCustomer;
   }

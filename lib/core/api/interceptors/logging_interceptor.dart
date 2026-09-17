@@ -36,6 +36,13 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
+      if (err.type == DioExceptionType.cancel) {
+        debugPrint(
+          '[DIO -- CANCELLED] ${err.requestOptions.method} ${err.requestOptions.uri} (${err.message ?? 'Cancelled'})',
+        );
+        super.onError(err, handler);
+        return;
+      }
       debugPrint(
         '[DIO !! ERROR] ${err.response?.statusCode ?? 'NO_STATUS'} ${err.requestOptions.method} ${err.requestOptions.uri}',
       );
