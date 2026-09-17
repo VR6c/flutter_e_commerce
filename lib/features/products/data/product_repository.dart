@@ -115,11 +115,16 @@ class ProductRepository {
     int? brandId,
     String? type,
     int limit = 10,
+    int? page,
+    int? perPage,
     int? excludeId,
   }) async {
+    final effectiveLimit = perPage ?? limit;
     final queryParams = <String, dynamic>{
-      'limit': limit,
+      'limit': effectiveLimit,
     };
+    if (page != null) queryParams['page'] = page;
+    if (perPage != null) queryParams['per_page'] = perPage;
     if (query != null && query.trim().isNotEmpty) {
       queryParams['q'] = query.trim();
     }
@@ -163,7 +168,7 @@ class ProductRepository {
         for (final p in rawProducts) {
           if (!products.any((existing) => existing.id == p.id)) {
             products.add(p);
-            if (products.length >= 8) break;
+            if (products.length >= effectiveLimit) break;
           }
         }
       }
@@ -217,10 +222,17 @@ class ProductRepository {
   Future<List<Product>> fetchRelatedProducts(
     String slug, {
     int limit = 10,
+    int? page,
+    int? perPage,
   }) async {
+    final effectiveLimit = perPage ?? limit;
+    final queryParams = <String, dynamic>{'limit': effectiveLimit};
+    if (page != null) queryParams['page'] = page;
+    if (perPage != null) queryParams['per_page'] = perPage;
+
     final response = await _apiClient.get(
       ApiEndpoints.productRelated(slug),
-      queryParameters: {'limit': limit},
+      queryParameters: queryParams,
     );
 
     final data = response.data;

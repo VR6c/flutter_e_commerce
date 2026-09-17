@@ -42,8 +42,11 @@ ProductSuggestionsResult generateLocalSuggestions(
 
   // Matching categories
   final matchingCategories = categories
-      .where((c) =>
-          c.name.toLowerCase().contains(q) || c.slug.toLowerCase().contains(q))
+      .where(
+        (c) =>
+            c.name.toLowerCase().contains(q) ||
+            c.slug.toLowerCase().contains(q),
+      )
       .take(4)
       .map((c) => SuggestionCategory(id: c.id, name: c.name, slug: c.slug))
       .toList();
@@ -66,8 +69,10 @@ ProductSuggestionsResult generateLocalSuggestions(
     }
   }
 
-  final matchingProducts =
-      [...prefixMatches, ...containsMatches].take(6).toList();
+  final matchingProducts = [
+    ...prefixMatches,
+    ...containsMatches,
+  ].take(6).toList();
 
   // Extract keywords
   final keywordSet = <String>{};
@@ -89,8 +94,8 @@ ProductSuggestionsResult generateLocalSuggestions(
 /// Keeps alive and leverages local cache + instant fallback from products catalog for 0ms render.
 final suggestedForYouProvider =
     AsyncNotifierProvider<SuggestedForYouNotifier, List<Product>>(
-  SuggestedForYouNotifier.new,
-);
+      SuggestedForYouNotifier.new,
+    );
 
 class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
   @override
@@ -117,7 +122,7 @@ class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
     try {
       final result = await repository.fetchSuggestions(
         type: 'recommended',
-        limit: 8,
+        limit: 10,
       );
       if (result.products.isNotEmpty) {
         await cacheService.saveCachedSuggestions(result.products);
@@ -138,7 +143,7 @@ class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
       try {
         final result = await repository.fetchSuggestions(
           type: 'recommended',
-          limit: 8,
+          limit: 10,
         );
         if (result.products.isNotEmpty) {
           state = AsyncData(result.products);
@@ -146,7 +151,8 @@ class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
         }
       } catch (e) {
         debugPrint(
-            'Background suggestions sync error (cached data preserved): $e');
+          'Background suggestions sync error (cached data preserved): $e',
+        );
       }
     });
   }
@@ -154,7 +160,7 @@ class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
   List<Product> _deriveRecommendedFromProducts(List<Product> products) {
     final sorted = List<Product>.from(products)
       ..sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
-    return sorted.take(8).toList();
+    return sorted.take(10).toList();
   }
 
   Future<void> refresh() async {
@@ -163,7 +169,7 @@ class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
     try {
       final result = await repository.fetchSuggestions(
         type: 'recommended',
-        limit: 8,
+        limit: 10,
       );
       if (result.products.isNotEmpty) {
         state = AsyncData(result.products);
@@ -178,48 +184,52 @@ class SuggestedForYouNotifier extends AsyncNotifier<List<Product>> {
 /// Live Search Autocomplete / Typeahead provider with query cache and 0ms fallback.
 final searchSuggestionsProvider =
     FutureProvider.family<ProductSuggestionsResult, String>((ref, query) async {
-  final trimmed = query.trim().toLowerCase();
+      final trimmed = query.trim().toLowerCase();
 
-  // 1. Instant hit from in-memory cache
-  if (_searchQueryCache.containsKey(trimmed)) {
-    return _searchQueryCache[trimmed]!;
-  }
+      // 1. Instant hit from in-memory cache
+      if (_searchQueryCache.containsKey(trimmed)) {
+        return _searchQueryCache[trimmed]!;
+      }
 
-  // 2. Immediate local fallback from memory or disk cache
-  final products = ref.read(productsProvider).valueOrNull ??
-      await ref.read(localCacheServiceProvider).getCachedProducts() ??
-      [];
-  final categories = ref.read(categoriesProvider).valueOrNull ??
-      await ref.read(localCacheServiceProvider).getCachedCategories() ??
-      [];
-  final local = generateLocalSuggestions(trimmed, products, categories);
-  if (local.isNotEmpty && !_searchQueryCache.containsKey(trimmed)) {
-    _searchQueryCache[trimmed] = local;
-  }
+      // 2. Immediate local fallback from memory or disk cache
+      final products =
+          ref.read(productsProvider).valueOrNull ??
+          await ref.read(localCacheServiceProvider).getCachedProducts() ??
+          [];
+      final categories =
+          ref.read(categoriesProvider).valueOrNull ??
+          await ref.read(localCacheServiceProvider).getCachedCategories() ??
+          [];
+      final local = generateLocalSuggestions(trimmed, products, categories);
+      if (local.isNotEmpty && !_searchQueryCache.containsKey(trimmed)) {
+        _searchQueryCache[trimmed] = local;
+      }
 
-  final repository = ref.watch(productRepositoryProvider);
+      final repository = ref.watch(productRepositoryProvider);
 
-  try {
-    final result = await repository.fetchSuggestions(
-      query: trimmed.isNotEmpty ? trimmed : null,
-      type: trimmed.isNotEmpty ? 'search' : 'trending',
-      limit: 10,
-    );
+      try {
+        final result = await repository.fetchSuggestions(
+          query: trimmed.isNotEmpty ? trimmed : null,
+          type: trimmed.isNotEmpty ? 'search' : 'trending',
+          limit: 10,
+        );
 
-    if (result.isNotEmpty) {
-      _searchQueryCache[trimmed] = result;
-      return result;
-    }
-  } catch (e) {
-    debugPrint('Search suggestions network notice: $e');
-  }
+        if (result.isNotEmpty) {
+          _searchQueryCache[trimmed] = result;
+          return result;
+        }
+      } catch (e) {
+        debugPrint('Search suggestions network notice: $e');
+      }
 
-  return _searchQueryCache[trimmed] ?? local;
-});
+      return _searchQueryCache[trimmed] ?? local;
+    });
 
 /// Contextual related product suggestions with in-memory caching and 0ms category fallback.
-final relatedProductsProvider =
-    FutureProvider.family<List<Product>, String>((ref, slug) async {
+final relatedProductsProvider = FutureProvider.family<List<Product>, String>((
+  ref,
+  slug,
+) async {
   if (slug.isEmpty) return const [];
 
   if (_relatedProductsCache.containsKey(slug)) {
@@ -227,15 +237,16 @@ final relatedProductsProvider =
   }
 
   // 1. Compute instant local same-category fallback from loaded or cached products
-  final allProducts = ref.read(productsProvider).valueOrNull ??
+  final allProducts =
+      ref.read(productsProvider).valueOrNull ??
       await ref.read(localCacheServiceProvider).getCachedProducts() ??
       [];
   final current = allProducts.where((p) => p.slug == slug).firstOrNull;
   final localFallback = current != null
       ? allProducts
-          .where((p) => p.id != current.id && p.category == current.category)
-          .take(8)
-          .toList()
+            .where((p) => p.id != current.id && p.category == current.category)
+            .take(10)
+            .toList()
       : <Product>[];
 
   if (localFallback.isNotEmpty && !_relatedProductsCache.containsKey(slug)) {
@@ -244,7 +255,7 @@ final relatedProductsProvider =
 
   final repository = ref.watch(productRepositoryProvider);
   try {
-    final related = await repository.fetchRelatedProducts(slug, limit: 8);
+    final related = await repository.fetchRelatedProducts(slug, limit: 10);
     if (related.isNotEmpty) {
       _relatedProductsCache[slug] = related;
       return related;

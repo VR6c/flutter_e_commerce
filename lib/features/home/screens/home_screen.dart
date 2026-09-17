@@ -1056,7 +1056,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 94,
+                    height: 98,
                     child: Consumer(
                       builder: (context, ref, _) {
                         final categoriesState = ref.watch(categoriesProvider);
@@ -1100,93 +1100,96 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           }
                                           _onCategorySelected(null);
                                         },
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            AnimatedContainer(
-                                              duration: const Duration(
-                                                milliseconds: 200,
-                                              ),
-                                              width: 58,
-                                              height: 58,
-                                              decoration: BoxDecoration(
-                                                gradient: isAllSelected
-                                                    ? LinearGradient(
-                                                        begin: Alignment.topLeft,
-                                                        end:
-                                                            Alignment.bottomRight,
-                                                        colors: [
-                                                          theme.colorScheme
-                                                              .primary,
-                                                          const Color(0xFF10B981),
-                                                        ],
-                                                      )
-                                                    : null,
-                                                color: isAllSelected
-                                                    ? null
-                                                    : theme.cardColor,
-                                                borderRadius:
-                                                    BorderRadius.circular(18),
-                                                border: Border.all(
-                                                  color: isAllSelected
-                                                      ? Colors.transparent
-                                                      : (isDark
-                                                          ? const Color(
-                                                              0xFF1E293B,
-                                                            )
-                                                          : const Color(
-                                                              0xFFE2E8F0,
-                                                            )),
-                                                  width: 1.2,
+                                        child: SizedBox(
+                                          width: 68,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              AnimatedContainer(
+                                                duration: const Duration(
+                                                  milliseconds: 200,
                                                 ),
-                                                boxShadow: [
-                                                  BoxShadow(
+                                                width: 60,
+                                                height: 60,
+                                                decoration: BoxDecoration(
+                                                  gradient: isAllSelected
+                                                      ? LinearGradient(
+                                                          begin: Alignment.topLeft,
+                                                          end:
+                                                              Alignment.bottomRight,
+                                                          colors: [
+                                                            theme.colorScheme
+                                                                .primary,
+                                                            const Color(0xFF10B981),
+                                                          ],
+                                                        )
+                                                      : null,
+                                                  color: isAllSelected
+                                                      ? null
+                                                      : theme.cardColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(18),
+                                                  border: Border.all(
                                                     color: isAllSelected
-                                                        ? theme
-                                                            .colorScheme
-                                                            .primary
-                                                            .withValues(
-                                                              alpha: 0.35,
-                                                            )
-                                                        : Colors.black.withValues(
-                                                            alpha: isDark
-                                                                ? 0.15
-                                                                : 0.02,
-                                                          ),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
+                                                        ? Colors.transparent
+                                                        : (isDark
+                                                            ? const Color(
+                                                                0xFF1E293B,
+                                                              )
+                                                            : const Color(
+                                                                0xFFE2E8F0,
+                                                              )),
+                                                    width: 1.2,
                                                   ),
-                                                ],
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: isAllSelected
+                                                          ? theme
+                                                              .colorScheme
+                                                              .primary
+                                                              .withValues(
+                                                                alpha: 0.35,
+                                                              )
+                                                          : Colors.black.withValues(
+                                                              alpha: isDark
+                                                                  ? 0.15
+                                                                  : 0.02,
+                                                            ),
+                                                      blurRadius: 8,
+                                                      offset: const Offset(0, 2),
+                                                    ),
+                                                  ],
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Icon(
+                                                  Icons.grid_view_rounded,
+                                                  color: isAllSelected
+                                                      ? Colors.white
+                                                      : theme.colorScheme.primary,
+                                                  size: 26,
+                                                ),
                                               ),
-                                              alignment: Alignment.center,
-                                              child: Icon(
-                                                Icons.grid_view_rounded,
-                                                color: isAllSelected
-                                                    ? Colors.white
-                                                    : theme.colorScheme.primary,
-                                                size: 24,
+                                              const SizedBox(height: 7),
+                                              Text(
+                                                l10n.allItems,
+                                                style: TextStyle(
+                                                  fontFamily: AppTheme.fontFamily,
+                                                  color: isAllSelected
+                                                      ? theme.colorScheme.primary
+                                                      : (isDark
+                                                          ? Colors.grey[300]
+                                                          : const Color(
+                                                              0xFF334155,
+                                                            )),
+                                                  fontWeight: isAllSelected
+                                                      ? FontWeight.w700
+                                                      : FontWeight.w600,
+                                                  fontSize: 12,
+                                                  letterSpacing: 0,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 7),
-                                            Text(
-                                              l10n.allItems,
-                                              style: TextStyle(
-                                                fontFamily: AppTheme.fontFamily,
-                                                color: isAllSelected
-                                                    ? theme.colorScheme.primary
-                                                    : (isDark
-                                                        ? Colors.grey[300]
-                                                        : const Color(
-                                                            0xFF334155,
-                                                          )),
-                                                fontWeight: isAllSelected
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w600,
-                                                fontSize: 12,
-                                                letterSpacing: 0,
-                                              ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -1219,7 +1222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         );
                                       },
                                       child: SizedBox(
-                                        width: 66,
+                                        width: 68,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
@@ -1227,17 +1230,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               duration: const Duration(
                                                 milliseconds: 200,
                                               ),
-                                              width: 58,
-                                              height: 58,
+                                              width: 60,
+                                              height: 60,
                                               decoration: BoxDecoration(
-                                                color: isSelected
-                                                    ? theme.colorScheme.primary
-                                                        .withValues(alpha: 0.12)
-                                                    : (isDark
-                                                        ? const Color(0xFF131D38)
-                                                        : const Color(
-                                                            0xFFF8FAFC,
-                                                          )),
+                                                color: isDark
+                                                    ? const Color(0xFF131D38)
+                                                    : const Color(0xFFF8FAFC),
                                                 borderRadius:
                                                     BorderRadius.circular(18),
                                                 border: Border.all(
@@ -1250,7 +1248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                           : const Color(
                                                               0xFFE2E8F0,
                                                             )),
-                                                  width: isSelected ? 2.0 : 1.0,
+                                                  width: isSelected ? 2.5 : 1.2,
                                                 ),
                                                 boxShadow: [
                                                   BoxShadow(
@@ -1259,7 +1257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                             .colorScheme
                                                             .primary
                                                             .withValues(
-                                                              alpha: 0.25,
+                                                              alpha: 0.35,
                                                             )
                                                         : Colors.black.withValues(
                                                             alpha: isDark
@@ -1271,30 +1269,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              padding: const EdgeInsets.all(9),
-                                              alignment: Alignment.center,
-                                              child: imageUrl.isNotEmpty
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: imageUrl,
-                                                      fit: BoxFit.contain,
-                                                      memCacheWidth: 100,
-                                                      memCacheHeight: 100,
-                                                      errorWidget: (_, _, _) =>
-                                                          Icon(
-                                                        Icons.eco_rounded,
-                                                        size: 24,
-                                                        color: theme
-                                                            .colorScheme
-                                                            .primary,
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                child: imageUrl.isNotEmpty
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: imageUrl,
+                                                        fit: BoxFit.cover,
+                                                        memCacheWidth: 200,
+                                                        memCacheHeight: 200,
+                                                        placeholder: (context, url) =>
+                                                            Center(
+                                                          child: Container(
+                                                            color: isDark
+                                                                ? const Color(
+                                                                    0xFF1E293B,
+                                                                  )
+                                                                : const Color(
+                                                                    0xFFF1F5F9,
+                                                                  ),
+                                                          ),
+                                                        ),
+                                                        errorWidget:
+                                                            (_, _, _) => Center(
+                                                          child: Icon(
+                                                            Icons.eco_rounded,
+                                                            size: 26,
+                                                            color: theme
+                                                                .colorScheme
+                                                                .primary,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : Center(
+                                                        child: Icon(
+                                                          Icons.eco_rounded,
+                                                          size: 26,
+                                                          color: theme
+                                                              .colorScheme
+                                                              .primary,
+                                                        ),
                                                       ),
-                                                    )
-                                                  : Icon(
-                                                      Icons.eco_rounded,
-                                                      size: 24,
-                                                      color: theme
-                                                          .colorScheme
-                                                          .primary,
-                                                    ),
+                                              ),
                                             ),
                                             const SizedBox(height: 7),
                                             Text(
@@ -1433,7 +1449,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       crossAxisCount: 2,
                       mainAxisSpacing: 14,
                       crossAxisSpacing: 14,
-                      childAspectRatio: 0.72,
+                      childAspectRatio: 0.68,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => const ProductCardShimmer(),
@@ -1488,7 +1504,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             crossAxisCount: 2,
                             mainAxisSpacing: 14,
                             crossAxisSpacing: 14,
-                            childAspectRatio: 0.72,
+                            childAspectRatio: 0.68,
                           ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) => const ProductCardShimmer(),
@@ -1549,7 +1565,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.72,
+                          childAspectRatio: 0.68,
                         ),
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final product = filtered[index];
@@ -1617,7 +1633,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 14,
                         crossAxisSpacing: 14,
-                        childAspectRatio: 0.72,
+                        childAspectRatio: 0.68,
                       ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final product = filtered[index];

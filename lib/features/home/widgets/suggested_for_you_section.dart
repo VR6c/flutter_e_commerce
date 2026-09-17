@@ -15,7 +15,7 @@ final topRatedFallbackProvider = Provider<List<Product>>((ref) {
   if (allProducts.isEmpty) return const [];
   final sorted = List<Product>.from(allProducts)
     ..sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
-  return sorted.take(8).toList();
+  return sorted.take(10).toList();
 });
 
 class SuggestedForYouSection extends ConsumerWidget {

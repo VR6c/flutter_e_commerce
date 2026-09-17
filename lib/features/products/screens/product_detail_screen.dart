@@ -725,43 +725,60 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Widget _buildImageCard(Color imageBg, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
-      height: 280,
+      height: 340,
       decoration: BoxDecoration(
         color: imageBg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: CachedNetworkImage(
-            imageUrl: widget.product.thumbnail,
-            fit: BoxFit.contain,
-            memCacheWidth: 600,
-            memCacheHeight: 600,
-            errorWidget: (context, url, error) {
-              final fallback = getFallbackImageUrl(
-                slug: widget.product.slug,
-                title: widget.product.name,
-                category: widget.product.category,
-              );
-              if (fallback.isNotEmpty) {
-                return CachedNetworkImage(
-                  imageUrl: fallback,
-                  fit: BoxFit.contain,
-                  memCacheWidth: 600,
-                  memCacheHeight: 600,
-                );
-              }
-              return Icon(
-                Icons.eco_rounded,
-                size: 80,
-                color: theme.colorScheme.primary.withValues(alpha: 0.5),
-              );
-            },
+        borderRadius: BorderRadius.circular(24),
+        child: CachedNetworkImage(
+          imageUrl: widget.product.thumbnail,
+          fit: BoxFit.cover,
+          memCacheWidth: 800,
+          memCacheHeight: 800,
+          fadeInDuration: const Duration(milliseconds: 150),
+          placeholder: (context, url) => Center(
+            child: Container(
+              color: imageBg,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           ),
+          errorWidget: (context, url, error) {
+            final fallback = getFallbackImageUrl(
+              slug: widget.product.slug,
+              title: widget.product.name,
+              category: widget.product.category,
+            );
+            if (fallback.isNotEmpty) {
+              return CachedNetworkImage(
+                imageUrl: fallback,
+                fit: BoxFit.cover,
+                memCacheWidth: 800,
+                memCacheHeight: 800,
+              );
+            }
+            return Icon(
+              Icons.eco_rounded,
+              size: 80,
+              color: theme.colorScheme.primary.withValues(alpha: 0.5),
+            );
+          },
         ),
       ),
     );

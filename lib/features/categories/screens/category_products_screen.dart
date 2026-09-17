@@ -514,7 +514,7 @@ class _CategoryProductsScreenState
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.72,
+                          childAspectRatio: 0.68,
                         ),
                     itemCount: 6,
                     itemBuilder: (context, index) => const ProductCardShimmer(),
@@ -589,7 +589,7 @@ class _CategoryProductsScreenState
                                         crossAxisCount: 2,
                                         mainAxisSpacing: 14,
                                         crossAxisSpacing: 14,
-                                        childAspectRatio: 0.72,
+                                        childAspectRatio: 0.68,
                                       ),
                                   delegate: SliverChildBuilderDelegate(
                                     (context, index) {

@@ -18,7 +18,7 @@ final relatedFallbackProvider =
   if (current == null) return const [];
   return allProducts
       .where((p) => p.id != current.id && p.category == current.category)
-      .take(8)
+      .take(10)
       .toList();
 });
 

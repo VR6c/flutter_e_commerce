@@ -142,6 +142,37 @@ void main() {
       expect(result.keywords, isEmpty);
       expect(result.categories, isEmpty);
     });
+
+    test('supports page and perPage pagination for suggestions', () async {
+      when(() => mockApiClient.get(
+            ApiEndpoints.productSuggestions,
+            queryParameters: {
+              'limit': 10,
+              'page': 2,
+              'per_page': 10,
+              'type': 'recommended',
+            },
+          )).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: ApiEndpoints.productSuggestions),
+          data: {
+            'status': true,
+            'data': [],
+            'keywords': [],
+            'categories': [],
+          },
+          statusCode: 200,
+        ),
+      );
+
+      final result = await repository.fetchSuggestions(
+        type: 'recommended',
+        page: 2,
+        perPage: 10,
+      );
+
+      expect(result.isEmpty, isTrue);
+    });
   });
 
   group('ProductRepository.fetchRelatedProducts', () {
@@ -203,6 +234,26 @@ void main() {
       );
 
       final related = await repository.fetchRelatedProducts(slug, limit: 8);
+      expect(related, isEmpty);
+    });
+
+    test('defaults to limit: 10 and supports page parameter', () async {
+      const slug = 'apple-iphone-15-pro';
+      when(() => mockApiClient.get(
+            ApiEndpoints.productRelated(slug),
+            queryParameters: {'limit': 10, 'page': 2},
+          )).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: ApiEndpoints.productRelated(slug)),
+          data: {
+            'status': true,
+            'data': [],
+          },
+          statusCode: 200,
+        ),
+      );
+
+      final related = await repository.fetchRelatedProducts(slug, page: 2);
       expect(related, isEmpty);
     });
   });
