@@ -28,9 +28,10 @@ Future<void> _loadGoogleSansFont() async {
   }
 }
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await _loadGoogleSansFont();
+  // Warm up Google Sans fonts asynchronously in the background without blocking initial paint
+  _loadGoogleSansFont();
   runApp(const ProviderScope(child: MyApp()));
 }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_image_cache.dart';
 import '../../../core/utils/image_url_formatter.dart';
 import '../../../shared/widgets/cart_icon_badge.dart';
 import '../../cart/providers/cart_provider.dart';
@@ -28,6 +30,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   String? _selectedColor;
   String? _selectedSize;
 
+  late final List<String> _allColors;
+  List<String> _availableSizes = [];
+  ProductVariant? _selectedVariant;
+  double _displayPrice = 0.0;
+  double? _originalPrice;
+  bool _hasDiscount = false;
+  int? _discountPercentage;
+  bool _inStock = true;
+
   String? _attr(ProductVariant v, String attrName) {
     try {
       return v.attributes
@@ -40,7 +51,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   List<ProductVariant> get _variants => widget.product.variants;
 
-  List<String> get _allColors {
+  List<String> _computeAllColors() {
     final seen = <String>{};
     return _variants
         .map((v) => _attr(v, 'Color') ?? '')
@@ -48,7 +59,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         .toList();
   }
 
-  List<String> get _availableSizes {
+  List<String> _computeAvailableSizes() {
     final seen = <String>{};
     final source = _selectedColor == null
         ? _variants
@@ -59,7 +70,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         .toList();
   }
 
-  ProductVariant? get _selectedVariant {
+  ProductVariant? _computeSelectedVariant() {
     if (_variants.isEmpty) return null;
     if (_selectedColor == null && _selectedSize == null) {
       return _variants.firstWhere(
@@ -78,42 +89,43 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
   }
 
-  double get _displayPrice =>
-      _selectedVariant?.discountPrice ??
-      _selectedVariant?.price ??
-      widget.product.effectivePrice;
+  void _recomputeDerivedState() {
+    _availableSizes = _computeAvailableSizes();
+    _selectedVariant = _computeSelectedVariant();
 
-  double? get _originalPrice {
+    _displayPrice = _selectedVariant?.discountPrice ??
+        _selectedVariant?.price ??
+        widget.product.effectivePrice;
+
     final v = _selectedVariant;
     if (v != null &&
         v.discountPrice != null &&
         v.discountPrice! > 0 &&
         v.price > v.discountPrice!) {
-      return v.price;
-    }
-    if (widget.product.originalPrice != null &&
+      _originalPrice = v.price;
+    } else if (widget.product.originalPrice != null &&
         widget.product.originalPrice! > _displayPrice) {
-      return widget.product.originalPrice;
+      _originalPrice = widget.product.originalPrice;
+    } else {
+      _originalPrice = null;
     }
-    return null;
-  }
 
-  bool get _hasDiscount =>
-      _originalPrice != null && _originalPrice! > _displayPrice;
-
-  int? get _discountPercentage {
-    if (!_hasDiscount || _originalPrice == null || _originalPrice! <= 0) {
-      return null;
+    _hasDiscount = _originalPrice != null && _originalPrice! > _displayPrice;
+    if (_hasDiscount && _originalPrice != null && _originalPrice! > 0) {
+      final diff = _originalPrice! - _displayPrice;
+      _discountPercentage = ((diff / _originalPrice!) * 100).round();
+    } else {
+      _discountPercentage = null;
     }
-    final diff = _originalPrice! - _displayPrice;
-    return ((diff / _originalPrice!) * 100).round();
-  }
 
-  bool get _inStock => _variants.isEmpty || (_selectedVariant?.stock ?? 1) > 0;
+    _inStock = _variants.isEmpty || (_selectedVariant?.stock ?? 1) > 0;
+  }
 
   @override
   void initState() {
     super.initState();
+    _allColors = _computeAllColors();
+
     // Default to the primary variant's attributes if available
     final primary = widget.product.primaryVariant;
     if (primary != null) {
@@ -121,18 +133,43 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       if (color != null && _allColors.contains(color)) {
         _selectedColor = color;
       }
-      final size = _attr(primary, 'Size');
-      if (size != null && _availableSizes.contains(size)) {
-        _selectedSize = size;
-      }
     }
     if (_selectedColor == null && _allColors.isNotEmpty) {
       _selectedColor = _allColors.first;
     }
-    final sizes = _availableSizes;
+
+    final sizes = _computeAvailableSizes();
+    if (primary != null) {
+      final size = _attr(primary, 'Size');
+      if (size != null && sizes.contains(size)) {
+        _selectedSize = size;
+      }
+    }
     if (_selectedSize == null && sizes.isNotEmpty) {
       _selectedSize = sizes.first;
     }
+
+    _recomputeDerivedState();
+  }
+
+  void _onColorSelected(String color) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedColor = color;
+      final available = _computeAvailableSizes();
+      if (_selectedSize == null || !available.contains(_selectedSize)) {
+        _selectedSize = available.isNotEmpty ? available.first : null;
+      }
+      _recomputeDerivedState();
+    });
+  }
+
+  void _onSizeSelected(String size) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedSize = size;
+      _recomputeDerivedState();
+    });
   }
 
   @override
@@ -515,26 +552,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               alpha: 0.15,
                             ),
                             onSelected: (val) {
-                              if (val) {
-                                setState(() {
-                                  _selectedColor = color;
-                                  final newSizes = _variants
-                                      .where((v) => _attr(v, 'Color') == color)
-                                      .map((v) => _attr(v, 'Size') ?? '')
-                                      .where((s) => s.isNotEmpty)
-                                      .toSet()
-                                      .toList();
-                                  if (_selectedSize != null &&
-                                      !newSizes.contains(_selectedSize)) {
-                                    _selectedSize = newSizes.isNotEmpty
-                                        ? newSizes.first
-                                        : null;
-                                  } else if (_selectedSize == null &&
-                                      newSizes.isNotEmpty) {
-                                    _selectedSize = newSizes.first;
-                                  }
-                                });
-                              }
+                              if (val) _onColorSelected(color);
                             },
                           );
                         }).toList(),
@@ -575,7 +593,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               alpha: 0.15,
                             ),
                             onSelected: (val) {
-                              if (val) setState(() => _selectedSize = size);
+                              if (val) _onSizeSelected(size);
                             },
                           );
                         }).toList(),
@@ -749,8 +767,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         child: CachedNetworkImage(
           imageUrl: widget.product.thumbnail,
           fit: BoxFit.cover,
-          memCacheWidth: 800,
-          memCacheHeight: 800,
+          memCacheWidth: AppImageCache.detailWidth,
           fadeInDuration: const Duration(milliseconds: 150),
           placeholder: (context, url) => Center(
             child: Container(
@@ -769,8 +786,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               return CachedNetworkImage(
                 imageUrl: fallback,
                 fit: BoxFit.cover,
-                memCacheWidth: 800,
-                memCacheHeight: 800,
+                memCacheWidth: AppImageCache.detailWidth,
               );
             }
             return Icon(

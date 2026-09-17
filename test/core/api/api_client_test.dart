@@ -73,6 +73,7 @@ void main() {
     mockAdapter = MockHttpAdapter();
     dio.httpClientAdapter = mockAdapter;
     mockStorageService = MockSecureStorageService();
+    when(() => mockStorageService.getToken()).thenAnswer((_) async => null);
     apiClient = ApiClient(dio, mockStorageService);
   });
 

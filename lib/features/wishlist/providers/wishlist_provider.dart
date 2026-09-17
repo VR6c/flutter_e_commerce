@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_endpoints.dart';
@@ -12,14 +13,22 @@ String _wishlistKey(int userId) => 'wishlist_items_$userId';
 
 @riverpod
 class Wishlist extends _$Wishlist {
+  CancelToken? _syncCancelToken;
+
   @override
   List<Product> build() {
     // Watch auth state — rebuild (and clear) whenever the user changes
     final authAsync = ref.watch(authStateProvider);
     final customer = authAsync.valueOrNull;
 
+    // Clean up any in-flight request on provider rebuild or dispose
+    ref.onDispose(() {
+      _syncCancelToken?.cancel('Wishlist provider disposed');
+    });
+
     if (customer == null) {
-      // Not signed in — always return empty, do not load persisted data
+      // Not signed in / logged out — abort active sync and return empty
+      _syncCancelToken?.cancel('User logged out');
       return [];
     }
 
@@ -35,9 +44,23 @@ class Wishlist extends _$Wishlist {
   // ── Remote API Sync ────────────────────────────────────────────────────────
 
   Future<void> _syncWithApi(int userId) async {
+    _syncCancelToken?.cancel('New sync started');
+    final cancelToken = CancelToken();
+    _syncCancelToken = cancelToken;
+
     try {
       final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.get<Map<String, dynamic>>(ApiEndpoints.wishlist);
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.wishlist,
+        cancelToken: cancelToken,
+      );
+
+      // Verify the user is still authenticated and matches the requested user
+      final currentCustomer = ref.read(authStateProvider).valueOrNull;
+      if (currentCustomer == null || currentCustomer.id != userId) {
+        return;
+      }
+
       final data = response.data;
 
       if (data != null && data['data'] is List) {
@@ -49,6 +72,8 @@ class Wishlist extends _$Wishlist {
         state = serverProducts;
         await _persistWishlist(serverProducts);
       }
+    } on DioException catch (e) {
+      if (CancelToken.isCancel(e)) return;
     } catch (_) {
       // Offline or network error: retain local cached state silently
     }
@@ -135,6 +160,7 @@ class Wishlist extends _$Wishlist {
 
   void clear() {
     if (ref.read(authStateProvider).valueOrNull == null) return;
+    _syncCancelToken?.cancel('Wishlist cleared');
     final currentIds = state.map((p) => p.id).toList();
     state = [];
     _persistWishlist([]);

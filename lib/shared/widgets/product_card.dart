@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/router/app_routes.dart';
+import '../../core/utils/app_image_cache.dart';
+import '../../core/utils/app_snackbar.dart';
 import '../../core/utils/image_url_formatter.dart';
 import '../../features/products/models/product.dart';
 import '../../features/auth/providers/auth_provider.dart';
@@ -109,8 +111,7 @@ class ProductCard extends ConsumerWidget {
                             child: CachedNetworkImage(
                               imageUrl: product.thumbnail,
                               fit: imageFit,
-                              memCacheWidth: 500,
-                              memCacheHeight: 500,
+                              memCacheWidth: AppImageCache.cardWidth,
                               fadeInDuration: const Duration(
                                 milliseconds: 120,
                               ),
@@ -140,8 +141,7 @@ class ProductCard extends ConsumerWidget {
                                   return CachedNetworkImage(
                                     imageUrl: fallback,
                                     fit: imageFit,
-                                    memCacheWidth: 500,
-                                    memCacheHeight: 500,
+                                    memCacheWidth: AppImageCache.cardWidth,
                                     errorWidget: (ctx, _, _) => Center(
                                       child: Icon(
                                         Icons.eco_rounded,
@@ -382,38 +382,11 @@ class ProductCard extends ConsumerWidget {
                                       variantName: pv?.name,
                                       unitPrice: product.effectivePrice,
                                     );
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.check_circle_rounded,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            context.l10n.isKhmer
-                                                ? 'បានបន្ថែម ${product.name} ទៅកន្ត្រក'
-                                                : 'Added ${product.name} to cart',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    duration: const Duration(seconds: 2),
-                                    backgroundColor: theme.colorScheme.primary,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
+                                AppSnackBar.showSuccess(
+                                  context,
+                                  context.l10n.isKhmer
+                                      ? 'បានបន្ថែម ${product.name} ទៅកន្ត្រក'
+                                      : 'Added ${product.name} to cart',
                                 );
                               },
                               child: Container(
