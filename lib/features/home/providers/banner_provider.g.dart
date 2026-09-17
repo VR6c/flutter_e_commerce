@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'banner_provider.dart';
-
-// **************************************************************************
-// RiverpodGenerator
-// **************************************************************************
 
 String _$bannersHash() => r'f1c50486adb437ca990848f8a618d3b43f840309';
 

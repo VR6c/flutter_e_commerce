@@ -1,5 +1,3 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'social_media_link.dart';
 
 // **************************************************************************

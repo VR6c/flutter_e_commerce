@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'banner.dart';
-
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
 
 _$BannerModelImpl _$$BannerModelImplFromJson(Map<String, dynamic> json) =>
     _$BannerModelImpl(

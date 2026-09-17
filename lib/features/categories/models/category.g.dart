@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'category.dart';
-
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
 
 _$CategoryChildImpl _$$CategoryChildImplFromJson(Map<String, dynamic> json) =>
     _$CategoryChildImpl(

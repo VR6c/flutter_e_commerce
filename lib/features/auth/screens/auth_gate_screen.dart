@@ -3,11 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 
-/// Auth Gate widget shown as a modal bottom sheet when an unauthenticated
-/// guest taps "Proceed to Checkout". Offers three paths:
-///   1. Login   — navigates to /login with returnTo
-///   2. Sign Up — navigates to /register with returnTo
-///   3. Guest   — proceeds straight to returnTo (checkout) without auth
 class AuthGateScreen extends StatelessWidget {
   /// The route to navigate to after the user chooses an option.
   final String returnTo;

@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'category_provider.dart';
-
-// **************************************************************************
-// RiverpodGenerator
-// **************************************************************************
 
 String _$categoriesHash() => r'b5ab535144e7cbf151abb7fd9f71f2941704252f';
 

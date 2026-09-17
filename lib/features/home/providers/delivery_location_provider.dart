@@ -33,13 +33,13 @@ class DeliveryLocationState {
 
 class DeliveryLocationNotifier extends StateNotifier<DeliveryLocationState> {
   DeliveryLocationNotifier()
-      : super(
-          const DeliveryLocationState(
-            savedLocations: DeliveryLocation.defaultLocations,
-            selectedLocation: DeliveryLocation.defaultHome,
-            isLoading: true,
-          ),
-        ) {
+    : super(
+        const DeliveryLocationState(
+          savedLocations: DeliveryLocation.defaultLocations,
+          selectedLocation: DeliveryLocation.defaultHome,
+          isLoading: true,
+        ),
+      ) {
     _loadFromPrefs();
   }
 
@@ -49,14 +49,20 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocationState> {
       final rawList = prefs.getString(_kSavedDeliveryLocationsKey);
       final selectedId = prefs.getString(_kSelectedDeliveryLocationIdKey);
 
-      List<DeliveryLocation> locations = List.from(DeliveryLocation.defaultLocations);
+      List<DeliveryLocation> locations = List.from(
+        DeliveryLocation.defaultLocations,
+      );
 
       if (rawList != null && rawList.isNotEmpty) {
         final List<dynamic> decoded = jsonDecode(rawList) as List<dynamic>;
         final loaded = decoded
             .map((e) => DeliveryLocation.fromJson(e as Map<String, dynamic>))
             // Purge any old "Current Location" or "Toul Kork" entries
-            .where((loc) => !loc.id.contains('current') && !loc.street.toLowerCase().contains('toul kork'))
+            .where(
+              (loc) =>
+                  !loc.id.contains('current') &&
+                  !loc.street.toLowerCase().contains('toul kork'),
+            )
             .toList();
         if (loaded.isNotEmpty) {
           locations = loaded;
@@ -67,7 +73,10 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocationState> {
       if (selectedId != null && !selectedId.contains('current')) {
         selected = locations.firstWhere(
           (loc) => loc.id == selectedId,
-          orElse: () => locations.firstWhere((l) => l.isDefault, orElse: () => locations.first),
+          orElse: () => locations.firstWhere(
+            (l) => l.isDefault,
+            orElse: () => locations.first,
+          ),
         );
       } else {
         selected = locations.firstWhere(
@@ -108,10 +117,7 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocationState> {
       location,
     ];
 
-    state = state.copyWith(
-      savedLocations: updated,
-      selectedLocation: location,
-    );
+    state = state.copyWith(savedLocations: updated, selectedLocation: location);
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -162,5 +168,5 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocationState> {
 
 final deliveryLocationProvider =
     StateNotifierProvider<DeliveryLocationNotifier, DeliveryLocationState>(
-  (ref) => DeliveryLocationNotifier(),
-);
+      (ref) => DeliveryLocationNotifier(),
+    );

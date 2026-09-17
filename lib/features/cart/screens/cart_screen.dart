@@ -239,7 +239,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                                 .shortDescription
                                                 .isNotEmpty
                                             ? item.product.shortDescription
-                                            : l10n.translateCategory(item.product.category)),
+                                            : l10n.translateCategory(
+                                                item.product.category,
+                                              )),
                                   style: TextStyle(
                                     fontFamily: AppTheme.fontFamily,
                                     color: isDark

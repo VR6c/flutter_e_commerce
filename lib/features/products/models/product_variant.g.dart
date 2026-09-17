@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'product_variant.dart';
-
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
 
 _$ProductVariantImpl _$$ProductVariantImplFromJson(Map<String, dynamic> json) =>
     _$ProductVariantImpl(

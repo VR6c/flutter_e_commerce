@@ -3,12 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/splash_provider.dart';
 import '../screens/splash_screen.dart';
 
-/// Wraps the root application with a high-performance, seamless Splash overlay.
-///
-/// On cold boot, [SplashScreen] is rendered on top while the home route
-/// initializes in the background. When startup completes, the splash layer
-/// smoothly dissolves and scales out over 600ms, completely avoiding route
-/// swaps, blank frames, or jank.
 class SplashWrapper extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -40,17 +34,11 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
     );
 
     _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: Curves.easeInOutCubic,
-      ),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOutCubic),
     );
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: Curves.easeInOutCubic,
-      ),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOutCubic),
     );
 
     _fadeController.addStatusListener((status) {

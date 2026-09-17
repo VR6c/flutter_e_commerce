@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'orders_provider.dart';
-
-// **************************************************************************
-// RiverpodGenerator
-// **************************************************************************
 
 String _$ordersHash() => r'd65ce55fa806a5c0e500c09a7ad3689b66e90bb5';
 

@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'variant_attribute.dart';
-
-// **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
 
 _$VariantAttributeImpl _$$VariantAttributeImplFromJson(
   Map<String, dynamic> json,

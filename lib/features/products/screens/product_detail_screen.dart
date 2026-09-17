@@ -598,7 +598,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ? widget.product.shortDescription
                           : (context.l10n.isKhmer
                                 ? 'ទំនិញគុណភាពខ្ពស់ ត្រូវបានជ្រើសរើសយ៉ាងយកចិត្តទុកដាក់ និងដឹកជញ្ជូនដល់គេហដ្ឋានរបស់អ្នកដោយផ្ទាល់ ធានាគុណភាពល្អ ១០០%។'
-                                : 'Carefully selected fresh premium produce delivered straight to your door. Hand-picked for the highest quality and freshness guaranteed.'),
+                                : 'High quality product are carefully selected and delivered straight to your door. Hand-picked for the best quality and freshness guaranteed.'),
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 13.5,
