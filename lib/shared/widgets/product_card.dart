@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/services.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +8,6 @@ import '../../core/theme/app_theme.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/utils/app_image_cache.dart';
 import '../../core/utils/app_snackbar.dart';
-import '../../core/utils/image_url_formatter.dart';
 import '../../features/products/models/product.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/cart/providers/cart_provider.dart';
@@ -33,13 +32,7 @@ class ProductCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final cardBg = isDark ? const Color(0xFF131D38) : Colors.white;
-    final imageBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F9F5);
-    final borderColor = isDark
-        ? const Color(0xFF1E293B)
-        : const Color(0xFFF1F5F9);
+    final isDark = context.isDark;
 
     final effectiveOnTap = onTap ??
         () {
@@ -55,9 +48,9 @@ class ProductCard extends ConsumerWidget {
     return RepaintBoundary(
       child: Container(
         decoration: BoxDecoration(
-          color: cardBg,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor, width: 1.2),
+          border: Border.all(color: context.borderSubtle, width: 1.2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -88,7 +81,7 @@ class ProductCard extends ConsumerWidget {
                               width: heroSize.width,
                               height: heroSize.height,
                               decoration: BoxDecoration(
-                                color: imageBg.withValues(alpha: 0.6),
+                                color: context.imageBg.withValues(alpha: 0.6),
                               ),
                             );
                           },
@@ -107,123 +100,80 @@ class ProductCard extends ConsumerWidget {
                           child: Container(
                             width: double.infinity,
                             height: double.infinity,
-                            color: imageBg,
-                            child: CachedNetworkImage(
+                            color: context.imageBg,
+                            child: AppCachedImage(
                               imageUrl: product.thumbnail,
                               fit: imageFit,
                               memCacheWidth: AppImageCache.cardWidth,
-                              fadeInDuration: const Duration(
-                                milliseconds: 120,
-                              ),
-                              placeholder: (context, url) => Center(
-                                child: Shimmer.fromColors(
-                                  baseColor: isDark
-                                      ? const Color(0xFF1E293B)
-                                      : const Color(0xFFE2E8F0),
-                                  highlightColor: isDark
-                                      ? const Color(0xFF334155)
-                                      : const Color(0xFFF8FAFC),
-                                  child: Container(
-                                    color: Colors.white,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              ),
-                              errorWidget: (context, url, error) {
-                                final fallback = getFallbackImageUrl(
-                                  slug: product.slug,
-                                  title: product.name,
-                                  category: product.category,
+                              fallbackSlug: product.slug,
+                              fallbackTitle: product.name,
+                              fallbackCategory: product.category,
+                            ),
+                          ),
+                        ),
+                        // Wishlist heart button (repaint-isolated)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: RepaintBoundary(
+                            child: Consumer(
+                              builder: (context, ref, _) {
+                                final isWishlisted = ref.watch(
+                                  isInWishlistProvider(product.id),
                                 );
-                                if (fallback.isNotEmpty &&
-                                    url != fallback) {
-                                  return CachedNetworkImage(
-                                    imageUrl: fallback,
-                                    fit: imageFit,
-                                    memCacheWidth: AppImageCache.cardWidth,
-                                    errorWidget: (ctx, _, _) => Center(
-                                      child: Icon(
-                                        Icons.eco_rounded,
-                                        color: theme.colorScheme.primary
-                                            .withValues(alpha: 0.5),
-                                        size: 32,
-                                      ),
+                                return GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    final isSignedIn =
+                                        ref
+                                            .read(authStateProvider)
+                                            .valueOrNull !=
+                                        null;
+                                    if (!isSignedIn) {
+                                      context.push(
+                                        '/login',
+                                        extra: {'returnTo': '/wishlist'},
+                                      );
+                                      return;
+                                    }
+                                    ref
+                                        .read(wishlistProvider.notifier)
+                                        .toggleItem(product);
+                                  },
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: (isDark
+                                              ? const Color(0xFF1E293B)
+                                              : Colors.white)
+                                          .withValues(alpha: 0.9),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                }
-                                return Center(
-                                  child: Icon(
-                                    Icons.eco_rounded,
-                                    color: theme.colorScheme.primary
-                                        .withValues(alpha: 0.5),
-                                    size: 32,
+                                    child: Icon(
+                                      isWishlisted
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_border_rounded,
+                                      size: 16,
+                                      color: isWishlisted
+                                          ? const Color(0xFFEF4444)
+                                          : (isDark
+                                                ? Colors.grey[400]
+                                                : const Color(0xFF94A3B8)),
+                                    ),
                                   ),
                                 );
                               },
                             ),
-                          ),
-                        ),
-                        // Wishlist heart button
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Consumer(
-                            builder: (context, ref, _) {
-                              final isWishlisted = ref.watch(
-                                isInWishlistProvider(product.id),
-                              );
-                              return GestureDetector(
-                                onTap: () {
-                                  final isSignedIn =
-                                      ref
-                                          .read(authStateProvider)
-                                          .valueOrNull !=
-                                      null;
-                                  if (!isSignedIn) {
-                                    context.push(
-                                      '/login',
-                                      extra: {'returnTo': '/wishlist'},
-                                    );
-                                    return;
-                                  }
-                                  ref
-                                      .read(wishlistProvider.notifier)
-                                      .toggleItem(product);
-                                },
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: (isDark
-                                            ? const Color(0xFF1E293B)
-                                            : Colors.white)
-                                        .withValues(alpha: 0.9),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.08,
-                                        ),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    isWishlisted
-                                        ? Icons.favorite_rounded
-                                        : Icons.favorite_border_rounded,
-                                    size: 16,
-                                    color: isWishlisted
-                                        ? const Color(0xFFEF4444)
-                                        : (isDark
-                                              ? Colors.grey[400]
-                                              : const Color(0xFF94A3B8)),
-                                  ),
-                                ),
-                              );
-                            },
                           ),
                         ),
                         // Rating & Discount Badges
@@ -335,19 +285,18 @@ class ProductCard extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 6),
-                        // Price & Green Quick Add (+) button
+                        // Optimized Price & Green Quick Add (+) button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 4,
-                                runSpacing: 2,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
                                 children: [
                                   Text(
-                                    '\$${product.effectivePrice.toStringAsFixed(2)}',
+                                    product.effectivePrice.toCurrency,
                                     style: TextStyle(
                                       color: theme.colorScheme.primary,
                                       fontWeight: FontWeight.w800,
@@ -355,60 +304,66 @@ class ProductCard extends ConsumerWidget {
                                     ),
                                   ),
                                   if (product.hasDiscount &&
-                                      product.originalPrice != null)
-                                    Text(
-                                      '\$${product.originalPrice!.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        color: isDark
-                                            ? Colors.grey[500]
-                                            : const Color(0xFF94A3B8),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        decoration: TextDecoration.lineThrough,
+                                      product.originalPrice != null) ...[
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        product.originalPrice!.toCurrency,
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.grey[500]
+                                              : const Color(0xFF94A3B8),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.lineThrough,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
+                                  ],
                                 ],
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                final pv = product.primaryVariant;
-                                ref
-                                    .read(cartProvider.notifier)
-                                    .addItem(
-                                      product,
-                                      quantity: 1,
-                                      variantId: pv?.id,
-                                      variantName: pv?.name,
-                                      unitPrice: product.effectivePrice,
-                                    );
-                                AppSnackBar.showSuccess(
-                                  context,
-                                  context.l10n.isKhmer
-                                      ? 'បានបន្ថែម ${product.name} ទៅកន្ត្រក'
-                                      : 'Added ${product.name} to cart',
-                                );
-                              },
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.colorScheme.primary.withValues(
-                                        alpha: 0.35,
+                            RepaintBoundary(
+                              child: GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  final pv = product.primaryVariant;
+                                  ref
+                                      .read(cartProvider.notifier)
+                                      .addItem(
+                                        product,
+                                        quantity: 1,
+                                        variantId: pv?.id,
+                                        variantName: pv?.name,
+                                        unitPrice: product.effectivePrice,
+                                      );
+                                  AppSnackBar.showSuccess(
+                                    context,
+                                    context.l10n.addedProductToCart(product.name),
+                                  );
+                                },
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: theme.colorScheme.primary.withValues(
+                                          alpha: 0.35,
+                                        ),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
                                       ),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.add_rounded,
-                                  color: Colors.white,
-                                  size: 18,
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
                             ),
@@ -433,7 +388,7 @@ class ProductCardShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = context.isDark;
     final baseColor = isDark
         ? const Color(0xFF1E293B)
         : const Color(0xFFE2E8F0);
@@ -447,9 +402,7 @@ class ProductCardShimmer extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-          ),
+          border: Border.all(color: context.borderSubtle),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),

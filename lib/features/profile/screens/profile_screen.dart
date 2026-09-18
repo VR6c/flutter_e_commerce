@@ -36,7 +36,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool _notificationsEnabled = true;
 
   @override
   void dispose() {
@@ -372,62 +371,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildNotificationToggleTile(ThemeData theme, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.2 : 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.notifications_active_outlined,
-              color: Color(0xFF10B981),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.pushNotifications,
-                  style: TextStyle(
-                    fontFamily: AppTheme.fontFamily,
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _notificationsEnabled
-                      ? context.l10n.notificationsEnabledSub
-                      : context.l10n.notificationsPausedSub,
-                  style: TextStyle(
-                    fontFamily: AppTheme.fontFamily,
-                    fontSize: 12,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch.adaptive(
-            value: _notificationsEnabled,
-            activeTrackColor: theme.colorScheme.primary,
-            onChanged: (val) {
-              HapticFeedback.lightImpact();
-              setState(() => _notificationsEnabled = val);
-            },
-          ),
-        ],
-      ),
-    );
+    return const _NotificationToggleTile();
   }
 
   Widget _buildSocialCard(
@@ -618,6 +562,80 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               letterSpacing: 0,
               color: isDark ? const Color(0xFF475569) : const Color(0xFFA1A1AA),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotificationToggleTile extends StatefulWidget {
+  const _NotificationToggleTile();
+
+  @override
+  State<_NotificationToggleTile> createState() => _NotificationToggleTileState();
+}
+
+class _NotificationToggleTileState extends State<_NotificationToggleTile> {
+  bool _notificationsEnabled = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.2 : 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.notifications_active_outlined,
+              color: Color(0xFF10B981),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.pushNotifications,
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _notificationsEnabled
+                      ? context.l10n.notificationsEnabledSub
+                      : context.l10n.notificationsPausedSub,
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    fontSize: 12,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch.adaptive(
+            value: _notificationsEnabled,
+            activeTrackColor: theme.colorScheme.primary,
+            onChanged: (val) {
+              HapticFeedback.lightImpact();
+              setState(() => _notificationsEnabled = val);
+            },
           ),
         ],
       ),

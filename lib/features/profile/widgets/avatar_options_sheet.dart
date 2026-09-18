@@ -34,11 +34,11 @@ class AvatarOptionsSheet extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final avatarState = ref.watch(userAvatarProvider);
 
-    String statusLabel = l10n.isKhmer ? 'អក្សរកាត់ដើម' : 'Default Initials';
+    String statusLabel = l10n.defaultInitials;
     if (avatarState.isPhoto) {
-      statusLabel = l10n.isKhmer ? 'រូបថតផ្ទាល់ខ្លួន' : 'Uploaded Photo';
+      statusLabel = l10n.uploadedPhoto;
     } else if (avatarState.isFluttermoji) {
-      statusLabel = l10n.isKhmer ? 'រូបតំណាង' : 'Custom Avatar';
+      statusLabel = l10n.customAvatar;
     }
 
     return SafeArea(
@@ -78,9 +78,7 @@ class AvatarOptionsSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.isKhmer
-                            ? 'រូបភាពគណនី & តំណាង'
-                            : 'Profile Picture & Avatar',
+                        l10n.profilePictureAvatar,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 18,
@@ -102,9 +100,7 @@ class AvatarOptionsSheet extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          l10n.isKhmer
-                              ? 'កំពុងប្រើ: $statusLabel'
-                              : 'Active: $statusLabel',
+                          l10n.activeStatus(statusLabel),
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 11,
@@ -135,10 +131,8 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 const Color(0xFF6366F1),
                 const Color(0xFF8B5CF6),
               ],
-              title: l10n.isKhmer ? 'កែសម្រួលរូបតំណាង' : 'Customize Avatar',
-              subtitle: l10n.isKhmer
-                  ? 'រចនាម៉ូដសក់ ផ្ទៃមុខ សម្លៀកបំពាក់...'
-                  : 'Design hair, face, clothes, and accessories',
+              title: l10n.customizeAvatar,
+              subtitle: l10n.designHairFaceClothesAnd,
               isHighlight: true,
               theme: theme,
               isDark: isDark,
@@ -157,10 +151,8 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 const Color(0xFF10B981),
                 const Color(0xFF059669),
               ],
-              title: l10n.isKhmer ? 'ថតរូប' : 'Take Photo',
-              subtitle: l10n.isKhmer
-                  ? 'ប្រើកាមេរ៉ាដើម្បីថតរូបថ្មី'
-                  : 'Use camera to snap a new picture',
+              title: l10n.takePhoto,
+              subtitle: l10n.useCameraToSnapA,
               theme: theme,
               isDark: isDark,
               onTap: () async {
@@ -206,10 +198,8 @@ class AvatarOptionsSheet extends ConsumerWidget {
                 const Color(0xFF3B82F6),
                 const Color(0xFF1D4ED8),
               ],
-              title: l10n.isKhmer ? 'ជ្រើសរើសពីរូបភាព' : 'Choose from Gallery',
-              subtitle: l10n.isKhmer
-                  ? 'ជ្រើសរើសរូបភាពពីវិចិត្រសាលរបស់អ្នក'
-                  : 'Select an image from your photos',
+              title: l10n.chooseFromGallery,
+              subtitle: l10n.selectAnImageFromYour,
               theme: theme,
               isDark: isDark,
               onTap: () async {
@@ -256,12 +246,8 @@ class AvatarOptionsSheet extends ConsumerWidget {
                   const Color(0xFFEF4444),
                   const Color(0xFFDC2626),
                 ],
-                title: l10n.isKhmer
-                    ? 'កំណត់រូបភាពដើមឡើងវិញ'
-                    : 'Reset to Default Avatar',
-                subtitle: l10n.isKhmer
-                    ? 'លុបរូបភាព ឬរូបតំណាងចេញ និងប្រើអក្សរកាត់'
-                    : 'Remove photo or avatar and use initials',
+                title: l10n.resetToDefaultAvatar,
+                subtitle: l10n.removePhotoOrAvatarAnd,
                 theme: theme,
                 isDark: isDark,
                 isDestructive: true,

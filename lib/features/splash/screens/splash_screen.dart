@@ -167,27 +167,35 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     const Spacer(flex: 3),
 
                     // ── Glowing Animated Brand Logo ───────────────────────
-                    FadeTransition(
-                      opacity: _logoFadeAnimation,
-                      child: ScaleTransition(
-                        scale: _logoScaleAnimation,
-                        child: AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Outer breathing ring
-                                Container(
-                                  width: 130 * _pulseAnimation.value,
-                                  height: 130 * _pulseAnimation.value,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: AppTheme.primaryColor.withValues(
-                                      alpha: 0.08,
+                    RepaintBoundary(
+                      child: FadeTransition(
+                        opacity: _logoFadeAnimation,
+                        child: ScaleTransition(
+                          scale: _logoScaleAnimation,
+                          child: AnimatedBuilder(
+                            animation: _pulseAnimation,
+                            builder: (context, staticChild) {
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Outer breathing ring
+                                  Container(
+                                    width: 130 * _pulseAnimation.value,
+                                    height: 130 * _pulseAnimation.value,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppTheme.primaryColor.withValues(
+                                        alpha: 0.08,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  ?staticChild,
+                                ],
+                              );
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
                                 // Mid ring
                                 Container(
                                   width: 104,
@@ -226,8 +234,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                   ),
                                 ),
                               ],
-                            );
-                          },
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -254,9 +262,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              context.l10n.isKhmer
-                                  ? 'គុណភាពល្អ និងដឹកជញ្ជូនរហ័ស'
-                                  : 'Great quality and quick shipping',
+                              context.l10n.greatQualityAndQuickShipping,
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontFamily: AppTheme.fontFamily,
@@ -289,9 +295,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          context.l10n.isKhmer
-                              ? 'v1.0.0 • ដឹកជញ្ជូនរហ័ស & សុវត្ថិភាព'
-                              : 'v1.0.0 • Fast & Secure Delivery',
+                          context.l10n.v100FastSecureDelivery,
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontFamily: AppTheme.fontFamily,
                             color:
@@ -319,17 +323,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget _buildLoadingIndicator(BuildContext context, SplashState state) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isKhmer = context.l10n.isKhmer;
+    final l10n = context.l10n;
 
     String displayMessage = state.message;
-    if (isKhmer) {
-      if (state.message.contains('Wait') || state.message.contains('minute')) {
-        displayMessage = 'សូមរង់ចាំបន្តិច...';
-      } else if (state.message.contains('Starting')) {
-        displayMessage = 'កំពុងចាប់ផ្ដើម TVR...';
-      } else if (state.message.contains('Ready')) {
-        displayMessage = 'រួចរាល់!';
-      }
+    if (state.message.contains('Wait') || state.message.contains('minute')) {
+      displayMessage = l10n.splashPleaseWait;
+    } else if (state.message.contains('Starting')) {
+      displayMessage = l10n.splashStarting;
+    } else if (state.message.contains('Ready')) {
+      displayMessage = l10n.splashReady;
     }
 
     return FadeTransition(
@@ -374,11 +376,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Widget _buildErrorWidget(BuildContext context, SplashState state) {
     final theme = Theme.of(context);
-    final isKhmer = context.l10n.isKhmer;
+    final l10n = context.l10n;
 
-    final String errorText = isKhmer
-        ? 'មិនអាចចាប់ផ្ដើមកម្មវិធីបានទេ។ សូមព្យាយាមម្តងទៀត។'
-        : (state.errorMessage ?? 'Initialization encountered an issue.');
+    final String errorText = state.errorMessage ?? l10n.splashInitError;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -424,7 +424,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 },
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: Text(
-                  isKhmer ? 'ព្យាយាមម្តងទៀត' : 'Try Again',
+                  l10n.tryAgain,
                   style: const TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     letterSpacing: 0,
@@ -457,7 +457,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                 ),
                 child: Text(
-                  isKhmer ? 'បន្តជាភ្ញៀវ' : 'Continue as Guest',
+                  l10n.continueAsGuest,
                   style: const TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     letterSpacing: 0,

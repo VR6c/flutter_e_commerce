@@ -57,7 +57,7 @@ class AddressInfoSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  l10n.isKhmer ? 'អាសយដ្ឋានដឹកជញ្ជូន' : 'Delivery Address',
+                  l10n.shippingAddress,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 18,
@@ -92,9 +92,7 @@ class AddressInfoSheet extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        l10n.isKhmer
-                            ? 'ផ្ទះ (អាសយដ្ឋានលំនាំដើម)'
-                            : 'Home (Default Delivery)',
+                        l10n.homeDefaultDelivery,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 14,
@@ -107,9 +105,7 @@ class AddressInfoSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.isKhmer
-                        ? 'រាជធានីភ្នំពេញ, កម្ពុជា\nផ្លូវ ២៧១, សង្កាត់បឹងទំពន់'
-                        : 'Phnom Penh City, Cambodia\nStreet 271, Sangkat Boeung Tumpun',
+                    l10n.phnomPenhCityCambodianstreet271,
                     style: TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontSize: 13,
@@ -136,7 +132,7 @@ class AddressInfoSheet extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  l10n.isKhmer ? 'រួចរាល់' : 'Done',
+                  l10n.done,
                   style: const TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 14,

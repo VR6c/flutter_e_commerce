@@ -67,9 +67,7 @@ class ReceiptService {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    l10n.isKhmer
-                        ? 'បានទាញយកវិក្កយបត្រ $fileName'
-                        : 'Receipt downloaded: $fileName',
+                    l10n.receiptDownloadedFile(fileName),
                     style: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       color: Colors.white,
@@ -191,7 +189,7 @@ class ReceiptService {
               ),
               const SizedBox(height: 14),
               Text(
-                l10n.isKhmer ? 'បានទាញយកវិក្កយបត្រ' : 'Receipt Downloaded',
+                l10n.receiptDownloaded1,
                 style: const TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   fontSize: 18,
@@ -239,9 +237,7 @@ class ReceiptService {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                l10n.isKhmer
-                                    ? 'ទីតាំងផ្ទុកឯកសារ (Files App):'
-                                    : 'Saved in Apple Files App:',
+                                l10n.savedInAppleFilesApp,
                                 style: const TextStyle(
                                   fontFamily: AppTheme.fontFamily,
                                   fontSize: 11,
@@ -322,7 +318,7 @@ class ReceiptService {
                         ),
                       ),
                       child: Text(
-                        l10n.isKhmer ? 'យល់ព្រម' : 'Done',
+                        l10n.done1,
                         style: const TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontWeight: FontWeight.w700,

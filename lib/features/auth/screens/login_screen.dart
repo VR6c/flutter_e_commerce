@@ -70,9 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         dialog.dismiss();
         if (!mounted) return;
         setState(() {
-          _errorMessage = context.l10n.isKhmer
-              ? 'ការចូលគណនីបានបរាជ័យ។ សូមពិនិត្យមើលអ៊ីមែល ឬពាក្យសម្ងាត់របស់អ្នក។'
-              : 'Login failed. Please verify your credentials.';
+          _errorMessage = context.l10n.loginFailedPleaseVerifyYour;
         });
         return;
       }
@@ -99,9 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       setState(() {
         _errorMessage = msg.isNotEmpty
             ? msg
-            : (context.l10n.isKhmer
-                ? 'អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ។'
-                : 'Invalid email or password. Please try again.');
+            : (context.l10n.invalidEmailOrPasswordPlease);
       });
     } finally {
       if (mounted) {
@@ -148,9 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                context.l10n.isKhmer
-                    ? 'កំណត់ពាក្យសម្ងាត់ឡើងវិញ!'
-                    : 'Reset your password!',
+                context.l10n.resetYourPassword,
                 style: TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   fontSize: 20,
@@ -161,9 +155,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                context.l10n.isKhmer
-                    ? 'សូមបញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែលរបស់អ្នក យើងនឹងផ្ញើលេខកូដផ្ទៀងផ្ទាត់។'
-                    : 'Please enter your phone number or email, we will send a verification code.',
+                context.l10n.pleaseEnterYourPhoneNumber,
                 style: const TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   fontSize: 13,
@@ -183,9 +175,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   letterSpacing: 0,
                 ),
                 decoration: InputDecoration(
-                  hintText: context.l10n.isKhmer
-                      ? 'បញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែល'
-                      : 'Enter phone number or email',
+                  hintText: context.l10n.enterPhoneNumberOrEmail,
                   hintStyle: const TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     letterSpacing: 0,
@@ -203,9 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          context.l10n.isKhmer
-                              ? 'លេខកូដផ្ទៀងផ្ទាត់ត្រូវបានផ្ញើទៅ ${phoneController.text}'
-                              : 'Verification code sent to ${phoneController.text}',
+                          context.l10n.verificationCodeSentTo(phoneController.text),
                           style: const TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             letterSpacing: 0,
@@ -223,9 +211,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   child: Text(
-                    context.l10n.isKhmer
-                        ? 'ផ្ញើលេខកូដផ្ទៀងផ្ទាត់'
-                        : 'Send Verification Code',
+                    context.l10n.sendVerificationCode,
                     style: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w700,
@@ -273,9 +259,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 20),
                 // Heading matching mockup
                 Text(
-                  context.l10n.isKhmer
-                      ? 'សូមស្វាគមន៍មកកាន់\nហាងទំនិញរបស់យើង'
-                      : 'Welcome Back to\nour grocery shop',
+                  context.l10n.welcomeBackTonourGroceryShop,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 26,
@@ -287,9 +271,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  context.l10n.isKhmer
-                      ? 'ចូលគណនីដើម្បីស្វែងរកទំនិញគុណភាពល្អៗ និងតាមដានការដឹកជញ្ជូនរបស់អ្នក។'
-                      : 'Sign in to explore organic fresh foods and track your deliveries.',
+                  context.l10n.signInToExploreOrganic,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 13.5,
@@ -338,9 +320,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Email / Mobile Field
                 Text(
-                  context.l10n.isKhmer
-                      ? 'អ៊ីមែល ឬលេខទូរស័ព្ទ'
-                      : 'Email or Mobile',
+                  context.l10n.emailOrMobile,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
@@ -372,14 +352,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return context.l10n.isKhmer
-                          ? 'សូមបំពេញព័ត៌មាននេះ'
-                          : 'Field is required';
+                      return context.l10n.fieldIsRequired;
                     }
                     if (!v.contains('@')) {
-                      return context.l10n.isKhmer
-                          ? 'សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែលដែលត្រឹមត្រូវ'
-                          : 'Please enter a valid email address';
+                      return context.l10n.pleaseEnterAValidEmail1;
                     }
                     return null;
                   },
@@ -388,7 +364,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Password Field
                 Text(
-                  context.l10n.isKhmer ? 'ពាក្យសម្ងាត់' : 'Password',
+                  context.l10n.password,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
@@ -408,9 +384,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     letterSpacing: 0,
                   ),
                   decoration: InputDecoration(
-                    hintText: context.l10n.isKhmer
-                        ? 'បញ្ចូលពាក្យសម្ងាត់របស់អ្នក'
-                        : 'Enter your password',
+                    hintText: context.l10n.enterYourPassword,
                     hintStyle: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       letterSpacing: 0,
@@ -433,14 +407,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) {
-                      return context.l10n.isKhmer
-                          ? 'សូមបំពេញព័ត៌មាននេះ'
-                          : 'Field is required';
+                      return context.l10n.fieldIsRequired;
                     }
                     if (v.length < 6) {
-                      return context.l10n.isKhmer
-                          ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ'
-                          : 'Password must be at least 6 characters';
+                      return context.l10n.passwordMustBeAtLeast;
                     }
                     return null;
                   },
@@ -453,9 +423,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: GestureDetector(
                     onTap: _showForgotPasswordSheet,
                     child: Text(
-                      context.l10n.isKhmer
-                          ? 'ភ្លេចពាក្យសម្ងាត់?'
-                          : 'Forgot password?',
+                      context.l10n.forgotPassword,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         color: theme.colorScheme.primary,
@@ -494,7 +462,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                context.l10n.isKhmer ? 'ចូលគណនី' : 'Login',
+                                context.l10n.login,
                                 style: const TextStyle(
                                   fontFamily: AppTheme.fontFamily,
                                   fontWeight: FontWeight.w800,
@@ -519,9 +487,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: RichText(
                       text: TextSpan(
-                        text: context.l10n.isKhmer
-                            ? 'មិនទាន់មានគណនីមែនទេ? '
-                            : "Don't have an Account? ",
+                        text: context.l10n.dontHaveAnAccount,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           color: isDark
@@ -532,7 +498,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         children: [
                           TextSpan(
-                            text: context.l10n.isKhmer ? 'ចុះឈ្មោះ' : 'Sign up',
+                            text: context.l10n.signUp,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               color: theme.colorScheme.primary,

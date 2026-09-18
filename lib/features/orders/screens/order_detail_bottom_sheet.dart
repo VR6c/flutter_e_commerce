@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/utils/app_image_cache.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/order.dart';
 import '../services/receipt_service.dart';
+import '../widgets/order_status_badge.dart';
 import 'receipt_viewer_screen.dart';
 
 class OrderDetailBottomSheet extends StatelessWidget {
@@ -25,7 +26,6 @@ class OrderDetailBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final statusInfo = _statusInfo(order.status, l10n);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -65,7 +65,7 @@ class OrderDetailBottomSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.isKhmer ? 'ការបញ្ជាទិញ #${order.id}' : 'Order #${order.id}',
+                            l10n.orderNumber(order.id),
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                               fontFamily: AppTheme.fontFamily,
@@ -84,7 +84,7 @@ class OrderDetailBottomSheet extends StatelessWidget {
                         ],
                       ),
                     ),
-                    _StatusBadge(status: order.status, info: statusInfo),
+                    OrderStatusBadge(status: order.status),
                   ],
                 ),
               ),
@@ -98,16 +98,14 @@ class OrderDetailBottomSheet extends StatelessWidget {
                     // Items
                     _SectionHeader(
                       icon: Icons.shopping_bag_outlined,
-                      label: l10n.isKhmer
-                          ? 'ទំនិញ (${order.items.length})'
-                          : 'Items (${order.items.length})',
+                      label: l10n.itemsCount(order.items.length),
                     ),
                     const SizedBox(height: 12),
                     if (order.items.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          l10n.isKhmer ? 'មិនមានព័ត៌មានលម្អិតទំនិញទេ' : 'No item details available.',
+                          l10n.noItemDetailsAvailable,
                           style: TextStyle(
                             color: theme.hintColor,
                             fontSize: 13,
@@ -211,38 +209,6 @@ class OrderDetailBottomSheet extends StatelessWidget {
     );
   }
 
-  Map<String, dynamic> _statusInfo(String status, AppLocalizations l10n) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'delivered':
-        return {
-          'color': const Color(0xFF059669),
-          'icon': Icons.check_circle_rounded,
-          'label': l10n.isKhmer ? 'បានដឹកដល់' : 'Completed',
-        };
-      case 'processing':
-        return {
-          'color': const Color(0xFF4F46E5),
-          'icon': Icons.sync_rounded,
-          'label': l10n.isKhmer ? 'កំពុងរៀបចំ' : 'Processing',
-        };
-      case 'cancelled':
-      case 'canceled':
-        return {
-          'color': const Color(0xFFDC2626),
-          'icon': Icons.cancel_rounded,
-          'label': l10n.isKhmer ? 'បានបោះបង់' : 'Cancelled',
-        };
-      case 'pending':
-      default:
-        return {
-          'color': const Color(0xFFF59E0B),
-          'icon': Icons.hourglass_top_rounded,
-          'label': l10n.isKhmer ? 'រង់ចាំ' : 'Pending',
-        };
-    }
-  }
-
   String _formatDate(String isoDate, AppLocalizations l10n) {
     try {
       final dt = DateTime.parse(isoDate).toLocal();
@@ -321,44 +287,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  final String status;
-  final Map<String, dynamic> info;
-  const _StatusBadge({required this.status, required this.info});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = info['color'] as Color;
-    final icon = info['icon'] as IconData;
-    final label = info['label'] as String;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: AppTheme.fontFamily,
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-              letterSpacing: 0,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _OrderItemTile extends StatelessWidget {
   final dynamic item;
   final ThemeData theme;
@@ -390,28 +318,16 @@ class _OrderItemTile extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF1F5F9),
+              color: context.imageBg,
             ),
             child: item.productThumbnail != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
+                    child: AppCachedImage(
                       imageUrl: item.productThumbnail!,
                       fit: BoxFit.cover,
-                      memCacheWidth: 150,
-                      memCacheHeight: 150,
-                      placeholder: (context, url) => const Center(
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => const Icon(
-                        Icons.broken_image_outlined,
-                        size: 24,
-                        color: Colors.grey,
-                      ),
+                      memCacheWidth: AppImageCache.thumbnailWidth,
+                      fallbackTitle: item.productName,
                     ),
                   )
                 : const Icon(
@@ -439,7 +355,7 @@ class _OrderItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.isKhmer ? 'ចំនួន: ${item.quantity}' : 'Qty: ${item.quantity}',
+                  l10n.qtyCount(item.quantity),
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     color: Colors.grey[500],
@@ -643,7 +559,7 @@ class _ReceiptActionCard extends ConsumerStatefulWidget {
 class _ReceiptActionCardState extends ConsumerState<_ReceiptActionCard> {
   bool _isDownloading = false;
 
-  Future<void> _handleDownload(BuildContext context, AppLocalizations l10n) async {
+  Future<void> _handleDownload() async {
     if (_isDownloading) return;
     setState(() => _isDownloading = true);
 
@@ -710,9 +626,7 @@ class _ReceiptActionCardState extends ConsumerState<_ReceiptActionCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.isKhmer
-                          ? 'វិក្កយបត្រផ្លូវការ #${widget.order.id}'
-                          : 'Official Receipt #${widget.order.id}',
+                      l10n.officialReceiptNumber(widget.order.id),
                       style: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w700,
@@ -723,9 +637,7 @@ class _ReceiptActionCardState extends ConsumerState<_ReceiptActionCard> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.isKhmer
-                          ? 'មើលវិក្កយបត្រលើអេក្រង់ ឬទាញយកជាឯកសារ'
-                          : 'Preview on screen or download as file',
+                      l10n.previewOnScreenOrDownload,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 12,
@@ -785,7 +697,7 @@ class _ReceiptActionCardState extends ConsumerState<_ReceiptActionCard> {
                   child: ElevatedButton.icon(
                     onPressed: _isDownloading
                         ? null
-                        : () => _handleDownload(context, l10n),
+                        : _handleDownload,
                     icon: _isDownloading
                         ? const SizedBox(
                             width: 14,
@@ -802,7 +714,7 @@ class _ReceiptActionCardState extends ConsumerState<_ReceiptActionCard> {
                           ),
                     label: Text(
                       _isDownloading
-                          ? (l10n.isKhmer ? 'កំពុងទាញ...' : 'Downloading...')
+                          ? (l10n.downloading1)
                           : l10n.downloadReceipt,
                       style: const TextStyle(
                         fontFamily: AppTheme.fontFamily,

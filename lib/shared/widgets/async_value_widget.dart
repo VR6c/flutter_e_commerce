@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_e_commerce/core/localization/app_localizations.dart';
 
 class AsyncValueWidget<T> extends StatelessWidget {
   final AsyncValue<T> value;
@@ -46,7 +47,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: onRetry,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(context.l10n.retry),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: theme.colorScheme.onPrimary,

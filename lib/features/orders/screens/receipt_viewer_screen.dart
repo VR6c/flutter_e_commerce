@@ -455,9 +455,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.isKhmer
-                  ? 'កំពុងទាញយកវិក្កយបត្រ...'
-                  : 'Loading receipt...',
+              l10n.loadingReceipt,
               style: TextStyle(
                 fontFamily: AppTheme.fontFamily,
                 color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -492,9 +490,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                l10n.isKhmer
-                    ? 'មិនអាចផ្ទុកវិក្កយបត្របានទេ'
-                    : 'Failed to Load Receipt',
+                l10n.failedToLoadReceipt,
                 style: const TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   fontWeight: FontWeight.w700,
@@ -505,9 +501,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.isKhmer
-                    ? 'សូមព្យាយាមម្តងទៀត ឬបើកមើលតាមកម្មវិធីរុករក។'
-                    : 'Please try again or open the receipt directly in your browser.',
+                l10n.pleaseTryAgainOrOpen,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: AppTheme.fontFamily,
@@ -524,7 +518,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
                   ElevatedButton.icon(
                     onPressed: _loadReceipt,
                     icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(l10n.isKhmer ? 'ព្យាយាមម្តងទៀត' : 'Retry'),
+                    label: Text(l10n.retry),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.white,
@@ -537,7 +531,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
                   OutlinedButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close_rounded, size: 18),
-                    label: Text(l10n.isKhmer ? 'បិទ' : 'Close'),
+                    label: Text(l10n.close),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.primary,
                       side: BorderSide(color: theme.colorScheme.primary),
@@ -625,7 +619,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
               : const Icon(Icons.file_download_outlined, size: 20),
           label: Text(
             _isDownloading
-                ? (l10n.isKhmer ? 'កំពុងទាញយក...' : 'Downloading...')
+                ? (l10n.downloading)
                 : l10n.downloadReceipt,
             style: const TextStyle(
               fontFamily: AppTheme.fontFamily,

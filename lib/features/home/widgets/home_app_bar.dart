@@ -54,12 +54,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     Text(
                       customer != null
-                          ? (l10n.isKhmer
-                              ? 'សួស្តី, ${customer.name.split(' ').first} 👋'
-                              : 'Hi, ${customer.name.split(' ').first} 👋')
-                          : (l10n.isKhmer
-                              ? 'សូមស្វាគមន៍មកកាន់ TVR 👋'
-                              : 'Welcome to TVR 👋'),
+                          ? l10n.greetingUser(customer.name.split(' ').first)
+                          : l10n.welcomeToTvr,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 12,
@@ -103,9 +99,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                                       ? '$labelText · $streetPart'
                                       : labelText;
                                 } else if (customer != null) {
-                                  displayText = l10n.isKhmer
-                                      ? 'ផ្ទះ · ${customer.name}'
-                                      : 'Home · ${customer.name}';
+                                  displayText = l10n.homeUserName(customer.name);
                                 } else {
                                   displayText = l10n.selectLocation;
                                 }

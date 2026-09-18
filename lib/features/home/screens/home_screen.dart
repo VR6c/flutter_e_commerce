@@ -16,7 +16,6 @@ import '../../../shared/widgets/product_card.dart';
 
 import '../../categories/providers/category_provider.dart';
 import '../../categories/providers/category_products_provider.dart';
-import '../../products/models/product.dart';
 import '../../products/providers/product_provider.dart';
 import '../../products/providers/product_suggestions_provider.dart';
 import '../../products/widgets/search_suggestion_overlay.dart';
@@ -332,10 +331,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             criteria.searchQuery.isNotEmpty
-                                ? (l10n.isKhmer ? 'លទ្ធផលស្វែងរក' : 'Search Results')
+                                ? l10n.searchResults
                                 : (criteria.selectedCategorySlug != null
-                                    ? (l10n.isKhmer ? 'ទំនិញតាមប្រភេទ' : 'Category Items')
-                                    : (l10n.isKhmer ? 'ទំនិញលក់ដាច់បំផុត' : 'Our Best Items')),
+                                    ? l10n.categoryItems
+                                    : l10n.ourBestItems),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontFamily: AppTheme.fontFamily,
                               fontWeight: FontWeight.w800,
@@ -345,9 +344,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           if (criteria.searchQuery.isNotEmpty)
                             Text(
-                              l10n.isKhmer
-                                  ? 'បង្ហាញលទ្ធផលសម្រាប់ "${criteria.searchQuery}"'
-                                  : 'Showing matches for "${criteria.searchQuery}"',
+                              l10n.showingMatchesFor(criteria.searchQuery),
                               style: TextStyle(
                                 fontFamily: AppTheme.fontFamily,
                                 fontSize: 12,
@@ -426,60 +423,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 color: Colors.grey[400],
                               ),
                               const SizedBox(height: 12),
-                              const Text(
-                                'Unable to load products',
-                                style: TextStyle(fontWeight: FontWeight.w600),
+                              Text(
+                                l10n.unableToLoadProducts,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 12),
                               ElevatedButton.icon(
                                 onPressed: () => ref.invalidate(productsProvider),
                                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                                label: const Text('Retry'),
+                                label: Text(l10n.retry),
                               ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    data: (products) {
-                      final List<Product> baseProducts;
-                      final bool filterCategory;
-
-                      if (selectedCat != null) {
-                        final catState = ref.watch(categoryProductsProvider);
-                        final catProducts = catState.productsFor(selectedCat.id);
-                        final isLoadingCategory = catState.isLoading(selectedCat.id);
-
-                        if (isLoadingCategory && catProducts.isEmpty) {
-                          return SliverPadding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            sliver: SliverGrid(
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 14,
-                                crossAxisSpacing: 14,
-                                childAspectRatio: 0.68,
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) => const ProductCardShimmer(),
-                                childCount: 4,
-                              ),
+                    data: (_) {
+                      final isCategoryLoading = ref.watch(homeCategoryLoadingProvider);
+                      if (isCategoryLoading) {
+                        return SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          sliver: SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: 0.68,
                             ),
-                          );
-                        }
-                        baseProducts = catProducts;
-                        filterCategory = false;
-                      } else {
-                        baseProducts = products;
-                        filterCategory = true;
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => const ProductCardShimmer(),
+                              childCount: 4,
+                            ),
+                          ),
+                        );
                       }
 
-                      final filtered = applyProductFilters(
-                        products: baseProducts,
-                        criteria: criteria,
-                        categories: categories,
-                        filterCategory: filterCategory,
-                      );
+                      final filtered = ref.watch(homeFilteredProductsProvider);
 
                       if (filtered.isEmpty) {
                         return SliverToBoxAdapter(
@@ -491,19 +470,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   icon: Icons.search_off_rounded,
                                   title: criteria.searchQuery.isEmpty
                                       ? (selectedCat != null
-                                          ? 'No Products in ${selectedCat.name}'
-                                          : 'No Products Available')
-                                      : 'No results for "${criteria.searchQuery}"',
+                                          ? l10n.noProductsInCategory(l10n.translateCategory(selectedCat.name))
+                                          : l10n.noProductsAvailable)
+                                      : l10n.noResultsForQuery(criteria.searchQuery),
                                   message: criteria.searchQuery.isEmpty
-                                      ? 'Check back later for fresh stock!'
-                                      : 'Try adjusting your search terms or clearing filters.',
+                                      ? l10n.checkBackLaterStock
+                                      : l10n.tryAdjustingSearch,
                                 ),
                                 if (criteria.isFilterActive) ...[
                                   const SizedBox(height: 16),
                                   OutlinedButton.icon(
                                     onPressed: _clearAllFilters,
                                     icon: const Icon(Icons.clear_all_rounded),
-                                    label: const Text('Clear All Filters'),
+                                    label: Text(l10n.clearAllFilters),
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: theme.colorScheme.primary,
                                       side: BorderSide(color: theme.colorScheme.primary),
@@ -532,6 +511,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             (context, index) {
                               final product = filtered[index];
                               return ProductCard(
+                                key: ValueKey('home_prod_${product.id}'),
                                 heroTagPrefix: 'home',
                                 product: product,
                                 onTap: () => context.push(

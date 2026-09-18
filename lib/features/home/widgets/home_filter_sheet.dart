@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/utils/app_image_cache.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
@@ -226,7 +226,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
             child: Row(
               children: [
                 Text(
-                  context.l10n.isKhmer ? 'តម្រៀប & តម្រង' : 'Sort & Filter',
+                  context.l10n.sortFilter,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w800,
@@ -249,9 +249,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                       ),
                     ),
                     child: Text(
-                      context.l10n.isKhmer
-                          ? '$activeCount កំពុងប្រើ'
-                          : '$activeCount Active',
+                      context.l10n.activeFiltersCount(activeCount),
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 11,
@@ -271,7 +269,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                         vertical: 4,
                       ),
                       child: Text(
-                        context.l10n.isKhmer ? 'កំណត់ឡើងវិញ' : 'Reset All',
+                        context.l10n.resetAll,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 13,
@@ -343,7 +341,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   // 3. Price Range Section
                   _buildSectionHeader(
                     icon: Icons.attach_money_rounded,
-                    title: context.l10n.isKhmer ? 'កម្រិតតម្លៃ' : 'Price Range',
+                    title: context.l10n.priceRange,
                     theme: theme,
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(
@@ -356,7 +354,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                       ),
                       child: Text(
                         _draftPriceRange == null
-                            ? (context.l10n.isKhmer ? 'តម្លៃទាំងអស់' : 'All Prices')
+                            ? (context.l10n.allPrices)
                             : '\$${currentSliderRange.start.round()} – \$${currentSliderRange.end.round()}',
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
@@ -382,7 +380,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                   // 4. Rating Section
                   _buildSectionHeader(
                     icon: Icons.star_rounded,
-                    title: context.l10n.isKhmer ? 'ការវាយតម្លៃ' : 'Customer Rating',
+                    title: context.l10n.customerRating,
                     iconColor: Colors.amber[600],
                     theme: theme,
                   ),
@@ -471,12 +469,8 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
                         const SizedBox(width: 8),
                         Text(
                           matchesCount > 0
-                              ? (context.l10n.isKhmer
-                                  ? 'អនុវត្ត ($matchesCount មុខ)'
-                                  : 'Apply ($matchesCount Products)')
-                              : (context.l10n.isKhmer
-                                  ? 'គ្មានទំនិញត្រូវគ្នាទេ'
-                                  : 'No Products Match'),
+                              ? (context.l10n.applyProductsCount(matchesCount))
+                              : (context.l10n.noProductsMatch),
                           style: const TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontWeight: FontWeight.w700,
@@ -737,14 +731,14 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
             if (imageUrl != null && imageUrl.isNotEmpty) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
+                child: AppCachedImage(
                   imageUrl: imageUrl,
                   width: 18,
                   height: 18,
                   fit: BoxFit.cover,
                   memCacheWidth: 60,
                   memCacheHeight: 60,
-                  errorWidget: (_, _, _) => Icon(
+                  errorWidget: Icon(
                     Icons.eco_rounded,
                     size: 14,
                     color: isSelected ? Colors.white : primary,
@@ -776,7 +770,7 @@ class _HomeFilterSheetState extends ConsumerState<HomeFilterSheet> {
     Color primary,
   ) {
     final quickTiers = [
-      (context.l10n.isKhmer ? 'ទាំងអស់' : 'All', null),
+      (context.l10n.all, null),
       ('Under \$10', const RangeValues(0.0, 10.0)),
       ('\$10 – \$25', const RangeValues(10.0, 25.0)),
       ('\$25 – \$50', const RangeValues(25.0, 50.0)),

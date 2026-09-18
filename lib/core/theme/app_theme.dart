@@ -386,3 +386,19 @@ class AppTheme {
     );
   }
 }
+
+/// Convenience extensions for semantic styling and formatting across the app.
+extension AppThemeContext on BuildContext {
+  ThemeData get theme => Theme.of(this);
+  bool get isDark => theme.brightness == Brightness.dark;
+  Color get cardBg => isDark ? AppTheme.darkSurface : Colors.white;
+  Color get borderSubtle => isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9);
+  Color get borderStrong => isDark ? AppTheme.darkBorderStrong : AppTheme.lightBorderStrong;
+  Color get imageBg => isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F9F5);
+  Color get subtextColor => isDark ? AppTheme.darkSubtext : AppTheme.lightSubtext;
+}
+
+extension AppCurrencyFormat on num {
+  String get toCurrency => '\$${toStringAsFixed(2)}';
+  String get toWeight => '${toStringAsFixed(1)} kg';
+}

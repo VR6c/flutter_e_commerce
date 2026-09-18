@@ -74,17 +74,19 @@ class _SplashWrapperState extends ConsumerState<SplashWrapper>
     return Stack(
       children: [
         // The underlying app shell (mounted and ready)
-        widget.child,
+        RepaintBoundary(child: widget.child),
 
         // The splash overlay dissolving smoothly on top
         Positioned.fill(
           child: IgnorePointer(
             ignoring: isCompleted,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: const SplashScreen(),
+            child: RepaintBoundary(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: const SplashScreen(),
+                ),
               ),
             ),
           ),

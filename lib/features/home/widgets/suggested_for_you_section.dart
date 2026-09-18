@@ -49,132 +49,104 @@ class SuggestedForYouSection extends ConsumerWidget {
     bool isDark,
     List<Product> products,
   ) {
-    return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+    return RepaintBoundary(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: const Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 15,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.suggestedForYou,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontFamily: AppTheme.fontFamily,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16.5,
-                              letterSpacing: 0,
-                            ),
-                          ),
-                          Text(
-                            context.l10n.suggestedForYouSub,
-                            style: TextStyle(
-                              fontFamily: AppTheme.fontFamily,
-                              fontSize: 11.5,
-                              letterSpacing: 0,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : const Color(0xFF64748B),
-                            ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(
-                        alpha: isDark ? 0.2 : 0.1,
+                      child: const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 15,
+                        color: Colors.white,
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: 0.3,
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.suggestedForYou,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontFamily: AppTheme.fontFamily,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16.5,
+                            letterSpacing: 0,
+                          ),
                         ),
-                        width: 1,
-                      ),
+                        Text(
+                          context.l10n.suggestedForYouSub,
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 12,
+                            color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                            letterSpacing: 0,
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      context.l10n.aiPicked,
-                      style: TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        color: theme.colorScheme.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
+          ),
 
-            // Horizontal Carousel
-            SizedBox(
-              height: 255,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: products.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return SizedBox(
-                    width: 170,
-                    child: ProductCard(
-                      product: product,
-                      heroTagPrefix: 'suggested',
-                      onTap: () {
-                        context.push(
-                          AppRoutes.productDetail,
-                          extra: {
-                            'product': product,
-                            'heroTag': 'suggested_product_${product.id}',
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
+          // Horizontal scrolling carousel
+          SizedBox(
+            height: 255,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: products.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return SizedBox(
+                  width: 170,
+                  child: ProductCard(
+                    product: product,
+                    heroTagPrefix: 'suggested',
+                    onTap: () {
+                      context.push(
+                        AppRoutes.productDetail,
+                        extra: {
+                          'product': product,
+                          'heroTag': 'suggested_product_${product.id}',
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 12),
-          ],
-        );
+          ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
   }
 
   Widget _buildLoading(bool isDark) {

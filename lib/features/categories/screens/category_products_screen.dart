@@ -258,7 +258,7 @@ class _CategoryProductsScreenState
               ),
               const SizedBox(height: 20),
               Text(
-                context.l10n.isKhmer ? 'តម្រៀបផលិតផល' : 'Sort Products',
+                context.l10n.sortProducts,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontFamily: AppTheme.fontFamily,
                   fontWeight: FontWeight.w800,
@@ -435,9 +435,7 @@ class _CategoryProductsScreenState
                         letterSpacing: 0,
                       ),
                       decoration: InputDecoration(
-                        hintText: context.l10n.isKhmer
-                            ? 'ស្វែងរកក្នុង ${context.l10n.translateCategory(widget.categoryName)}...'
-                            : 'Search in ${widget.categoryName}...',
+                        hintText: context.l10n.searchInCategory(widget.categoryName),
                         hintStyle: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           color: isDark
@@ -558,19 +556,11 @@ class _CategoryProductsScreenState
                                         child: EmptyStateWidget(
                                           icon: Icons.inventory_2_outlined,
                                           title: _searchQuery.isNotEmpty
-                                              ? (context.l10n.isKhmer
-                                                  ? 'គ្មានលទ្ធផលសម្រាប់ "$_searchQuery"'
-                                                  : 'No results for "$_searchQuery"')
-                                              : (context.l10n.isKhmer
-                                                  ? 'មិនមានផលិតផលទេ'
-                                                  : 'No Products Found'),
+                                              ? (context.l10n.noResultsForQuery(_searchQuery))
+                                              : (context.l10n.noProductsFound),
                                           message: _searchQuery.isNotEmpty
-                                              ? (context.l10n.isKhmer
-                                                  ? 'សូមសាកល្បងស្វែងរកពាក្យផ្សេង។'
-                                                  : 'Try a different search term.')
-                                              : (context.l10n.isKhmer
-                                                  ? 'មិនទាន់មានផលិតផលនៅក្នុងប្រភេទនេះនៅឡើយទេ។'
-                                                  : 'No products are available in this category yet.'),
+                                              ? (context.l10n.tryADifferentSearchTerm)
+                                              : (context.l10n.noProductsAreAvailableIn),
                                         ),
                                       ),
                                     ),

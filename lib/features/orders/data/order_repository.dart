@@ -143,4 +143,48 @@ class OrderRepository {
     }
     return getReceiptUrl(orderId);
   }
+
+  Future<Map<String, dynamic>> submitCheckout(
+    Map<String, dynamic> payload,
+  ) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.checkout,
+      data: payload,
+      options: Options(
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 90),
+      ),
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    return {'status': false, 'message': 'Invalid server response'};
+  }
+
+  Future<bool> checkPaymentStatus({
+    required String tranId,
+    required String orderId,
+  }) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.checkoutPaymentStatus,
+        queryParameters: {
+          'tran_id': tranId,
+          'order_id': orderId,
+        },
+        options: Options(
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+        ),
+      );
+      final responseData = response.data;
+      if (responseData is Map<String, dynamic>) {
+        return responseData['approved'] == true;
+      }
+    } catch (_) {
+      // Return false on error to allow caller retry
+    }
+    return false;
+  }
 }

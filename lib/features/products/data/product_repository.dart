@@ -48,7 +48,7 @@ class ProductRepository {
     if (sort != null && sort.isNotEmpty) queryParameters['sort'] = sort;
 
     final response = await _apiClient.get(
-      '/products',
+      ApiEndpoints.products,
       queryParameters: queryParameters,
     );
     final data = response.data;

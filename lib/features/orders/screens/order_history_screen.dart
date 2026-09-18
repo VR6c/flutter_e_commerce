@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/empty_state_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/order.dart';
 import '../providers/orders_provider.dart';
+import '../widgets/order_status_badge.dart';
 import 'order_detail_bottom_sheet.dart';
 
 class OrderHistoryScreen extends ConsumerWidget {
@@ -51,9 +54,7 @@ class OrderHistoryScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  context.l10n.isKhmer
-                      ? 'ចូលគណនីដើម្បីមើលការបញ្ជាទិញ'
-                      : 'Sign In to view Orders',
+                  context.l10n.signInToViewOrders,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -62,9 +63,7 @@ class OrderHistoryScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  context.l10n.isKhmer
-                      ? 'ចូលគណនីដើម្បីតាមដានការដឹកជញ្ជូន និងមើលប្រវត្តិការទិញរបស់អ្នក។'
-                      : 'Sign in to track live grocery deliveries and view your purchase history.',
+                  context.l10n.signInToTrackLive,
                   style: TextStyle(
                     color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                     fontSize: 14,
@@ -155,70 +154,12 @@ class OrderHistoryScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, ThemeData theme, bool isDark) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF1E293B)
-                    : const Color(0xFFEBF8EE),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.receipt_long_rounded,
-                size: 56,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              context.l10n.noOrders,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.noOrdersSub,
-              style: TextStyle(
-                color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-                fontSize: 14,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: 200,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () => context.go('/home'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  context.l10n.startShopping,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return EmptyStateWidget(
+      icon: Icons.receipt_long_rounded,
+      title: context.l10n.noOrders,
+      message: context.l10n.noOrdersSub,
+      actionLabel: context.l10n.startShopping,
+      onActionPressed: () => context.go('/home'),
     );
   }
 
@@ -237,9 +178,7 @@ class OrderHistoryScreen extends ConsumerWidget {
             Icon(Icons.cloud_off_rounded, size: 56, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              context.l10n.isKhmer
-                  ? 'មិនអាចផ្ទុកការបញ្ជាទិញបានទេ'
-                  : 'Could not load orders',
+              context.l10n.couldNotLoadOrders,
               style: const TextStyle(
                 fontFamily: AppTheme.fontFamily,
                 fontSize: 18,
@@ -273,6 +212,11 @@ class OrderHistoryScreen extends ConsumerWidget {
   }
 
   Widget _buildSkeletonList(ThemeData theme, bool isDark) {
+    final baseColor =
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final highlightColor =
+        isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 4,
@@ -284,6 +228,64 @@ class OrderHistoryScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 110,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: baseColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      Container(
+                        width: 70,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: baseColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: baseColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      Container(
+                        width: 60,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: baseColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -336,9 +338,7 @@ class _OrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    context.l10n.isKhmer
-                        ? 'ការបញ្ជាទិញ #${order.id}'
-                        : 'Order #${order.id}',
+                    context.l10n.orderNumber(order.id),
                     style: TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w800,
@@ -347,26 +347,7 @@ class _OrderCard extends StatelessWidget {
                       letterSpacing: 0,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      _getOrderStatusLabel(order.status, context.l10n.isKhmer),
-                      style: TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        color: theme.colorScheme.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
+                  OrderStatusBadge(status: order.status),
                 ],
               ),
               const SizedBox(height: 10),
@@ -374,9 +355,7 @@ class _OrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    context.l10n.isKhmer
-                        ? '${order.items.length} មុខទំនិញ'
-                        : '${order.items.length} item${order.items.length == 1 ? '' : 's'}',
+                    context.l10n.itemCountLabel(order.items.length),
                     style: TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       color: isDark
@@ -403,20 +382,5 @@ class _OrderCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getOrderStatusLabel(String status, bool isKhmer) {
-    if (!isKhmer) return status.toUpperCase();
-    switch (status.toLowerCase()) {
-      case 'delivered':
-        return 'បានដឹកដល់';
-      case 'processing':
-        return 'កំពុងរៀបចំ';
-      case 'cancelled':
-        return 'បានបោះបង់';
-      case 'pending':
-      default:
-        return 'រង់ចាំ';
-    }
   }
 }

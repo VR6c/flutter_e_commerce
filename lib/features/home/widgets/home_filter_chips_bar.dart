@@ -94,7 +94,7 @@ class HomeFilterChipsBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      l10n.isKhmer ? 'សម្អាតទាំងអស់' : 'Clear All',
+                      l10n.clearAll,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 11.5,

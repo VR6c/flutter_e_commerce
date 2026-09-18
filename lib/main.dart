@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/localization/app_localizations.dart';
 import 'core/localization/locale_provider.dart';
@@ -8,30 +7,8 @@ import 'core/theme/app_theme.dart';
 import 'features/splash/widgets/splash_wrapper.dart';
 import 'shared/providers/theme_provider.dart';
 
-Future<void> _loadGoogleSansFont() async {
-  try {
-    final fontLoader = FontLoader('GoogleSans');
-    fontLoader.addFont(rootBundle.load('assets/fonts/GoogleSans-Regular.ttf'));
-    fontLoader.addFont(rootBundle.load('assets/fonts/GoogleSans-Medium.ttf'));
-    fontLoader.addFont(rootBundle.load('assets/fonts/GoogleSans-SemiBold.ttf'));
-    fontLoader.addFont(rootBundle.load('assets/fonts/GoogleSans-Bold.ttf'));
-    await fontLoader.load();
-
-    final fontLoaderSpaced = FontLoader('Google Sans');
-    fontLoaderSpaced.addFont(rootBundle.load('assets/fonts/GoogleSans-Regular.ttf'));
-    fontLoaderSpaced.addFont(rootBundle.load('assets/fonts/GoogleSans-Medium.ttf'));
-    fontLoaderSpaced.addFont(rootBundle.load('assets/fonts/GoogleSans-SemiBold.ttf'));
-    fontLoaderSpaced.addFont(rootBundle.load('assets/fonts/GoogleSans-Bold.ttf'));
-    await fontLoaderSpaced.load();
-  } catch (e) {
-    debugPrint('Google Sans FontLoader: $e');
-  }
-}
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // Warm up Google Sans fonts asynchronously in the background without blocking initial paint
-  _loadGoogleSansFont();
   runApp(const ProviderScope(child: MyApp()));
 }
 

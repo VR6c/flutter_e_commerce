@@ -6,6 +6,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/auth/screens/auth_gate_screen.dart';
+import '../../../shared/widgets/empty_state_widget.dart';
 import '../providers/cart_provider.dart';
 import '../providers/coupon_provider.dart';
 import '../widgets/cart_item_tile.dart';
@@ -319,9 +320,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               if (couponState.isApplied) ...[
                 const SizedBox(height: 6),
                 Text(
-                  l10n.isKhmer
-                      ? 'បានបញ្ចុះតម្លៃ: -\$${couponState.discountAmount.toStringAsFixed(2)}'
-                      : 'Coupon applied: \$${couponState.discountAmount.toStringAsFixed(2)} discount',
+                  l10n.couponDiscountApplied(couponState.discountAmount.toStringAsFixed(2)),
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     color: theme.colorScheme.primary,
@@ -426,79 +425,15 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
   Widget _buildEmptyState(BuildContext context, ThemeData theme, bool isDark) {
     final l10n = context.l10n;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEBF8EE),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.shopping_basket_rounded,
-                size: 64,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 28),
-            Text(
-              l10n.emptyCart,
-              style: TextStyle(
-                fontFamily: AppTheme.fontFamily,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: theme.colorScheme.onSurface,
-                letterSpacing: l10n.isKhmer ? 0 : -0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.emptyCartSub,
-              style: TextStyle(
-                fontFamily: AppTheme.fontFamily,
-                color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-                fontSize: 14,
-                height: 1.5,
-                letterSpacing: 0,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: 200,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  context.go('/home');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  l10n.startShopping,
-                  style: const TextStyle(
-                    fontFamily: AppTheme.fontFamily,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: Colors.white,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return EmptyStateWidget(
+      icon: Icons.shopping_basket_rounded,
+      title: l10n.emptyCart,
+      message: l10n.emptyCartSub,
+      actionLabel: l10n.startShopping,
+      onActionPressed: () {
+        HapticFeedback.lightImpact();
+        context.go('/home');
+      },
     );
   }
 }

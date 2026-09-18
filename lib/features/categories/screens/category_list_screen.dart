@@ -16,6 +16,7 @@ import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../providers/category_products_provider.dart';
 import '../../../shared/providers/bottom_nav_scroll_provider.dart';
+import '../../home/providers/filtered_products_provider.dart';
 
 /// All Products screen listing all store items with category filtering, search, and sorting.
 class AllProductsScreen extends ConsumerStatefulWidget {
@@ -46,7 +47,6 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
   String _lastQuery = '';
   String? _lastCategory;
   SortOption _lastSort = SortOption.none;
-  static final _alphanumericRegex = RegExp(r'[^a-z0-9]');
 
   Category? _findCategory(String? slug, List<Category> categories) =>
       CategoryProductsNotifier.findCategory(slug, categories);
@@ -173,87 +173,19 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
     _lastCategory = _selectedCategorySlug;
     _lastSort = _sortBy;
 
-    var result = List<Product>.from(allProducts);
+    final allCategories =
+        ref.read(categoriesProvider).valueOrNull ?? <Category>[];
 
-    // 1. Filter by category slug if selected and requested
-    if (filterCategory && _selectedCategorySlug != null) {
-      final target = _selectedCategorySlug!.toLowerCase().trim();
-      final targetClean = target.replaceAll(_alphanumericRegex, '');
-      final matchingSlugs = <String>{target, targetClean};
-      final allCategories =
-          ref.read(categoriesProvider).valueOrNull ?? <Category>[];
-
-      for (final cat in allCategories) {
-        final catSlug = cat.slug.toLowerCase().trim();
-        final catName = cat.name.toLowerCase().trim();
-        final catSlugClean = catSlug.replaceAll(_alphanumericRegex, '');
-        final catNameClean = catName.replaceAll(_alphanumericRegex, '');
-
-        if (catSlug == target ||
-            catName == target ||
-            catSlugClean == targetClean ||
-            catNameClean == targetClean) {
-          matchingSlugs.addAll([catSlug, catName, catSlugClean, catNameClean]);
-          for (final child in cat.children) {
-            final cSlug = child.slug.toLowerCase().trim();
-            final cName = child.name.toLowerCase().trim();
-            matchingSlugs.addAll([
-              cSlug,
-              cName,
-              cSlug.replaceAll(_alphanumericRegex, ''),
-              cName.replaceAll(_alphanumericRegex, ''),
-            ]);
-          }
-          break;
-        }
-      }
-
-      result = result.where((p) {
-        final cat = p.category.toLowerCase().trim();
-        final catClean = cat.replaceAll(_alphanumericRegex, '');
-        return matchingSlugs.contains(cat) ||
-            matchingSlugs.contains(catClean) ||
-            matchingSlugs.any(
-              (slug) =>
-                  (slug.length >= 3 &&
-                      (cat.contains(slug) || slug.contains(cat))) ||
-                  (slug.length >= 3 &&
-                      (catClean.contains(slug) || slug.contains(catClean))),
-            );
-      }).toList();
-    }
-
-    // 2. Filter by search query
-    if (_searchQuery.isNotEmpty) {
-      result = result.where((p) {
-        final name = p.name.toLowerCase();
-        final desc = p.shortDescription.toLowerCase();
-        final brand = p.brand?.toLowerCase() ?? '';
-        return name.contains(_searchQuery) ||
-            desc.contains(_searchQuery) ||
-            brand.contains(_searchQuery);
-      }).toList();
-    }
-
-    // 3. Sort
-    switch (_sortBy) {
-      case SortOption.priceAsc:
-        result.sort((a, b) => a.effectivePrice.compareTo(b.effectivePrice));
-        break;
-      case SortOption.priceDesc:
-        result.sort((a, b) => b.effectivePrice.compareTo(a.effectivePrice));
-        break;
-      case SortOption.nameAsc:
-        result.sort(
-          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-        );
-        break;
-      case SortOption.rating:
-        result.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
-        break;
-      case SortOption.none:
-        break;
-    }
+    final result = applyProductFilters(
+      products: allProducts,
+      criteria: HomeFilterCriteria(
+        searchQuery: _searchQuery,
+        selectedCategorySlug: _selectedCategorySlug,
+        sortBy: _sortBy,
+      ),
+      categories: allCategories,
+      filterCategory: filterCategory,
+    );
 
     _cachedFiltered = result;
     return result;
@@ -308,7 +240,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    context.l10n.isKhmer ? 'តម្រៀបផលិតផល' : 'Sort Products',
+                    context.l10n.sortProducts,
                     style: TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontSize: 18,
@@ -324,7 +256,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                         Navigator.pop(ctx);
                       },
                       child: Text(
-                        context.l10n.isKhmer ? 'កំណត់ឡើងវិញ' : 'Reset',
+                        context.l10n.reset,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           color: theme.colorScheme.primary,
@@ -579,7 +511,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                   child: Row(
                     children: [
                       _FilterChip(
-                        label: context.l10n.isKhmer ? 'ទាំងអស់' : 'All Items',
+                        label: context.l10n.allItems,
                         isSelected: _selectedCategorySlug == null,
                         onTap: () {
                           HapticFeedback.selectionClick();
@@ -764,11 +696,11 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
               child: EmptyStateWidget(
                 icon: Icons.inventory_2_outlined,
                 title: _searchQuery.isNotEmpty
-                    ? 'No products for "$_searchQuery"'
-                    : 'No Products Found',
+                    ? context.l10n.noResultsForQuery(_searchQuery)
+                    : context.l10n.noProductsFound,
                 message: hasActiveFilter
-                    ? 'Try clearing your category or search filter.'
-                    : 'Check back later for newly added items.',
+                    ? context.l10n.tryClearingFilter
+                    : context.l10n.checkBackLaterItems,
               ),
             ),
           ),
@@ -793,6 +725,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
               (context, index) {
                 final product = filtered[index];
                 return ProductCard(
+                  key: ValueKey('all_prod_${product.id}'),
                   heroTagPrefix: 'all_products',
                   product: product,
                   onTap: () => context.push(

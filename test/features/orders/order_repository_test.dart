@@ -102,5 +102,71 @@ void main() {
       final orders = await repository.fetchOrders();
       expect(orders, isEmpty);
     });
+
+    test('submitCheckout calls checkout endpoint and returns data', () async {
+      final payload = {'gateway': 'abapayway', 'first_name': 'Test'};
+      when(
+        () => mockApiClient.post<dynamic>(
+          '/checkout',
+          data: payload,
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/checkout'),
+          data: {'status': true, 'data': {'order_id': 999, 'tran_id': 'TX123'}},
+          statusCode: 200,
+        ),
+      );
+
+      final result = await repository.submitCheckout(payload);
+      expect(result['status'], isTrue);
+      expect(result['data']['order_id'], 999);
+      expect(result['data']['tran_id'], 'TX123');
+    });
+
+    test('checkPaymentStatus returns true when approved', () async {
+      when(
+        () => mockApiClient.get<Map<String, dynamic>>(
+          '/checkout/payment-status',
+          queryParameters: {'tran_id': 'TX123', 'order_id': '999'},
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/checkout/payment-status'),
+          data: {'approved': true},
+          statusCode: 200,
+        ),
+      );
+
+      final approved = await repository.checkPaymentStatus(
+        tranId: 'TX123',
+        orderId: '999',
+      );
+      expect(approved, isTrue);
+    });
+
+    test('checkPaymentStatus returns false when not approved or on error', () async {
+      when(
+        () => mockApiClient.get<Map<String, dynamic>>(
+          '/checkout/payment-status',
+          queryParameters: {'tran_id': 'TX123', 'order_id': '999'},
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/checkout/payment-status'),
+          data: {'approved': false},
+          statusCode: 200,
+        ),
+      );
+
+      final approved = await repository.checkPaymentStatus(
+        tranId: 'TX123',
+        orderId: '999',
+      );
+      expect(approved, isFalse);
+    });
   });
 }

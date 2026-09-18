@@ -42,7 +42,7 @@ class _AvatarCustomizerScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          l10n.isKhmer ? 'កែសម្រួលរូបតំណាង' : 'Customize Avatar',
+          l10n.customizeAvatar,
           style: TextStyle(
             fontFamily: AppTheme.fontFamily,
             fontWeight: FontWeight.w800,
@@ -153,9 +153,7 @@ class _AvatarCustomizerScreenState
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        l10n.isKhmer
-                            ? 'មើលផ្ទាល់ · រក្សាទុកស្វ័យប្រវត្តិ'
-                            : 'Live Preview · Auto-Saved',
+                        l10n.livePreviewAutosaved,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
@@ -249,9 +247,7 @@ class _AvatarCustomizerScreenState
                   onPressed: _onSaveAndApply,
                   icon: const Icon(Icons.check_circle_rounded, size: 20),
                   label: Text(
-                    l10n.isKhmer
-                        ? 'អនុវត្ត & ប្រើរូបតំណាងនេះ'
-                        : 'Apply & Use This Avatar',
+                    l10n.applyUseThisAvatar,
                     style: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontSize: 15,

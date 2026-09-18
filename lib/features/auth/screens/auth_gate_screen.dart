@@ -108,9 +108,7 @@ class AuthGateScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        l10n.isKhmer
-                            ? 'ការទូទាត់ប្រាក់ប្រកបដោយសុវត្ថិភាព'
-                            : 'Secure Checkout',
+                        l10n.secureCheckout,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontFamily: AppTheme.fontFamily,
@@ -123,9 +121,7 @@ class AuthGateScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Text(
-                          l10n.isKhmer
-                              ? 'សូមជ្រើសរើសវិធីសាស្ត្របន្តរបស់អ្នក។ ចូលគណនីដើម្បីតាមដានការបញ្ជាទិញ ឬគិតលុយផ្ទាល់ជាភ្ញៀវ។'
-                              : 'Choose how you\'d like to proceed. Sign in to track order status or checkout directly as a guest.',
+                          l10n.chooseHowYou,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontFamily: AppTheme.fontFamily,
@@ -147,12 +143,8 @@ class AuthGateScreen extends StatelessWidget {
                               icon: Icons.login_rounded,
                               iconBgColor: theme.colorScheme.primary,
                               title: l10n.signIn,
-                              subtitle: l10n.isKhmer
-                                  ? 'ចូលប្រើគណនី អាសយដ្ឋាន និងប្រវត្តិការបញ្ជាទិញ'
-                                  : 'Access your account, saved addresses, and order history',
-                              badgeLabel: l10n.isKhmer
-                                  ? 'អតិថិជនចាស់'
-                                  : 'Returning customer',
+                              subtitle: l10n.accessYourAccountSavedAddresses,
+                              badgeLabel: l10n.returningCustomer,
                               badgeColor: theme.colorScheme.primary.withValues(
                                 alpha: 0.1,
                               ),
@@ -172,12 +164,8 @@ class AuthGateScreen extends StatelessWidget {
                               icon: Icons.person_add_rounded,
                               iconBgColor: theme.colorScheme.secondary,
                               title: l10n.createAccount,
-                              subtitle: l10n.isKhmer
-                                  ? 'រក្សាទុកព័ត៌មាន តាមដានការបញ្ជាទិញ និងទទួលបានរង្វាន់'
-                                  : 'Save your details, track orders, and earn rewards',
-                              badgeLabel: l10n.isKhmer
-                                  ? 'អតិថិជនថ្មី'
-                                  : 'New customer',
+                              subtitle: l10n.saveYourDetailsTrackOrders,
+                              badgeLabel: l10n.newCustomer,
                               badgeColor: theme.colorScheme.secondary
                                   .withValues(alpha: 0.1),
                               badgeTextColor: theme.colorScheme.secondary,
@@ -195,15 +183,9 @@ class AuthGateScreen extends StatelessWidget {
                             _AuthOptionCard(
                               icon: Icons.bolt_rounded,
                               iconBgColor: const Color(0xFF059669),
-                              title: l10n.isKhmer
-                                  ? 'គិតលុយជាភ្ញៀវ'
-                                  : 'Checkout as Guest',
-                              subtitle: l10n.isKhmer
-                                  ? 'មិនចាំបាច់មានគណនី — គ្រាន់តែបញ្ចូលអ៊ីមែលដើម្បីទទួលដំណឹង'
-                                  : 'No account needed — just enter your email for order updates',
-                              badgeLabel: l10n.isKhmer
-                                  ? 'លឿនបំផុត'
-                                  : 'Fastest option',
+                              title: l10n.checkoutAsGuest,
+                              subtitle: l10n.noAccountNeededJustEnter,
+                              badgeLabel: l10n.fastestOption,
                               badgeColor: const Color(
                                 0xFF059669,
                               ).withValues(alpha: 0.1),
@@ -234,9 +216,7 @@ class AuthGateScreen extends StatelessWidget {
                                     horizontal: 16,
                                   ),
                                   child: Text(
-                                    l10n.isKhmer
-                                        ? 'ហេតុអ្វីគួរបង្កើតគណនី?'
-                                        : 'Why create an account?',
+                                    l10n.whyCreateAnAccount,
                                     style: theme.textTheme.labelMedium
                                         ?.copyWith(
                                           fontFamily: AppTheme.fontFamily,
@@ -265,9 +245,7 @@ class AuthGateScreen extends StatelessWidget {
                                     Expanded(
                                       child: _BenefitCard(
                                         icon: Icons.track_changes_rounded,
-                                        label: l10n.isKhmer
-                                            ? 'តាមដានផ្ទាល់'
-                                            : 'Track Orders',
+                                        label: l10n.trackOrders,
                                         color: theme.colorScheme.primary,
                                       ),
                                     ),

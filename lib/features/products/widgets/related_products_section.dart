@@ -58,9 +58,10 @@ class RelatedProductsSection extends ConsumerWidget {
     bool isDark,
     List<Product> products,
   ) {
-    return Column(
-          children: [
-            const SizedBox(height: 16),
+    return RepaintBoundary(
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
             // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -143,7 +144,8 @@ class RelatedProductsSection extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
           ],
-        );
+        ),
+      );
   }
 
   Widget _buildLoading(bool isDark) {

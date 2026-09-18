@@ -245,9 +245,7 @@ class _AuthSuccessDialogState extends State<AuthSuccessDialog>
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            l10n.isKhmer
-                                ? 'ចូលគណនីបានជោគជ័យ'
-                                : 'Successfully signed in',
+                            l10n.successfullySignedIn,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 12.5,

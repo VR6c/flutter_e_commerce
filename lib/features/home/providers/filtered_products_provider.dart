@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/models/sort_option.dart';
+import '../../categories/models/category.dart';
+import '../../categories/providers/category_provider.dart';
+import '../../categories/providers/category_products_provider.dart';
 import '../../products/models/product.dart';
+import '../../products/providers/product_provider.dart';
 
 final _alphanumericRegex = RegExp(r'[^a-z0-9]');
 
@@ -122,6 +126,51 @@ final homeFilterCriteriaProvider =
     StateNotifierProvider<HomeFilterCriteriaNotifier, HomeFilterCriteria>(
   (ref) => HomeFilterCriteriaNotifier(),
 );
+
+/// Memoized provider that derives filtered & sorted home products.
+/// Decouples complex string sanitization, category tree checking, and sorting
+/// completely from the UI build loop.
+final homeFilteredProductsProvider = Provider<List<Product>>((ref) {
+  final criteria = ref.watch(homeFilterCriteriaProvider);
+  final products = ref.watch(productsProvider).valueOrNull ?? const <Product>[];
+  final categories = ref.watch(categoriesProvider).valueOrNull ?? const <Category>[];
+  final selectedCat = CategoryProductsNotifier.findCategory(
+    criteria.selectedCategorySlug,
+    categories,
+  );
+
+  final List<Product> baseProducts;
+  final bool filterCategory;
+
+  if (selectedCat != null) {
+    final catState = ref.watch(categoryProductsProvider);
+    baseProducts = catState.productsFor(selectedCat.id);
+    filterCategory = false;
+  } else {
+    baseProducts = products;
+    filterCategory = true;
+  }
+
+  return applyProductFilters(
+    products: baseProducts,
+    criteria: criteria,
+    categories: categories,
+    filterCategory: filterCategory,
+  );
+});
+
+/// Indicates whether category-specific products are currently loading for the selected category.
+final homeCategoryLoadingProvider = Provider<bool>((ref) {
+  final criteria = ref.watch(homeFilterCriteriaProvider);
+  final categories = ref.watch(categoriesProvider).valueOrNull ?? const <Category>[];
+  final selectedCat = CategoryProductsNotifier.findCategory(
+    criteria.selectedCategorySlug,
+    categories,
+  );
+  if (selectedCat == null) return false;
+  final catState = ref.watch(categoryProductsProvider);
+  return catState.isLoading(selectedCat.id) && catState.productsFor(selectedCat.id).isEmpty;
+});
 
 /// Pure function to filter and sort products efficiently outside the UI build loop.
 List<Product> applyProductFilters({

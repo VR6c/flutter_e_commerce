@@ -132,7 +132,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            l10n.isKhmer ? 'លេខយោងបញ្ជាទិញ' : 'Order Reference',
+                            l10n.orderReference,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
@@ -157,7 +157,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            l10n.isKhmer ? 'ប្រភេទការទូទាត់' : 'Payment Type',
+                            l10n.paymentType,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
@@ -182,7 +182,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            l10n.isKhmer ? 'ពេលវេលាដឹកជញ្ជូន' : 'Estimated Delivery',
+                            l10n.estimatedDelivery,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
@@ -191,7 +191,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            l10n.isKhmer ? 'ថ្ងៃនេះ (៣០–៤៥ នាទី)' : 'Today (30-45 mins)',
+                            l10n.today3045Mins,
                             style: const TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontWeight: FontWeight.w700,
@@ -258,9 +258,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 Text(
-                                  l10n.isKhmer
-                                      ? 'វិក្កយបត្រផ្លូវការសម្រាប់បញ្ជាទិញនេះ'
-                                      : 'Official invoice for this order',
+                                  l10n.officialInvoiceForThisOrder,
                                   style: TextStyle(
                                     fontFamily: AppTheme.fontFamily,
                                     color: isDark
@@ -376,9 +374,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              l10n.isKhmer
-                                  ? 'បានរក្សាទុកការបញ្ជាទិញ! ចូលគណនីគ្រប់ពេលដើម្បីតាមដានប្រវត្តិដឹកជញ្ជូន។'
-                                  : 'Order saved! Sign in anytime to see full order tracking history.',
+                              l10n.orderSavedSignInAnytime,
                               style: const TextStyle(fontFamily: AppTheme.fontFamily, letterSpacing: 0),
                             ),
                             behavior: SnackBarBehavior.floating,
@@ -394,7 +390,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                     ),
                     child: Text(
                       isAuthenticated
-                          ? (l10n.isKhmer ? 'តាមដានការបញ្ជាទិញ' : 'Track Order')
+                          ? (l10n.trackOrder)
                           : l10n.continueShopping,
                       style: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
@@ -413,7 +409,7 @@ class OrderSuccessScreen extends ConsumerWidget {
                   TextButton(
                     onPressed: () => context.go('/home'),
                     child: Text(
-                      l10n.isKhmer ? 'ត្រឡប់ទៅទំព័រដើម' : 'Back to Home',
+                      l10n.backToHome,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w700,

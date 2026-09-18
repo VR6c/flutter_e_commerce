@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../models/social_media_link.dart';
 
 class SocialMediaLinkRepository {
@@ -7,7 +8,7 @@ class SocialMediaLinkRepository {
   SocialMediaLinkRepository(this._apiClient);
 
   Future<List<SocialMediaLink>> fetchSocialMediaLinks() async {
-    final response = await _apiClient.get('/social-media-links');
+    final response = await _apiClient.get(ApiEndpoints.socialMediaLinks);
     final data = response.data;
     if (data is Map<String, dynamic> && data['data'] is List) {
       return (data['data'] as List)

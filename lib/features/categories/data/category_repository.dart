@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/utils/image_url_formatter.dart';
 import '../models/category.dart';
 
@@ -8,7 +9,7 @@ class CategoryRepository {
   CategoryRepository(this._apiClient);
 
   Future<List<Category>> fetchCategories() async {
-    final response = await _apiClient.get('/categories');
+    final response = await _apiClient.get(ApiEndpoints.categories);
     final data = response.data;
     if (data is Map<String, dynamic> && data['data'] is List) {
       final baseUrl = _apiClient.dio.options.baseUrl;

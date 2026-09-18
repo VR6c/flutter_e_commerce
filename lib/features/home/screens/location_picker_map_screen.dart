@@ -371,9 +371,7 @@ class _LocationPickerMapScreenState
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              context.l10n.isKhmer
-                                  ? 'កំណត់ទីតាំងដឹកជញ្ជូន'
-                                  : 'Pin Delivery Location',
+                              context.l10n.pinDeliveryLocation,
                               style: TextStyle(
                                 fontFamily: AppTheme.fontFamily,
                                 fontWeight: FontWeight.w800,
@@ -483,9 +481,7 @@ class _LocationPickerMapScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                context.l10n.isKhmer
-                                    ? 'ទីតាំងដែលបានជ្រើសរើស'
-                                    : 'SELECTED LOCATION',
+                                context.l10n.selectedLocation,
                                 style: TextStyle(
                                   fontFamily: AppTheme.fontFamily,
                                   fontSize: 10.5,
@@ -513,9 +509,7 @@ class _LocationPickerMapScreenState
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      context.l10n.isKhmer
-                                          ? 'កំពុងកំណត់អាសយដ្ឋាន...'
-                                          : 'Locating address...',
+                                      context.l10n.locatingAddress,
                                       style: TextStyle(
                                         fontFamily: AppTheme.fontFamily,
                                         fontSize: 14,
@@ -623,9 +617,7 @@ class _LocationPickerMapScreenState
                         elevation: 0,
                       ),
                       child: Text(
-                        context.l10n.isKhmer
-                            ? 'បញ្ជាក់ទីតាំងដឹកជញ្ជូន'
-                            : 'Confirm Delivery Location',
+                        context.l10n.confirmDeliveryLocation,
                         style: const TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 15,

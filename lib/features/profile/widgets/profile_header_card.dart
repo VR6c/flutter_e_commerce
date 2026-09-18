@@ -143,7 +143,7 @@ class ProfileHeaderCard extends StatelessWidget {
                               Clipboard.setData(ClipboardData(text: customer.email));
                               AppSnackBar.showSuccess(
                                 context,
-                                l10n.isKhmer ? 'បានចម្លងអ៊ីមែល' : 'Email copied to clipboard',
+                                l10n.emailCopiedToClipboard,
                               );
                             },
                             child: Row(

@@ -75,7 +75,7 @@ void main() {
       // Tap the banner card
       final bannerFinder = find.text('Mega Summer Sale');
       expect(bannerFinder, findsOneWidget);
-      await tester.tap(bannerFinder);
+      await tester.tap(bannerFinder, warnIfMissed: false);
       await tester.pump();
 
       expect(tappedBanner, isNotNull);

@@ -102,9 +102,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               ),
               const SizedBox(width: 8),
               Text(
-                l10n.isKhmer
-                    ? 'បានកែសម្រួលព័ត៌មានគណនីជោគជ័យ!'
-                    : 'Profile updated successfully!',
+                l10n.profileUpdatedSuccessfully,
                 style: const TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   letterSpacing: 0,
@@ -178,7 +176,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      l10n.isKhmer ? 'កែសម្រួលព័ត៌មានគណនី' : 'Edit Profile',
+                      l10n.editProfile,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 18,
@@ -244,9 +242,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                           customerName: widget.customer.name,
                         ),
                         child: Text(
-                          l10n.isKhmer
-                              ? 'ចុចដើម្បីប្ដូររូបថត ឬរូបតំណាង'
-                              : 'Tap to change photo or avatar',
+                          l10n.tapToChangePhotoOr,
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 12,
@@ -261,7 +257,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  l10n.isKhmer ? 'ឈ្មោះពេញ' : 'Full Name',
+                  l10n.fullName,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 13,
@@ -282,9 +278,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                       Icons.person_outline_rounded,
                       size: 20,
                     ),
-                    hintText: l10n.isKhmer
-                        ? 'បញ្ចូលឈ្មោះពេញរបស់អ្នក'
-                        : 'Enter your full name',
+                    hintText: l10n.enterYourFullName,
                     hintStyle: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       letterSpacing: 0,
@@ -292,16 +286,14 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return l10n.isKhmer
-                          ? 'សូមបញ្ចូលឈ្មោះពេញ'
-                          : 'Full name is required';
+                      return l10n.fullNameIsRequired;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  l10n.isKhmer ? 'អាសយដ្ឋានអ៊ីមែល' : 'Email Address',
+                  l10n.emailAddress,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 13,
@@ -323,9 +315,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                       Icons.email_outlined,
                       size: 20,
                     ),
-                    hintText: l10n.isKhmer
-                        ? 'បញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នក'
-                        : 'Enter your email address',
+                    hintText: l10n.enterYourEmailAddress,
                     hintStyle: const TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       letterSpacing: 0,
@@ -333,14 +323,10 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return l10n.isKhmer
-                          ? 'សូមបញ្ចូលអ៊ីមែល'
-                          : 'Email is required';
+                      return l10n.emailIsRequired;
                     }
                     if (!val.contains('@') || !val.contains('.')) {
-                      return l10n.isKhmer
-                          ? 'សូមបញ្ចូលអ៊ីមែលឱ្យបានត្រឹមត្រូវ'
-                          : 'Please enter a valid email address';
+                      return l10n.pleaseEnterAValidEmail2;
                     }
                     return null;
                   },
@@ -367,7 +353,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          l10n.isKhmer ? 'ប្តូរពាក្យសម្ងាត់' : 'Change Password',
+                          l10n.changePassword,
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 13,
@@ -394,9 +380,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                         Icons.lock_outline_rounded,
                         size: 20,
                       ),
-                      hintText: l10n.isKhmer
-                          ? 'ពាក្យសម្ងាត់បច្ចុប្បន្ន'
-                          : 'Current Password',
+                      hintText: l10n.currentPassword,
                       hintStyle: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         letterSpacing: 0,
@@ -417,9 +401,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                     ),
                     validator: (val) {
                       if (_changePassword && (val == null || val.isEmpty)) {
-                        return l10n.isKhmer
-                            ? 'សូមបញ្ចូលពាក្យសម្ងាត់បច្ចុប្បន្ន'
-                            : 'Current password is required to change password';
+                        return l10n.currentPasswordIsRequiredTo;
                       }
                       return null;
                     },
@@ -437,9 +419,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                         Icons.lock_reset_rounded,
                         size: 20,
                       ),
-                      hintText: l10n.isKhmer
-                          ? 'ពាក្យសម្ងាត់ថ្មី (យ៉ាងតិច ៦ តួអក្សរ)'
-                          : 'New Password (min 6 characters)',
+                      hintText: l10n.newPasswordMin6Characters,
                       hintStyle: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         letterSpacing: 0,
@@ -461,9 +441,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                     validator: (val) {
                       if (_changePassword) {
                         if (val == null || val.length < 6) {
-                          return l10n.isKhmer
-                              ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ'
-                              : 'New password must be at least 6 characters';
+                          return l10n.newPasswordMustBeAt;
                         }
                       }
                       return null;
@@ -482,9 +460,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                         Icons.lock_reset_rounded,
                         size: 20,
                       ),
-                      hintText: l10n.isKhmer
-                          ? 'ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់ថ្មី'
-                          : 'Confirm New Password',
+                      hintText: l10n.confirmNewPassword,
                       hintStyle: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         letterSpacing: 0,
@@ -505,9 +481,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                     ),
                     validator: (val) {
                       if (_changePassword && val != _newPasswordController.text) {
-                        return l10n.isKhmer
-                            ? 'ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ'
-                            : 'Passwords do not match';
+                        return l10n.passwordsDoNotMatch;
                       }
                       return null;
                     },
@@ -532,7 +506,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                             ),
                           ),
                           child: Text(
-                            l10n.isKhmer ? 'បោះបង់' : 'Cancel',
+                            l10n.cancel,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 14,
@@ -568,9 +542,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                                   ),
                                 )
                               : Text(
-                                  l10n.isKhmer
-                                      ? 'រក្សាទុកការផ្លាស់ប្តូរ'
-                                      : 'Save Changes',
+                                  l10n.saveChanges,
                                   style: const TextStyle(
                                     fontFamily: AppTheme.fontFamily,
                                     fontSize: 14,

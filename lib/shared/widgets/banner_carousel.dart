@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/utils/app_image_cache.dart';
 import '../../core/utils/image_url_formatter.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
@@ -23,25 +23,25 @@ class _BannerCarouselState extends State<BannerCarousel> {
   Timer? _timer;
 
   String _getBannerBadge(BuildContext context, BannerModel banner) {
-    final isKhmer = context.l10n.isKhmer;
+    final l10n = context.l10n;
     final type = banner.type?.trim();
     if (type != null && type.isNotEmpty) {
       switch (type.toLowerCase()) {
         case 'promotion':
-          return isKhmer ? 'ការផ្ដល់ជូនពិសេស' : 'PROMOTION';
+          return l10n.promotion;
         case 'sale':
-          return isKhmer ? 'ប្រូម៉ូសិនពិសេស' : 'SPECIAL SALE';
+          return l10n.specialSale;
         case 'seasonal':
-          return isKhmer ? 'រដូវកាលពិសេស' : 'SEASONAL';
+          return l10n.seasonal;
         case 'featured':
-          return isKhmer ? 'ទំនិញពិសេស' : 'FEATURED';
+          return l10n.featured;
         case 'announcement':
-          return isKhmer ? 'ដំណឹងពិសេស' : 'ANNOUNCEMENT';
+          return l10n.announcement;
         default:
           return type.toUpperCase();
       }
     }
-    return isKhmer ? 'ការផ្ដល់ជូនពិសេស' : 'FRESH DEALS';
+    return l10n.freshDeals;
   }
 
   String _getLocalizedTitle(BuildContext context, String title) {
@@ -116,13 +116,6 @@ class _BannerCarouselState extends State<BannerCarousel> {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final baseColor = isDark
-        ? const Color(0xFF1E293B)
-        : const Color(0xFFE2E8F0);
-    final highlightColor = isDark
-        ? const Color(0xFF334155)
-        : const Color(0xFFF8FAFC);
-    final placeholderColor = isDark ? const Color(0xFF0F172A) : Colors.white;
 
     return RepaintBoundary(
       child: Column(
@@ -156,54 +149,15 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      CachedNetworkImage(
+                      AppCachedImage(
                         imageUrl: banner.imageUrl,
                         fit: BoxFit.cover,
-                        memCacheWidth: 800,
-                        placeholder: (context, url) => Shimmer.fromColors(
-                          baseColor: baseColor,
-                          highlightColor: highlightColor,
-                          child: Container(color: placeholderColor),
+                        memCacheWidth: AppImageCache.bannerWidth,
+                        fallbackImageUrl: getFallbackImageUrl(
+                          title: banner.title,
+                          url: banner.imageUrl,
+                          isBanner: true,
                         ),
-                        errorWidget: (context, url, error) {
-                          final fallback = getFallbackImageUrl(
-                            title: banner.title,
-                            url: banner.imageUrl,
-                            isBanner: true,
-                          );
-                          if (url != fallback && fallback.isNotEmpty) {
-                            return CachedNetworkImage(
-                              imageUrl: fallback,
-                              fit: BoxFit.cover,
-                              memCacheWidth: 800,
-                              placeholder: (context, url) => Shimmer.fromColors(
-                                baseColor: baseColor,
-                                highlightColor: highlightColor,
-                                child: Container(color: placeholderColor),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF1F5F9),
-                                child: Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 40,
-                                  color: theme.hintColor,
-                                ),
-                              ),
-                            );
-                          }
-                          return Container(
-                            color: isDark
-                                ? const Color(0xFF1E293B)
-                                : const Color(0xFFF1F5F9),
-                            child: Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 40,
-                              color: theme.hintColor,
-                            ),
-                          );
-                        },
                       ),
                       Positioned.fill(
                         child: DecoratedBox(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'image_url_formatter.dart';
 
 /// Centralized image cache dimensions and optimized image widget.
 /// Standardizes memory decoding bounds to prevent OOM and reduce GPU/RAM usage.
@@ -31,6 +32,10 @@ class AppCachedImage extends StatelessWidget {
   final Widget? placeholder;
   final Widget? errorWidget;
   final Duration fadeInDuration;
+  final String? fallbackImageUrl;
+  final String? fallbackSlug;
+  final String? fallbackTitle;
+  final String? fallbackCategory;
 
   const AppCachedImage({
     super.key,
@@ -44,7 +49,28 @@ class AppCachedImage extends StatelessWidget {
     this.placeholder,
     this.errorWidget,
     this.fadeInDuration = const Duration(milliseconds: 120),
+    this.fallbackImageUrl,
+    this.fallbackSlug,
+    this.fallbackTitle,
+    this.fallbackCategory,
   });
+
+  String? _resolveFallbackUrl() {
+    if (fallbackImageUrl != null && fallbackImageUrl!.isNotEmpty && fallbackImageUrl != imageUrl) {
+      return fallbackImageUrl;
+    }
+    if (fallbackSlug != null || fallbackTitle != null || fallbackCategory != null) {
+      final fallback = getFallbackImageUrl(
+        slug: fallbackSlug ?? '',
+        title: fallbackTitle,
+        category: fallbackCategory,
+      );
+      if (fallback.isNotEmpty && fallback != imageUrl) {
+        return fallback;
+      }
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +80,43 @@ class AppCachedImage extends StatelessWidget {
     final baseColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
     final highlightColor = isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC);
     final fallbackBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9);
+
+    final defaultError = Container(
+      width: width,
+      height: height,
+      color: fallbackBg,
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.eco_rounded,
+        size: 28,
+        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+      ),
+    );
+
+    final resolvedFallback = _resolveFallbackUrl();
+
+    // If main image URL is empty, try fallback directly
+    if (imageUrl.trim().isEmpty) {
+      if (resolvedFallback != null) {
+        return AppCachedImage(
+          imageUrl: resolvedFallback,
+          width: width,
+          height: height,
+          fit: fit,
+          memCacheWidth: memCacheWidth,
+          memCacheHeight: memCacheHeight,
+          borderRadius: borderRadius,
+          placeholder: placeholder,
+          errorWidget: errorWidget ?? defaultError,
+          fadeInDuration: fadeInDuration,
+        );
+      }
+      Widget fallbackWidget = errorWidget ?? defaultError;
+      if (borderRadius != null) {
+        fallbackWidget = ClipRRect(borderRadius: borderRadius!, child: fallbackWidget);
+      }
+      return fallbackWidget;
+    }
 
     Widget image = CachedNetworkImage(
       imageUrl: imageUrl,
@@ -74,19 +137,21 @@ class AppCachedImage extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-      errorWidget: (context, url, error) =>
-          errorWidget ??
-          Container(
+      errorWidget: (context, url, error) {
+        if (resolvedFallback != null) {
+          return CachedNetworkImage(
+            imageUrl: resolvedFallback,
             width: width,
             height: height,
-            color: fallbackBg,
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.eco_rounded,
-              size: 28,
-              color: theme.colorScheme.primary.withValues(alpha: 0.5),
-            ),
-          ),
+            fit: fit,
+            memCacheWidth: memCacheWidth,
+            memCacheHeight: memCacheHeight,
+            fadeInDuration: fadeInDuration,
+            errorWidget: (_, _, _) => errorWidget ?? defaultError,
+          );
+        }
+        return errorWidget ?? defaultError;
+      },
     );
 
     if (borderRadius != null) {

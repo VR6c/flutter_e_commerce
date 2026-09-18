@@ -20,11 +20,12 @@ class ProfileShoppingMetricsCard extends ConsumerWidget {
     final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
 
-    final ordersCount = ref.watch(ordersProvider).valueOrNull?.length ?? 0;
-    final wishlistCount = ref.watch(wishlistProvider).length;
-    final cartCount = ref.watch(cartProvider).length;
+    final ordersCount = ref.watch(ordersProvider.select((o) => o.valueOrNull?.length ?? 0));
+    final wishlistCount = ref.watch(wishlistProvider.select((w) => w.length));
+    final cartCount = ref.watch(cartProvider.select((c) => c.length));
 
-    return Container(
+    return RepaintBoundary(
+      child: Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -75,6 +76,7 @@ class ProfileShoppingMetricsCard extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -151,11 +153,23 @@ class ProfileOrderStatusCard extends ConsumerWidget {
 
     final orders = ref.watch(ordersProvider).valueOrNull ?? [];
 
-    int countForStatus(String status) {
-      return orders.where((o) => o.status.toLowerCase() == status.toLowerCase()).length;
+    final statusCounts = <String, int>{
+      'pending': 0,
+      'processing': 0,
+      'shipped': 0,
+      'delivered': 0,
+    };
+    for (final order in orders) {
+      final s = order.status.toLowerCase();
+      if (s == 'completed') {
+        statusCounts['delivered'] = (statusCounts['delivered'] ?? 0) + 1;
+      } else if (statusCounts.containsKey(s)) {
+        statusCounts[s] = statusCounts[s]! + 1;
+      }
     }
 
-    return Container(
+    return RepaintBoundary(
+      child: Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -225,7 +239,7 @@ class ProfileOrderStatusCard extends ConsumerWidget {
               _statusItem(
                 icon: Icons.hourglass_top_rounded,
                 label: l10n.toPay,
-                count: countForStatus('pending'),
+                count: statusCounts['pending'] ?? 0,
                 theme: theme,
                 isDark: isDark,
                 onTap: () => context.push(AppRoutes.orders),
@@ -233,7 +247,7 @@ class ProfileOrderStatusCard extends ConsumerWidget {
               _statusItem(
                 icon: Icons.inventory_2_outlined,
                 label: l10n.processingStatus,
-                count: countForStatus('processing'),
+                count: statusCounts['processing'] ?? 0,
                 theme: theme,
                 isDark: isDark,
                 onTap: () => context.push(AppRoutes.orders),
@@ -241,7 +255,7 @@ class ProfileOrderStatusCard extends ConsumerWidget {
               _statusItem(
                 icon: Icons.local_shipping_outlined,
                 label: l10n.shippedStatus,
-                count: countForStatus('shipped'),
+                count: statusCounts['shipped'] ?? 0,
                 theme: theme,
                 isDark: isDark,
                 onTap: () => context.push(AppRoutes.orders),
@@ -249,7 +263,7 @@ class ProfileOrderStatusCard extends ConsumerWidget {
               _statusItem(
                 icon: Icons.check_circle_outline_rounded,
                 label: l10n.deliveredStatus,
-                count: countForStatus('delivered'),
+                count: statusCounts['delivered'] ?? 0,
                 theme: theme,
                 isDark: isDark,
                 onTap: () => context.push(AppRoutes.orders),
@@ -258,6 +272,7 @@ class ProfileOrderStatusCard extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 

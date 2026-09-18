@@ -69,9 +69,7 @@ class _LocationSelectionSheetState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            context.l10n.isKhmer
-                ? 'សូមបញ្ចូលឈ្មោះផ្លូវ ឬអាសយដ្ឋាន'
-                : 'Please enter a street address',
+            context.l10n.pleaseEnterAStreetAddress,
             style: const TextStyle(
               fontFamily: AppTheme.fontFamily,
               letterSpacing: 0,
@@ -195,9 +193,7 @@ class _LocationSelectionSheetState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          context.l10n.isKhmer
-                              ? 'ជ្រើសរើសទីតាំងដឹកជញ្ជូន'
-                              : 'Choose Delivery Location',
+                          context.l10n.chooseDeliveryLocation,
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 17,
@@ -208,9 +204,7 @@ class _LocationSelectionSheetState
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          context.l10n.isKhmer
-                              ? 'ទំនិញនឹងត្រូវដឹកជញ្ជូនទៅកាន់អាសយដ្ឋាននេះ'
-                              : 'Groceries will be delivered to this address',
+                          context.l10n.groceriesWillBeDeliveredTo,
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 12,
@@ -271,9 +265,7 @@ class _LocationSelectionSheetState
                             letterSpacing: 0,
                           ),
                           decoration: InputDecoration(
-                            hintText: context.l10n.isKhmer
-                                ? 'ស្វែងរកតំបន់ ផ្លូវ ឬទីតាំងសម្គាល់...'
-                                : 'Search area, street or landmark...',
+                            hintText: context.l10n.searchAreaStreetOrLandmark,
                             hintStyle: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 13,
@@ -361,9 +353,7 @@ class _LocationSelectionSheetState
                                     Row(
                                       children: [
                                         Text(
-                                          context.l10n.isKhmer
-                                              ? 'កំណត់ទីតាំងលើផែនទី'
-                                              : 'Set Location on Map',
+                                          context.l10n.setLocationOnMap,
                                           style: TextStyle(
                                             fontFamily: AppTheme.fontFamily,
                                             fontWeight: FontWeight.w700,
@@ -386,9 +376,7 @@ class _LocationSelectionSheetState
                                             ),
                                           ),
                                           child: Text(
-                                            context.l10n.isKhmer
-                                                ? 'អន្តរកម្ម'
-                                                : 'Interactive',
+                                            context.l10n.interactive,
                                             style: TextStyle(
                                               fontFamily: AppTheme.fontFamily,
                                               fontSize: 9,
@@ -402,9 +390,7 @@ class _LocationSelectionSheetState
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      context.l10n.isKhmer
-                                          ? 'អូសម្ជុលទៅកាន់ចំណុចដឹកជញ្ជូនជាក់លាក់របស់អ្នក'
-                                          : 'Drag pin to your exact delivery spot',
+                                      context.l10n.dragPinToYourExact,
                                       style: TextStyle(
                                         fontFamily: AppTheme.fontFamily,
                                         fontSize: 12,
@@ -436,9 +422,7 @@ class _LocationSelectionSheetState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            context.l10n.isKhmer
-                                ? 'អាសយដ្ឋានដែលបានរក្សាទុក'
-                                : 'SAVED ADDRESSES',
+                            context.l10n.savedAddresses,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 11,
@@ -450,9 +434,7 @@ class _LocationSelectionSheetState
                             ),
                           ),
                           Text(
-                            context.l10n.isKhmer
-                                ? '${filteredLocations.length} ទីតាំង'
-                                : '${filteredLocations.length} locations',
+                            context.l10n.locationsCount(filteredLocations.length),
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 11,
@@ -599,7 +581,7 @@ class _LocationSelectionSheetState
                                                         ),
                                                   ),
                                                   child: Text(
-                                                    context.l10n.isKhmer ? 'លំនាំដើម' : 'Default',
+                                                    context.l10n.defaultBadge,
                                                     style: TextStyle(
                                                       fontFamily: AppTheme.fontFamily,
                                                       fontSize: 10,
@@ -689,7 +671,7 @@ class _LocationSelectionSheetState
                           size: 18,
                         ),
                         label: Text(
-                          context.l10n.isKhmer ? 'បន្ថែមអាសយដ្ឋានថ្មី' : 'Add New Address',
+                          context.l10n.addNewAddress,
                           style: const TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontWeight: FontWeight.w700,
@@ -715,7 +697,7 @@ class _LocationSelectionSheetState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            context.l10n.isKhmer ? 'បន្ថែមអាសយដ្ឋានដឹកជញ្ជូន' : 'Add Delivery Address',
+                            context.l10n.addDeliveryAddress,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 16,
@@ -733,7 +715,7 @@ class _LocationSelectionSheetState
                               size: 16,
                             ),
                             label: Text(
-                              context.l10n.isKhmer ? 'ត្រឡប់ក្រោយ' : 'Back',
+                              context.l10n.back,
                               style: const TextStyle(
                                 fontFamily: AppTheme.fontFamily,
                                 letterSpacing: 0,
@@ -749,7 +731,7 @@ class _LocationSelectionSheetState
 
                       // Label selection chips
                       Text(
-                        context.l10n.isKhmer ? 'ស្លាកអាសយដ្ឋាន' : 'Address Label',
+                        context.l10n.addressLabel,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
@@ -817,9 +799,7 @@ class _LocationSelectionSheetState
                             letterSpacing: 0,
                           ),
                           decoration: InputDecoration(
-                            hintText: context.l10n.isKhmer
-                                ? 'ស្លាកផ្ទាល់ខ្លួន (ឧ. កន្លែងហាត់ប្រាណ ផ្ទះមិត្តភក្តិ)'
-                                : 'Custom label (e.g. Gym, Friend\'s Place)',
+                            hintText: context.l10n.customLabelEgGymFriend,
                             hintStyle: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 13,
@@ -852,7 +832,7 @@ class _LocationSelectionSheetState
 
                       // Street Address Input
                       Text(
-                        context.l10n.isKhmer ? 'ផ្លូវ & ផ្ទះលេខ / អគារ' : 'Street & House / Building',
+                        context.l10n.streetHouseBuilding,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
@@ -874,9 +854,7 @@ class _LocationSelectionSheetState
                           letterSpacing: 0,
                         ),
                         decoration: InputDecoration(
-                          hintText: context.l10n.isKhmer
-                              ? 'ឧ. ផ្លូវ ២០០៤, សែនសុខ, ផ្ទះលេខ ៤២'
-                              : 'e.g. Street 2004, Sen Sok, House #42',
+                          hintText: context.l10n.egStreet2004SenSok,
                           hintStyle: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 13,
@@ -909,7 +887,7 @@ class _LocationSelectionSheetState
 
                       // City Input
                       Text(
-                        context.l10n.isKhmer ? 'រាជធានី / ខេត្ត / ខណ្ឌ' : 'City / District',
+                        context.l10n.cityDistrict,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 12,
@@ -930,7 +908,7 @@ class _LocationSelectionSheetState
                           letterSpacing: 0,
                         ),
                         decoration: InputDecoration(
-                          hintText: context.l10n.isKhmer ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh',
+                          hintText: context.l10n.phnomPenh,
                           hintStyle: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 13,
@@ -977,9 +955,7 @@ class _LocationSelectionSheetState
                           elevation: 0,
                         ),
                         child: Text(
-                          context.l10n.isKhmer
-                              ? 'រក្សាទុក & ដឹកជញ្ជូនមកទីនេះ'
-                              : 'Save & Deliver Here',
+                          context.l10n.saveDeliverHere,
                           style: const TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 15,

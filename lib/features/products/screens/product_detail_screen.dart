@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_image_cache.dart';
-import '../../../core/utils/image_url_formatter.dart';
 import '../../../shared/widgets/cart_icon_badge.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../wishlist/providers/wishlist_provider.dart';
@@ -26,7 +24,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  int _quantity = 1;
+  late final ValueNotifier<int> _quantityNotifier;
   String? _selectedColor;
   String? _selectedSize;
 
@@ -124,6 +122,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _quantityNotifier = ValueNotifier<int>(1);
     _allColors = _computeAllColors();
 
     // Default to the primary variant's attributes if available
@@ -173,10 +172,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   @override
+  void dispose() {
+    _quantityNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isWishlisted = ref.watch(isInWishlistProvider(widget.product.id));
 
     final imageBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F9F5);
 
@@ -228,20 +232,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         : const Color(0xFFF1F5F9),
                   ),
                 ),
-                child: IconButton(
-                  icon: Icon(
-                    isWishlisted
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: isWishlisted
-                        ? const Color(0xFFEF4444)
-                        : (isDark ? Colors.grey[400] : const Color(0xFF94A3B8)),
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    ref
-                        .read(wishlistProvider.notifier)
-                        .toggleItem(widget.product);
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final isWishlisted = ref.watch(
+                      isInWishlistProvider(widget.product.id),
+                    );
+                    return IconButton(
+                      icon: Icon(
+                        isWishlisted
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isWishlisted
+                            ? const Color(0xFFEF4444)
+                            : (isDark
+                                ? Colors.grey[400]
+                                : const Color(0xFF94A3B8)),
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        ref
+                            .read(wishlistProvider.notifier)
+                            .toggleItem(widget.product);
+                      },
+                    );
                   },
                 ),
               ),
@@ -334,9 +347,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               Text(
                                 widget.product.shortDescription.isNotEmpty
                                     ? widget.product.shortDescription
-                                    : (context.l10n.isKhmer
-                                          ? '${context.l10n.translateCategory(widget.product.category)} · មានក្នុងស្តុក'
-                                          : '${widget.product.category} · Fresh Stock'),
+                                    : context.l10n.categoryFreshStock(context.l10n.translateCategory(widget.product.category)),
                                 style: TextStyle(
                                   fontFamily: AppTheme.fontFamily,
                                   fontSize: 13,
@@ -396,9 +407,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              context.l10n.isKhmer
-                                  ? 'តម្លៃសរុប'
-                                  : 'Total Price',
+                              context.l10n.totalPrice,
                               style: TextStyle(
                                 fontFamily: AppTheme.fontFamily,
                                 fontSize: 12,
@@ -409,56 +418,61 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                             ),
                             const SizedBox(height: 2),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Text(
-                                  '\$${(_displayPrice * _quantity).toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w800,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                                if (_hasDiscount && _originalPrice != null) ...[
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '\$${(_originalPrice! * _quantity).toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: isDark
-                                          ? Colors.grey[500]
-                                          : const Color(0xFF94A3B8),
-                                      decoration: TextDecoration.lineThrough,
+                            ValueListenableBuilder<int>(
+                              valueListenable: _quantityNotifier,
+                              builder: (context, currentQty, _) {
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      '\$${(_displayPrice * currentQty).toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
+                                        color: theme.colorScheme.primary,
+                                      ),
                                     ),
-                                  ),
-                                  if (_discountPercentage != null) ...[
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFFEF4444,
-                                        ).withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '-$_discountPercentage%',
-                                        style: const TextStyle(
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFFEF4444),
+                                    if (_hasDiscount && _originalPrice != null) ...[
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '\$${(_originalPrice! * currentQty).toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark
+                                              ? Colors.grey[500]
+                                              : const Color(0xFF94A3B8),
+                                          decoration: TextDecoration.lineThrough,
                                         ),
                                       ),
-                                    ),
+                                      if (_discountPercentage != null) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xFFEF4444,
+                                            ).withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            '-$_discountPercentage%',
+                                            style: const TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFFEF4444),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ],
-                                ],
-                              ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -480,38 +494,43 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               width: 1,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              _buildStepperBtn(
-                                icon: Icons.remove_rounded,
-                                onTap: () {
-                                  if (_quantity > 1) {
-                                    setState(() => _quantity--);
-                                  }
-                                },
-                                theme: theme,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                child: Text(
-                                  '$_quantity',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                    color: theme.colorScheme.onSurface,
+                          child: ValueListenableBuilder<int>(
+                            valueListenable: _quantityNotifier,
+                            builder: (context, currentQty, _) {
+                              return Row(
+                                children: [
+                                  _buildStepperBtn(
+                                    icon: Icons.remove_rounded,
+                                    onTap: () {
+                                      if (currentQty > 1) {
+                                        _quantityNotifier.value = currentQty - 1;
+                                      }
+                                    },
+                                    theme: theme,
                                   ),
-                                ),
-                              ),
-                              _buildStepperBtn(
-                                icon: Icons.add_rounded,
-                                onTap: () {
-                                  setState(() => _quantity++);
-                                },
-                                theme: theme,
-                              ),
-                            ],
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    child: Text(
+                                      '$currentQty',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  _buildStepperBtn(
+                                    icon: Icons.add_rounded,
+                                    onTap: () {
+                                      _quantityNotifier.value = currentQty + 1;
+                                    },
+                                    theme: theme,
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -614,9 +633,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     Text(
                       widget.product.shortDescription.isNotEmpty
                           ? widget.product.shortDescription
-                          : (context.l10n.isKhmer
-                                ? 'ទំនិញគុណភាពខ្ពស់ ត្រូវបានជ្រើសរើសយ៉ាងយកចិត្តទុកដាក់ និងដឹកជញ្ជូនដល់គេហដ្ឋានរបស់អ្នកដោយផ្ទាល់ ធានាគុណភាពល្អ ១០០%។'
-                                : 'High quality product are carefully selected and delivered straight to your door. Hand-picked for the best quality and freshness guaranteed.'),
+                          : (context.l10n.highQualityProductAreCarefully),
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 13.5,
@@ -661,79 +678,84 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             child: SizedBox(
               width: double.infinity,
               height: 54,
-              child: ElevatedButton.icon(
-                onPressed: _inStock
-                    ? () {
-                        ref
-                            .read(cartProvider.notifier)
-                            .addItem(
-                              widget.product,
-                              quantity: _quantity,
-                              variantId: _selectedVariant?.id,
-                              variantName: _selectedVariant?.name,
-                              selectedColor: _selectedColor,
-                              selectedSize: _selectedSize,
-                              unitPrice: _displayPrice,
-                            );
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    context.l10n.isKhmer
-                                        ? 'បានបន្ថែម $_quantity × ${widget.product.name} ទៅកន្ត្រក'
-                                        : 'Added $_quantity × ${widget.product.name} to cart',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: AppTheme.fontFamily,
-                                      fontWeight: FontWeight.w600,
+              child: ValueListenableBuilder<int>(
+                valueListenable: _quantityNotifier,
+                builder: (context, currentQty, _) {
+                  return ElevatedButton.icon(
+                    onPressed: _inStock
+                        ? () {
+                            HapticFeedback.mediumImpact();
+                            final pv = _selectedVariant ??
+                                widget.product.primaryVariant;
+                            ref.read(cartProvider.notifier).addItem(
+                                  widget.product,
+                                  quantity: currentQty,
+                                  variantId: pv?.id,
+                                  variantName: pv?.name,
+                                  selectedColor: _selectedColor,
+                                  selectedSize: _selectedSize,
+                                  unitPrice: _displayPrice,
+                                );
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_rounded,
+                                      color: Colors.white,
+                                      size: 18,
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        context.l10n.addedQuantityToCart(
+                                          currentQty,
+                                          widget.product.name,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontFamily: AppTheme.fontFamily,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: theme.colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            action: SnackBarAction(
-                              label: context.l10n.isKhmer
-                                  ? 'មើលកន្ត្រក'
-                                  : 'View Cart',
-                              textColor: Colors.white,
-                              onPressed: () => context.push('/cart'),
-                            ),
-                          ),
-                        );
-                      }
-                    : null,
-                icon: const Icon(Icons.shopping_bag_rounded, size: 20),
-                label: Text(
-                  _inStock
-                      ? '${context.l10n.addToCart} · \$${(_displayPrice * _quantity).toStringAsFixed(2)}'
-                      : context.l10n.outOfStock,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 0,
-                ),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: theme.colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                action: SnackBarAction(
+                                  label: context.l10n.viewCart,
+                                  textColor: Colors.white,
+                                  onPressed: () => context.push('/cart'),
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.shopping_bag_rounded, size: 20),
+                    label: Text(
+                      _inStock
+                          ? '${context.l10n.addToCart} · \$${(_displayPrice * currentQty).toStringAsFixed(2)}'
+                          : context.l10n.outOfStock,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      elevation: 0,
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -743,15 +765,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Widget _buildImageCard(Color imageBg, ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = context.isDark;
     return Container(
       width: double.infinity,
       height: 340,
       decoration: BoxDecoration(
-        color: imageBg,
+        color: context.imageBg,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+          color: context.borderSubtle,
           width: 1.2,
         ),
         boxShadow: [
@@ -764,37 +786,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
-        child: CachedNetworkImage(
+        child: AppCachedImage(
           imageUrl: widget.product.thumbnail,
           fit: BoxFit.cover,
           memCacheWidth: AppImageCache.detailWidth,
-          fadeInDuration: const Duration(milliseconds: 150),
-          placeholder: (context, url) => Center(
-            child: Container(
-              color: imageBg,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-          ),
-          errorWidget: (context, url, error) {
-            final fallback = getFallbackImageUrl(
-              slug: widget.product.slug,
-              title: widget.product.name,
-              category: widget.product.category,
-            );
-            if (fallback.isNotEmpty) {
-              return CachedNetworkImage(
-                imageUrl: fallback,
-                fit: BoxFit.cover,
-                memCacheWidth: AppImageCache.detailWidth,
-              );
-            }
-            return Icon(
-              Icons.eco_rounded,
-              size: 80,
-              color: theme.colorScheme.primary.withValues(alpha: 0.5),
-            );
-          },
+          fallbackSlug: widget.product.slug,
+          fallbackTitle: widget.product.name,
+          fallbackCategory: widget.product.category,
         ),
       ),
     );
@@ -805,16 +803,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     required VoidCallback onTap,
     required ThemeData theme,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary,
-          shape: BoxShape.circle,
+    return Material(
+      color: theme.colorScheme.primary,
+      shape: const CircleBorder(),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: Icon(icon, color: Colors.white, size: 18),
         ),
-        child: Icon(icon, color: Colors.white, size: 18),
       ),
     );
   }

@@ -142,7 +142,7 @@ class PaymentMethodsSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  l10n.isKhmer ? 'ជម្រើសទូទាត់' : 'Payment Options',
+                  l10n.paymentOptions,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 18,
@@ -157,9 +157,7 @@ class PaymentMethodsSheet extends StatelessWidget {
             _buildPaymentOptionTile(
               icon: Icons.qr_code_2_rounded,
               title: 'ABA PayWay / KHQR',
-              subtitle: l10n.isKhmer
-                  ? 'ការទូទាត់រហ័ស និងមានសុវត្ថិភាពខ្ពស់'
-                  : 'Fast and secure contactless checkout',
+              subtitle: l10n.abaPaywaySub,
               theme: theme,
               isDark: isDark,
               isDefault: true,
@@ -167,12 +165,8 @@ class PaymentMethodsSheet extends StatelessWidget {
             const SizedBox(height: 10),
             _buildPaymentOptionTile(
               icon: Icons.money_rounded,
-              title: l10n.isKhmer
-                  ? 'ទូទាត់ពេលទទួលទំនិញ (COD)'
-                  : 'Cash on Delivery (COD)',
-              subtitle: l10n.isKhmer
-                  ? 'បង់ប្រាក់សុទ្ធនៅពេលទំនិញត្រូវបានដឹកជញ្ជូនដល់'
-                  : 'Pay cash when items are delivered',
+              title: l10n.cashOnDelivery,
+              subtitle: l10n.codSub,
               theme: theme,
               isDark: isDark,
             ),
@@ -189,7 +183,7 @@ class PaymentMethodsSheet extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  l10n.isKhmer ? 'រួចរាល់' : 'Done',
+                  l10n.done,
                   style: const TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 14,

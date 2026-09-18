@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/utils/app_image_cache.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
@@ -86,7 +86,7 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     title: Text(
-                      l10n.isKhmer ? 'សម្អាតបញ្ជីចង់បាន?' : 'Clear Wishlist?',
+                      l10n.clearWishlist,
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontFamily: AppTheme.fontFamily,
@@ -94,9 +94,7 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                       ),
                     ),
                     content: Text(
-                      l10n.isKhmer
-                          ? 'តើអ្នកពិតជាចង់លុបទំនិញទាំងអស់ចេញពីបញ្ជីចង់បានមែនទេ?'
-                          : 'Do you want to remove all favorite items?',
+                      l10n.doYouWantToRemove,
                       style: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         letterSpacing: 0,
@@ -171,9 +169,7 @@ class _WishlistItem extends ConsumerWidget {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-          ),
+          border: Border.all(color: context.borderSubtle),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -204,10 +200,7 @@ class _WishlistItem extends ConsumerWidget {
                       width: heroSize.width,
                       height: heroSize.height,
                       decoration: BoxDecoration(
-                        color: (isDark
-                                ? const Color(0xFF1E293B)
-                                : const Color(0xFFF3F9F5))
-                            .withValues(alpha: 0.6),
+                        color: context.imageBg.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     );
@@ -228,23 +221,19 @@ class _WishlistItem extends ConsumerWidget {
                     width: 76,
                     height: 76,
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : const Color(0xFFF3F9F5),
+                      color: context.imageBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(6),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: CachedNetworkImage(
+                      child: AppCachedImage(
                         imageUrl: product.thumbnail,
                         fit: BoxFit.contain,
-                        memCacheWidth: 200,
-                        memCacheHeight: 200,
-                        errorWidget: (_, _, _) => Icon(
-                          Icons.eco_rounded,
-                          color: theme.colorScheme.primary,
-                        ),
+                        memCacheWidth: AppImageCache.thumbnailWidth,
+                        fallbackSlug: product.slug,
+                        fallbackTitle: product.name,
+                        fallbackCategory: product.category,
                       ),
                     ),
                   ),
@@ -423,7 +412,7 @@ class _EmptyWishlist extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              context.l10n.isKhmer ? 'បញ្ជីចង់បានរបស់អ្នកទទេ' : 'Your Wishlist is Empty',
+              context.l10n.emptyWishlist,
               style: TextStyle(
                 fontFamily: AppTheme.fontFamily,
                 fontSize: 20,
@@ -434,9 +423,7 @@ class _EmptyWishlist extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              context.l10n.isKhmer
-                  ? 'រក្សាទុកទំនិញដែលអ្នកចូលចិត្ត និងបន្ថែមទៅកន្ត្រកនៅពេលក្រោយយ៉ាងងាយស្រួល។'
-                  : 'Save your favorite items and easily add them to your cart later.',
+              context.l10n.saveYourFavoriteItemsAnd,
               style: TextStyle(
                 fontFamily: AppTheme.fontFamily,
                 color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
@@ -459,7 +446,7 @@ class _EmptyWishlist extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  context.l10n.isKhmer ? 'ស្វែងរកទំនិញ' : 'Explore Products',
+                  context.l10n.exploreProducts,
                   style: const TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontWeight: FontWeight.w700,
@@ -521,9 +508,7 @@ class _GuestWishlist extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                context.l10n.isKhmer
-                    ? 'ចូលគណនីដើម្បីមើលបញ្ជីចង់បាន'
-                    : 'Sign In to view Wishlist',
+                context.l10n.signInToViewWishlist,
                 style: TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   fontSize: 20,
@@ -534,9 +519,7 @@ class _GuestWishlist extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                context.l10n.isKhmer
-                    ? 'ចូលគណនីដើម្បីរក្សាទុកទំនិញដែលអ្នកចូលចិត្តនៅលើគ្រប់ឧបករណ៍របស់អ្នក។'
-                    : 'Sign in to sync your favorite items across all your devices.',
+                context.l10n.signInToSyncYour,
                 style: TextStyle(
                   fontFamily: AppTheme.fontFamily,
                   color: isDark ? Colors.grey[400] : const Color(0xFF64748B),

@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_endpoints.dart';
 import '../../../core/utils/image_url_formatter.dart';
 import '../models/brand.dart';
 
@@ -8,7 +9,7 @@ class BrandRepository {
   BrandRepository(this._apiClient);
 
   Future<List<Brand>> fetchBrands() async {
-    final response = await _apiClient.get('/brands');
+    final response = await _apiClient.get(ApiEndpoints.brands);
     final data = response.data;
     if (data is Map<String, dynamic> && data['data'] is List) {
       final baseUrl = _apiClient.dio.options.baseUrl;

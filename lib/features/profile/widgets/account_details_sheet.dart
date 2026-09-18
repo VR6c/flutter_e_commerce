@@ -36,9 +36,7 @@ class AccountDetailsSheet extends StatelessWidget {
             const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Text(
-              l10n.isKhmer
-                  ? 'បានចម្លង $label ជោគជ័យ'
-                  : 'Copied $label to clipboard',
+              l10n.copiedToClipboardLabel(label),
               style: const TextStyle(
                 fontFamily: AppTheme.fontFamily,
                 letterSpacing: 0,
@@ -170,7 +168,7 @@ class AccountDetailsSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  l10n.isKhmer ? 'ព័ត៌មានលម្អិតគណនី' : 'Account Details',
+                  l10n.accountDetails,
                   style: TextStyle(
                     fontFamily: AppTheme.fontFamily,
                     fontSize: 18,
@@ -207,9 +205,7 @@ class AccountDetailsSheet extends StatelessWidget {
                       );
                     },
                     child: Text(
-                      l10n.isKhmer
-                          ? 'ប្ដូររូបតំណាង / រូបថត'
-                          : 'Change Avatar / Photo',
+                      l10n.changeAvatarPhoto,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontSize: 12,
@@ -225,27 +221,27 @@ class AccountDetailsSheet extends StatelessWidget {
             const SizedBox(height: 16),
             _buildInfoDetailRow(
               context,
-              l10n.isKhmer ? 'ឈ្មោះពេញ' : 'Full Name',
+              l10n.fullName,
               customer.name,
               theme,
             ),
             _buildInfoDetailRow(
               context,
-              l10n.isKhmer ? 'អាសយដ្ឋានអ៊ីមែល' : 'Email Address',
+              l10n.emailAddress,
               customer.email,
               theme,
               canCopy: true,
             ),
             _buildInfoDetailRow(
               context,
-              l10n.isKhmer ? 'លេខសម្គាល់អតិថិជន' : 'Customer ID',
+              l10n.customerId,
               '#${customer.id}',
               theme,
               canCopy: true,
             ),
             _buildInfoDetailRow(
               context,
-              l10n.isKhmer ? 'ស្ថានភាព' : 'Status',
+              l10n.status,
               l10n.isKhmer
                   ? (customer.status.toLowerCase() == 'active'
                       ? 'សកម្ម'
@@ -273,7 +269,7 @@ class AccountDetailsSheet extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        l10n.isKhmer ? 'បិទ' : 'Close',
+                        l10n.close,
                         style: TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 14,
@@ -300,7 +296,7 @@ class AccountDetailsSheet extends StatelessWidget {
                         color: Colors.white,
                       ),
                       label: Text(
-                        l10n.isKhmer ? 'កែសម្រួលព័ត៌មាន' : 'Edit Info',
+                        l10n.editInfo,
                         style: const TextStyle(
                           fontFamily: AppTheme.fontFamily,
                           fontSize: 14,

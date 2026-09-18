@@ -373,7 +373,7 @@ class _AuthSuccessScreenState extends ConsumerState<AuthSuccessScreen>
                       context.go(AppRoutes.home);
                     },
                     child: Text(
-                      l10n.isKhmer ? 'ត្រឡប់ទៅទំព័រដើម' : 'Back to Home',
+                      l10n.backToHome,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w700,

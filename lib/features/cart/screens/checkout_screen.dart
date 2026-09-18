@@ -1,33 +1,18 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/api/api_endpoints.dart';
-import '../../../core/api/providers.dart';
 import '../../../core/api/app_exception.dart';
+import '../../../shared/widgets/price_breakdown_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../home/providers/delivery_location_provider.dart';
 import '../../home/widgets/location_selection_sheet.dart';
+import '../../orders/providers/orders_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/coupon_provider.dart';
-
-const String _abaPayWayLogoSvg = '''
-<svg width="196" height="31" viewBox="0 0 196 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15.5709 5.11267L25.0237 30.837H19.3634L17.5806 25.5494H7.39852L5.68665 30.837H0L9.33729 5.11267H15.5709ZM8.81867 21.212H16.1159L12.4754 10.2631L8.81867 21.212Z" fill="#055E7C"/>
-<path d="M32.594 5.11267H44.9559C50.3894 5.11267 53.1952 7.43444 53.1952 11.6168C53.1952 14.191 52.1802 15.9502 50.0632 16.9163C52.8001 17.9917 54.117 19.9915 54.117 23.009C54.117 27.903 50.756 30.835 44.5609 30.835H32.594V5.11267ZM43.9369 15.0537C46.5199 15.0537 47.7679 14.2328 47.7679 12.2569C47.7679 10.281 46.4956 9.58128 43.8964 9.58128H37.7762V15.0537H43.9389H43.9369ZM44.1496 26.1895C47.1074 26.1895 48.5053 25.2115 48.5053 22.8579C48.5053 20.3473 47.1054 19.4508 44.1172 19.4508H37.7742V26.1895H44.1496Z" fill="#055E7C"/>
-<path d="M75.0165 5.11267L84.4733 30.837H78.8171L77.0242 25.5494H66.8481L65.1322 30.837H59.4537L68.7788 5.11267H75.0145H75.0165ZM68.2703 21.214H75.5676L71.925 10.2651L68.2703 21.214Z" fill="#055E7C"/>
-<path d="M91.9077 0H86.9077V10H91.9077V0Z" fill="#EB2227"/>
-<path d="M193.08 5.29766C192.29 5.29766 191.573 5.60776 191.046 6.10869L179.343 15.3838L177.127 13.6524L167.585 6.19814L167.415 6.05502C167.269 5.93774 167.25 5.92184 167.015 5.75685C166.503 5.38314 165.928 5.14062 165.265 5.14062C163.719 5.14062 162.467 6.40487 162.467 7.96531C162.467 8.83398 162.856 9.61122 163.468 10.13L163.472 10.134C163.499 10.1559 163.525 10.1777 163.553 10.1996L174.42 18.9679L176.328 20.5084L176.337 28.1794V28.1933C176.351 29.7339 177.629 30.9782 179.201 30.9782C180.773 30.9782 182.019 29.7657 182.064 28.251L182.07 28.241V20.5144L193.65 11.4301L193.781 11.3227L194.12 11.0444C194.191 10.9848 194.286 10.9152 194.351 10.8536L194.807 10.4779C195.499 9.88951 196 9.11625 196 8.16807C196 6.58577 194.693 5.30363 193.08 5.30363V5.29766Z" fill="#00BCD4"/>
-<path d="M165.632 26.5812L151.884 6.33331C151.357 5.61174 150.484 5.14062 149.512 5.14062C147.911 5.14062 146.613 6.41481 146.613 7.98519C146.613 8.6193 146.823 9.20372 147.18 9.67682L153.687 18.8705L141.313 18.8506C140.584 18.8705 139.435 19.3217 138.604 20.3315L134.247 26.4063C133.793 26.8933 133.517 27.5433 133.517 28.2549C133.517 29.7716 134.769 31.0001 136.315 31.0001C137.241 31.0001 138.061 30.5588 138.57 29.879L138.606 29.8591L142.535 24.7345H157.828L160.988 29.5888C161.46 30.4296 162.374 31.0001 163.421 31.0001C164.955 31.0001 166.199 29.7796 166.199 28.2748C166.199 27.7063 166.021 27.1795 165.719 26.7422C165.692 26.6846 165.664 26.6289 165.634 26.5812H165.632Z" fill="#00BCD4"/>
-<path d="M128.119 5.1366C128.098 5.1366 128.078 5.1366 128.058 5.1366H106.734C105.129 5.1366 103.83 6.41277 103.83 7.98513C103.83 8.55762 104.005 9.09036 104.3 9.53563C104.704 10.0962 105.271 10.4977 105.994 10.7363C106.231 10.7979 106.478 10.8337 106.734 10.8337H128.244H128.289C128.366 10.8337 128.441 10.8376 128.516 10.8456C129.699 10.9649 130.623 11.9468 130.623 13.1395C130.623 14.4018 129.588 15.4275 128.305 15.4434H128.111H120.149H106.592C104.868 15.4434 103.83 16.7593 103.83 18.2582V28.1078C103.83 29.6642 105.117 30.9265 106.703 30.9265C108.289 30.9265 109.515 29.7199 109.572 28.2131V21.1723H128.121L128.202 21.1683C128.202 21.1683 128.206 21.1683 128.208 21.1683C132.614 21.051 136.151 17.5088 136.151 13.1554C136.151 8.80213 132.568 5.20816 128.117 5.1366H128.119Z" fill="#00BCD4"/>
-</svg>
-''';
+import '../widgets/aba_payway_modal.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final bool isGuest;
@@ -38,8 +23,7 @@ class CheckoutScreen extends ConsumerStatefulWidget {
   ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
-    with WidgetsBindingObserver {
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -53,28 +37,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
   bool _isSubmitting = false;
   bool _saveCardForFuture = false;
 
-  Timer? _pollingTimer;
-  String? _activeTranId;
-  dynamic _activeOrderId;
-  String? _activeQrImage;
-  String? _activeDeeplink;
-  bool _isCheckingStatus = false;
-  bool _isManualChecking = false;
-  bool _isModalOpen = false;
-  void Function(void Function())? _modalSetState;
-  int _pollingRemainingSeconds = 120;
-  bool _isPollingTimedOut = false;
-
-  String _formatRemainingTime(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return '$m:${s.toString().padLeft(2, '0')}';
-  }
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final selectedLocation = ref
           .read(deliveryLocationProvider)
@@ -110,8 +75,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _resetPaymentState();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -120,15 +83,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     _cityController.dispose();
     _countryController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        _activeTranId != null &&
-        _activeOrderId != null) {
-      _checkPaymentStatus(silent: false);
-    }
   }
 
   Future<void> _submitOrder() async {
@@ -164,18 +118,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     };
 
     try {
-      final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.post(
-        ApiEndpoints.checkout,
-        data: payload,
-        options: Options(
-          sendTimeout: const Duration(seconds: 60),
-          receiveTimeout: const Duration(seconds: 90),
-        ),
-      );
-      final data = response.data;
+      final orderRepo = ref.read(orderRepositoryProvider);
+      final data = await orderRepo.submitCheckout(payload);
 
-      if (data is Map<String, dynamic> && data['status'] == true) {
+      if (data['status'] == true) {
         final orderId =
             data['data']?['order_id'] ??
             DateTime.now().millisecondsSinceEpoch % 100000;
@@ -185,11 +131,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
 
         if (_selectedGateway == 'abapayway' && tranId != null) {
           if (!mounted) return;
-          _activeTranId = tranId;
-          _activeOrderId = orderId;
-          _activeQrImage = qrImage;
-          _activeDeeplink = abapayDeeplink;
-
           await _startPaymentFlow(
             abapayDeeplink: abapayDeeplink,
             qrImageBase64: qrImage,
@@ -229,642 +170,46 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
   }) async {
     bool launched = false;
     if (abapayDeeplink != null && abapayDeeplink.isNotEmpty) {
-      launched = await _launchDeeplink(abapayDeeplink);
+      try {
+        launched = await launchUrl(
+          Uri.parse(abapayDeeplink),
+          mode: LaunchMode.externalApplication,
+        );
+      } catch (_) {
+        launched = false;
+      }
     }
 
     if (!mounted) return;
 
-    if (launched) {
-      // Deeplink directly opened ABA Mobile app.
-      // Do NOT open QR modal! Open payment status loading modal instead!
-      _startStatusPolling();
-      _showPaymentStatusModal();
-    } else {
-      // Deeplink failed or ABA Mobile is not installed on device.
-      // Fallback to showing the KHQR modal.
-      if (qrImageBase64 != null && qrImageBase64.isNotEmpty) {
-        _startStatusPolling();
-        _showPayWayQrModal();
-      } else {
-        _showErrorSnackbar(
-          'Could not launch ABA Mobile and QR code is unavailable.',
-        );
-      }
-    }
-  }
-
-  void _startStatusPolling({int durationSeconds = 120}) {
-    _pollingTimer?.cancel();
-    _pollingRemainingSeconds = durationSeconds;
-    _isPollingTimedOut = false;
-    _modalSetState?.call(() {});
-
-    _pollingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-
-      if (_pollingRemainingSeconds > 0) {
-        _pollingRemainingSeconds--;
-        _modalSetState?.call(() {});
-
-        // Check payment status every 3 seconds
-        if (_pollingRemainingSeconds % 3 == 0) {
-          _checkPaymentStatus(silent: true);
-        }
-      } else {
-        timer.cancel();
-        _isPollingTimedOut = true;
-        _isCheckingStatus = false;
-        _isManualChecking = false;
-        _modalSetState?.call(() {});
-        if (mounted) setState(() {});
-      }
-    });
-  }
-
-  Future<void> _checkPaymentStatus({bool silent = false}) async {
-    if (_isCheckingStatus || _activeTranId == null || _activeOrderId == null) {
+    final initialShowQr = !launched;
+    if (initialShowQr && (qrImageBase64 == null || qrImageBase64.isEmpty)) {
+      _showErrorSnackbar(
+        'Could not launch ABA Mobile and QR code is unavailable.',
+      );
       return;
     }
 
-    _isCheckingStatus = true;
-    if (!silent) {
-      _isManualChecking = true;
-      _modalSetState?.call(() {});
-      if (mounted) setState(() {});
-    }
-
-    try {
-      final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.get<Map<String, dynamic>>(
-        ApiEndpoints.checkoutPaymentStatus,
-        queryParameters: {
-          'tran_id': _activeTranId,
-          'order_id': _activeOrderId.toString(),
-        },
-        options: Options(
-          sendTimeout: const Duration(seconds: 8),
-          receiveTimeout: const Duration(seconds: 8),
-        ),
-      );
-      final responseData = response.data;
-      if (responseData is Map<String, dynamic> &&
-          responseData['approved'] == true) {
-        final successOrderId = _activeOrderId;
-        _resetPaymentState();
-
-        if (mounted) {
-          if (_isModalOpen) {
-            Navigator.of(context, rootNavigator: true).pop();
-            _isModalOpen = false;
-          }
-          _onOrderSuccess(successOrderId);
-        }
-        return;
-      }
-    } catch (_) {
-      // Silently ignore transient network errors during polling
-    } finally {
-      _isCheckingStatus = false;
-      if (!silent) {
-        _isManualChecking = false;
-        _modalSetState?.call(() {});
-        if (mounted) setState(() {});
-      }
-    }
-  }
-
-  void _resetPaymentState() {
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
-    _activeTranId = null;
-    _activeOrderId = null;
-    _activeQrImage = null;
-    _activeDeeplink = null;
-    _isCheckingStatus = false;
-    _isManualChecking = false;
-    _pollingRemainingSeconds = 120;
-    _isPollingTimedOut = false;
-    _modalSetState = null;
-  }
-
-  void _showPaymentStatusModal() {
-    if (_isModalOpen && mounted) {
-      Navigator.of(context, rootNavigator: true).pop();
-      _isModalOpen = false;
-    }
-
-    _isModalOpen = true;
-
-    showModalBottomSheet(
+    await AbaPayWayModal.show(
       context: context,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        final theme = Theme.of(sheetContext);
-        final isDark = theme.brightness == Brightness.dark;
-
-        return StatefulBuilder(
-          builder: (builderContext, setModalState) {
-            _modalSetState = setModalState;
-            return Container(
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SvgPicture.string(_abaPayWayLogoSvg, height: 22),
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded),
-                            onPressed: () {
-                              _resetPaymentState();
-                              Navigator.pop(sheetContext);
-                              _showErrorSnackbar('Payment was cancelled.');
-                            },
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 24),
-                      if (!_isPollingTimedOut) ...[
-                        // Single centralized loading indicator with wallet icon
-                        SizedBox(
-                          width: 84,
-                          height: 84,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 84,
-                                height: 84,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.5,
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF005C8A),
-                                  ),
-                                  backgroundColor: const Color(0xFF005C8A)
-                                      .withValues(alpha: 0.12),
-                                ),
-                              ),
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF005C8A)
-                                      .withValues(alpha: 0.09),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.account_balance_wallet_rounded,
-                                  size: 28,
-                                  color: Color(0xFF005C8A),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          'Waiting for ABA Payment',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please complete the payment in the ABA Mobile app.\nYour order will be confirmed automatically.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 7),
-                          decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF005C8A).withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.access_time_rounded,
-                                size: 14,
-                                color: Color(0xFF005C8A),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Auto-checking status (${_formatRemainingTime(_pollingRemainingSeconds)})',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF005C8A),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: _isManualChecking
-                                ? null
-                                : () async {
-                                    await _checkPaymentStatus(silent: false);
-                                  },
-                            icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: Text(
-                              _isManualChecking
-                                  ? 'Checking...'
-                                  : 'Check Status Now',
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF005C8A),
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: const Color(0xFF005C8A)
-                                  .withValues(alpha: 0.65),
-                              disabledForegroundColor: Colors.white70,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                          ),
-                        ),
-                      ] else ...[
-                        Container(
-                          width: 76,
-                          height: 76,
-                          decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.hourglass_bottom_rounded,
-                            size: 38,
-                            color: Color(0xFFD97706),
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          'Payment Confirmation Timeout',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'We haven\'t received confirmation from ABA Pay yet.\nIf you already paid, check your orders or try checking status again.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              _startStatusPolling(durationSeconds: 60);
-                              _checkPaymentStatus(silent: false);
-                            },
-                            icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: const Text('Try Checking Again (60s)'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF005C8A),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              _resetPaymentState();
-                              Navigator.pop(sheetContext);
-                              context.push('/orders');
-                            },
-                            icon: const Icon(Icons.receipt_long_rounded,
-                                size: 18),
-                            label: const Text('View in My Orders'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF005C8A),
-                              side: const BorderSide(color: Color(0xFF005C8A)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (_activeQrImage != null) ...[
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(sheetContext);
-                              _showPayWayQrModal();
-                            },
-                            icon: const Icon(Icons.qr_code_rounded, size: 18),
-                            label: const Text('Pay with KHQR Code instead'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF005C8A),
-                              side: const BorderSide(color: Color(0xFF005C8A)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () {
-                          _resetPaymentState();
-                          Navigator.pop(sheetContext);
-                          _showErrorSnackbar('Payment was cancelled.');
-                        },
-                        child: Text(
-                          'Cancel Payment',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).then((_) {
-      _isModalOpen = false;
-      _modalSetState = null;
-    });
-  }
-
-  void _showPayWayQrModal() {
-    if (_activeQrImage == null) return;
-
-    if (_isModalOpen && mounted) {
-      Navigator.of(context, rootNavigator: true).pop();
-      _isModalOpen = false;
-    }
-
-    _isModalOpen = true;
-
-    String cleanedBase64 = _activeQrImage!;
-    if (cleanedBase64.startsWith('data:image/png;base64,')) {
-      cleanedBase64 = cleanedBase64.replaceFirst('data:image/png;base64,', '');
-    }
-    final imageBytes = base64Decode(cleanedBase64);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        final theme = Theme.of(sheetContext);
-        final isDark = theme.brightness == Brightness.dark;
-
-        return StatefulBuilder(
-          builder: (builderContext, setModalState) {
-            _modalSetState = setModalState;
-            return Container(
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SvgPicture.string(_abaPayWayLogoSvg, height: 22),
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded),
-                            onPressed: () {
-                              _resetPaymentState();
-                              Navigator.pop(sheetContext);
-                              _showErrorSnackbar('Payment was cancelled.');
-                            },
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xFFE2E8F0),
-                              width: 1.5,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.white,
-                          ),
-                          width: 190,
-                          height: 190,
-                          child: Image.memory(imageBytes, fit: BoxFit.contain),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Scan KHQR code or pay via ABA Mobile',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (!_isPollingTimedOut) ...[
-                            const Icon(
-                              Icons.access_time_rounded,
-                              size: 13,
-                              color: Color(0xFF005C8A),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              'Checking payment status... (${_formatRemainingTime(_pollingRemainingSeconds)})',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF005C8A),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ] else ...[
-                            const Icon(Icons.hourglass_bottom_rounded,
-                                size: 14, color: Color(0xFFD97706)),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'QR validity timed out',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFFD97706),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      if (!_isPollingTimedOut &&
-                          _activeDeeplink != null &&
-                          _activeDeeplink!.isNotEmpty)
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: () async {
-                              Navigator.pop(sheetContext);
-                              final launched =
-                                  await _launchDeeplink(_activeDeeplink!);
-                              if (launched) {
-                                _showPaymentStatusModal();
-                              } else {
-                                _showErrorSnackbar(
-                                  'Could not launch ABA Mobile. Ensure the app is installed.',
-                                );
-                                _showPayWayQrModal();
-                              }
-                            },
-                            icon:
-                                const Icon(Icons.open_in_new_rounded, size: 18),
-                            label: const Text('Open ABA Mobile App'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF005C8A),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      if (_isPollingTimedOut)
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              _startStatusPolling(durationSeconds: 60);
-                              _checkPaymentStatus(silent: false);
-                            },
-                            icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: const Text('Restart Status Check (60s)'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF005C8A),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () {
-                          _resetPaymentState();
-                          Navigator.pop(sheetContext);
-                          _showErrorSnackbar('Payment was cancelled.');
-                        },
-                        child: Text(
-                          'Cancel Payment',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).then((_) {
-      _isModalOpen = false;
-      _modalSetState = null;
-    });
-  }
-
-  Future<bool> _launchDeeplink(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      return await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      return false;
-    }
+      tranId: tranId,
+      orderId: orderId,
+      deeplink: abapayDeeplink,
+      qrImageBase64: qrImageBase64,
+      initialShowQr: initialShowQr,
+      onCheckStatus: () => ref
+          .read(orderRepositoryProvider)
+          .checkPaymentStatus(tranId: tranId, orderId: orderId.toString()),
+      onSuccess: (successId) => _onOrderSuccess(successId),
+      onCancel: () => _showErrorSnackbar('Payment was cancelled.'),
+    );
   }
 
   void _onOrderSuccess(dynamic orderId) {
-    _resetPaymentState();
     ref.read(cartProvider.notifier).clear();
     ref.read(couponProvider.notifier).removeCoupon();
 
     if (!mounted) return;
-    if (_isModalOpen) {
-      Navigator.of(context, rootNavigator: true).pop();
-      _isModalOpen = false;
-    }
     context.go(
       '/order-success',
       extra: {'orderId': orderId, 'isPayWay': _selectedGateway == 'abapayway'},
@@ -924,7 +269,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
         ),
         title: Text(
           widget.isGuest
-              ? (context.l10n.isKhmer ? 'គិតលុយ (ភ្ញៀវ)' : 'Guest Checkout')
+              ? (context.l10n.guestCheckout)
               : context.l10n.checkoutTitle,
           style: TextStyle(
             fontWeight: FontWeight.w800,
@@ -998,7 +343,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            context.l10n.isKhmer ? 'ផ្លាស់ប្តូរ' : 'Change',
+                            context.l10n.change,
                             style: TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               color: theme.colorScheme.primary,
@@ -1048,9 +393,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                               Text(
                                 _addressController.text.isNotEmpty
                                     ? _addressController.text
-                                    : (context.l10n.isKhmer
-                                        ? 'ជ្រើសរើសអាសយដ្ឋានដឹកជញ្ជូន'
-                                        : 'Select delivery address'),
+                                    : (context.l10n.selectDeliveryAddress),
                                 style: TextStyle(
                                   fontFamily: AppTheme.fontFamily,
                                   fontWeight: FontWeight.w700,
@@ -1087,13 +430,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                     controller: _addressController,
                     style: const TextStyle(fontFamily: AppTheme.fontFamily),
                     decoration: InputDecoration(
-                      hintText: context.l10n.isKhmer
-                          ? 'អាសយដ្ឋានលម្អិត'
-                          : 'Detailed street address',
+                      hintText: context.l10n.detailedStreetAddress,
                       prefixIcon: const Icon(Icons.home_outlined, size: 18),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? (context.l10n.isKhmer ? 'សូមបញ្ចូលអាសយដ្ឋាន' : 'Address is required')
+                        ? (context.l10n.addressIsRequired)
                         : null,
                   ),
                 ],
@@ -1118,7 +459,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.l10n.isKhmer ? 'ព័ត៌មានទំនាក់ទំនង' : 'Contact Information',
+                    context.l10n.contactInformation,
                     style: TextStyle(
                       fontFamily: AppTheme.fontFamily,
                       fontWeight: FontWeight.w800,
@@ -1137,7 +478,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                             hintText: context.l10n.firstName,
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? (context.l10n.isKhmer ? 'ចាំបាច់' : 'Required')
+                              ? (context.l10n.required)
                               : null,
                         ),
                       ),
@@ -1150,7 +491,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                             hintText: context.l10n.lastName,
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? (context.l10n.isKhmer ? 'ចាំបាច់' : 'Required')
+                              ? (context.l10n.required)
                               : null,
                         ),
                       ),
@@ -1166,7 +507,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       prefixIcon: const Icon(Icons.phone_outlined, size: 18),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? (context.l10n.isKhmer ? 'សូមបញ្ចូលលេខទូរស័ព្ទ' : 'Phone is required')
+                        ? (context.l10n.phoneIsRequired)
                         : null,
                   ),
                   const SizedBox(height: 10),
@@ -1179,7 +520,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       prefixIcon: const Icon(Icons.email_outlined, size: 18),
                     ),
                     validator: (v) => (v == null || !v.contains('@'))
-                        ? (context.l10n.isKhmer ? 'អ៊ីមែលមិនត្រឹមត្រូវ' : 'Valid email required')
+                        ? (context.l10n.validEmailRequired)
                         : null,
                   ),
                 ],
@@ -1228,7 +569,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       Expanded(
                         child: _paymentPill(
                           id: 'card',
-                          title: context.l10n.isKhmer ? 'កាតធនាគារ' : 'Credit Card',
+                          title: context.l10n.creditCard1,
                           icon: Icons.credit_card_rounded,
                           theme: theme,
                           isDark: isDark,
@@ -1238,7 +579,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       Expanded(
                         child: _paymentPill(
                           id: 'cod',
-                          title: context.l10n.isKhmer ? 'សាច់ប្រាក់' : 'Cash on Del.',
+                          title: context.l10n.cashOnDel,
                           icon: Icons.payments_outlined,
                           theme: theme,
                           isDark: isDark,
@@ -1251,7 +592,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                     TextFormField(
                       style: const TextStyle(fontFamily: AppTheme.fontFamily),
                       decoration: InputDecoration(
-                        hintText: context.l10n.isKhmer ? 'លេខកាត' : 'Card Number',
+                        hintText: context.l10n.cardNumber,
                         prefixIcon: const Icon(Icons.credit_card_rounded, size: 18),
                       ),
                     ),
@@ -1262,7 +603,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                           child: TextField(
                             style: const TextStyle(fontFamily: AppTheme.fontFamily),
                             decoration: InputDecoration(
-                              hintText: context.l10n.isKhmer ? 'ខែ/ឆ្នាំ' : 'MM/YY',
+                              hintText: context.l10n.mmyy,
                             ),
                           ),
                         ),
@@ -1286,9 +627,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          context.l10n.isKhmer
-                              ? 'រក្សាទុកកាតសម្រាប់ការទូទាត់លើកក្រោយ'
-                              : 'Save card for future payments',
+                          context.l10n.saveCardForFuturePayments,
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 12,
@@ -1308,58 +647,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
             const SizedBox(height: 16),
 
             // Order Price Summary
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFFF1F5F9),
-                ),
-              ),
-              child: Column(
-                children: [
-                  _priceRow(
-                    context.l10n.subtotal,
-                    '\$${totalAmount.toStringAsFixed(2)}',
-                    theme,
-                    isDark,
-                  ),
-                  const SizedBox(height: 8),
-                  if (couponState.isApplied) ...[
-                    _priceRow(
-                      context.l10n.discount,
-                      '-\$${couponState.discountAmount.toStringAsFixed(2)}',
-                      theme,
-                      isDark,
-                      valueColor: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  _priceRow(
-                    context.l10n.deliveryFee,
-                    context.l10n.isKhmer ? 'ឥតគិតថ្លៃ' : 'FREE',
-                    theme,
-                    isDark,
-                    valueColor: theme.colorScheme.primary,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Divider(height: 1),
-                  ),
-                  _priceRow(
-                    context.l10n.total,
-                    '\$${finalTotal.toStringAsFixed(2)}',
-                    theme,
-                    isDark,
-                    isBold: true,
-                    fontSize: 18,
-                    valueColor: theme.colorScheme.primary,
-                  ),
-                ],
-              ),
+            PriceBreakdownCard(
+              subtotal: totalAmount,
+              discount: couponState.isApplied ? couponState.discountAmount : null,
+              couponCode: couponState.isApplied ? couponState.code : null,
+              deliveryFee: 0.0,
+              total: finalTotal,
             ),
           ],
         ),
@@ -1406,9 +699,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                       ),
                     )
                   : Text(
-                      context.l10n.isKhmer
-                          ? 'ទូទាត់ឥឡូវនេះ · \$${finalTotal.toStringAsFixed(2)}'
-                          : 'Pay Now · \$${finalTotal.toStringAsFixed(2)}',
+                      context.l10n.payNowAmount(finalTotal.toStringAsFixed(2)),
                       style: const TextStyle(
                         fontFamily: AppTheme.fontFamily,
                         fontWeight: FontWeight.w800,
@@ -1473,42 +764,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
           ],
         ),
       ),
-    );
-  }
-
-  Widget _priceRow(
-    String label,
-    String value,
-    ThemeData theme,
-    bool isDark, {
-    bool isBold = false,
-    double fontSize = 14,
-    Color? valueColor,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-            fontSize: fontSize,
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color:
-                valueColor ??
-                (isBold
-                    ? theme.colorScheme.onSurface
-                    : theme.colorScheme.onSurface),
-            fontSize: fontSize,
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }

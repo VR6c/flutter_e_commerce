@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/app_image_cache.dart';
 import '../../categories/providers/category_provider.dart';
 import '../models/product.dart';
 import '../models/product_suggestion.dart';
 import '../providers/product_provider.dart';
 import '../providers/product_suggestions_provider.dart';
+
+final _editionCleanRegex = RegExp(r'\s*[-–—]\s*Edition\s*\d+', caseSensitive: false);
+final _editionMatchRegex = RegExp(r'[-–—]\s*(Edition\s*\d+)', caseSensitive: false);
 
 class SearchSuggestionOverlay extends ConsumerWidget {
   final String query;
@@ -45,9 +49,9 @@ class SearchSuggestionOverlay extends ConsumerWidget {
     } else if (suggestionsAsync.isLoading && localResult.isEmpty) {
       body = _buildShimmerLoading(isDark, theme);
     } else if (suggestionsAsync.hasError && localResult.isEmpty) {
-      body = _buildErrorState(theme, isDark);
+      body = _buildErrorState(context, theme, isDark);
     } else {
-      body = _buildEmptyState(theme, isDark);
+      body = _buildEmptyState(context, theme, isDark);
     }
 
     return Container(
@@ -104,7 +108,9 @@ class SearchSuggestionOverlay extends ConsumerWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    query.trim().isEmpty ? 'Trending Searches' : 'Instant Suggestions',
+                    query.trim().isEmpty
+                        ? context.l10n.trendingSearches
+                        : context.l10n.instantSuggestions,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -215,7 +221,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'In Categories',
+                  context.l10n.inCategories,
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
@@ -280,7 +286,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Matching Items',
+                  context.l10n.matchingItems,
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
@@ -316,12 +322,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
     for (final raw in rawKeywords) {
       final trimmed = raw.trim();
       if (trimmed.isEmpty) continue;
-      final cleaned = trimmed
-          .replaceAll(
-            RegExp(r'\s*[-–—]\s*Edition\s*\d+', caseSensitive: false),
-            '',
-          )
-          .trim();
+      final cleaned = trimmed.replaceAll(_editionCleanRegex, '').trim();
       final candidate = cleaned.isNotEmpty ? cleaned : trimmed;
       if (seen.add(candidate.toLowerCase())) {
         unique.add(candidate);
@@ -337,13 +338,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
 
     for (final p in rawProducts) {
       if (!seenIds.add(p.id)) continue;
-      final baseName = p.name
-          .replaceAll(
-            RegExp(r'\s*[-–—]\s*Edition\s*\d+', caseSensitive: false),
-            '',
-          )
-          .trim()
-          .toLowerCase();
+      final baseName = p.name.replaceAll(_editionCleanRegex, '').trim().toLowerCase();
       if (seenBaseNames.add(baseName)) {
         unique.add(p);
       }
@@ -367,16 +362,8 @@ class SearchSuggestionOverlay extends ConsumerWidget {
     ThemeData theme,
     bool isDark,
   ) {
-    final editionMatch = RegExp(
-      r'[-–—]\s*(Edition\s*\d+)',
-      caseSensitive: false,
-    ).firstMatch(product.name);
-    final cleanName = product.name
-        .replaceAll(
-          RegExp(r'\s*[-–—]\s*Edition\s*\d+', caseSensitive: false),
-          '',
-        )
-        .trim();
+    final editionMatch = _editionMatchRegex.firstMatch(product.name);
+    final cleanName = product.name.replaceAll(_editionCleanRegex, '').trim();
     final displayName = cleanName.isNotEmpty ? cleanName : product.name;
     final editionTag = editionMatch?.group(1);
 
@@ -409,12 +396,15 @@ class SearchSuggestionOverlay extends ConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: product.thumbnail.isNotEmpty
-                    ? CachedNetworkImage(
+                    ? AppCachedImage(
                         imageUrl: product.thumbnail,
                         fit: BoxFit.contain,
                         memCacheWidth: 100,
                         memCacheHeight: 100,
-                        errorWidget: (_, _, _) => Icon(
+                        fallbackSlug: product.slug,
+                        fallbackTitle: product.name,
+                        fallbackCategory: product.category,
+                        errorWidget: Icon(
                           Icons.image_outlined,
                           size: 20,
                           color: isDark ? Colors.grey[600] : Colors.grey[400],
@@ -609,7 +599,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme, bool isDark) {
+  Widget _buildEmptyState(BuildContext context, ThemeData theme, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       child: Row(
@@ -622,7 +612,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'No instant suggestions found. Press enter to search catalog.',
+              context.l10n.noInstantSuggestions,
               style: TextStyle(
                 fontSize: 12.5,
                 color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
@@ -635,7 +625,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(ThemeData theme, bool isDark) {
+  Widget _buildErrorState(BuildContext context, ThemeData theme, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -648,7 +638,7 @@ class SearchSuggestionOverlay extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Could not load instant suggestions.',
+              context.l10n.couldNotLoadSuggestions,
               style: TextStyle(
                 fontSize: 12,
                 color: isDark ? Colors.grey[400] : Colors.grey[600],
