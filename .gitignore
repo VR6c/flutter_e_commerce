@@ -43,3 +43,31 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+!*.env.example
+
+# Keystores & Signing credentials
+*.jks
+*.keystore
+key.properties
+local.properties
+
+# Application Packages & Installers
+*.apk
+*.aab
+*.ipa
+
+# Fastlane & Tooling
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Ephemeral Desktop / Web builds
+**/linux/flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
