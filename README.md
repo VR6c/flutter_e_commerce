@@ -154,8 +154,7 @@ Ensure your development environment is set up with:
 The application connects to a **Laravel REST API**:
 - **Base URL**: `https://e-commers-laravel.vercel.app/api`
 - **Authentication**: Bearer JWT tokens with automatic token refreshing via Dio interceptors.
-- **Postman Collection**: A complete Postman API collection is included in the project root:
-  - [`postman_collection.json`](./postman_collection.json) — Import this into Postman to explore and test all backend endpoints.
+- **Postman Collection**: Import the backend Postman collection into Postman to explore and test all backend endpoints.
 
 ---
 
