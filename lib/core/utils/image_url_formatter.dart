@@ -458,9 +458,7 @@ String formatImageUrl(
   }
 
   if (enableVercelFallback) {
-    final isVercelStorage = formattedUrl.contains(
-      'e-commers-laravel.vercel.app/storage/',
-    );
+    final isVercelStorage = formattedUrl.contains('.vercel.app/storage/');
     if (formattedUrl.isEmpty || isVercelStorage) {
       return getFallbackImageUrl(
         slug: slug,
