@@ -127,6 +127,14 @@ final homeFilterCriteriaProvider =
   (ref) => HomeFilterCriteriaNotifier(),
 );
 
+/// Memoized provider that resolves the selected category entity only when slug or categories change.
+final homeSelectedCategoryProvider = Provider<Category?>((ref) {
+  final slug = ref.watch(homeFilterCriteriaProvider.select((c) => c.selectedCategorySlug));
+  if (slug == null) return null;
+  final categories = ref.watch(categoriesProvider).valueOrNull ?? const <Category>[];
+  return CategoryProductsNotifier.findCategory(slug, categories);
+});
+
 /// Memoized provider that derives filtered & sorted home products.
 /// Decouples complex string sanitization, category tree checking, and sorting
 /// completely from the UI build loop.

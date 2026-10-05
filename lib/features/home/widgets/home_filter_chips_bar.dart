@@ -35,78 +35,80 @@ class HomeFilterChipsBar extends StatelessWidget {
     final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            if (sortBy != SortOption.none)
-              _buildChip(
-                icon: Icons.swap_vert_rounded,
-                label: sortBy.label,
-                onRemove: onClearSort,
-                theme: theme,
-                isDark: isDark,
-              ),
-            if (selectedCategoryName != null)
-              _buildChip(
-                icon: Icons.category_rounded,
-                label: selectedCategoryName!,
-                onRemove: onClearCategory,
-                theme: theme,
-                isDark: isDark,
-              ),
-            if (priceRange != null)
-              _buildChip(
-                icon: Icons.attach_money_rounded,
-                label: '\$${priceRange!.start.round()} – \$${priceRange!.end.round()}',
-                onRemove: onClearPriceRange,
-                theme: theme,
-                isDark: isDark,
-              ),
-            if (minRating != null && minRating! > 0)
-              _buildChip(
-                icon: Icons.star_rounded,
-                label: '$minRating★ & up',
-                onRemove: onClearMinRating,
-                theme: theme,
-                isDark: isDark,
-              ),
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                onClearAll();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(16),
+    return RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              if (sortBy != SortOption.none)
+                _buildChip(
+                  icon: Icons.swap_vert_rounded,
+                  label: sortBy.label,
+                  onRemove: onClearSort,
+                  theme: theme,
+                  isDark: isDark,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.refresh_rounded,
-                      size: 13,
-                      color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      l10n.clearAll,
-                      style: TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
+              if (selectedCategoryName != null)
+                _buildChip(
+                  icon: Icons.category_rounded,
+                  label: selectedCategoryName!,
+                  onRemove: onClearCategory,
+                  theme: theme,
+                  isDark: isDark,
+                ),
+              if (priceRange != null)
+                _buildChip(
+                  icon: Icons.attach_money_rounded,
+                  label: '\$${priceRange!.start.round()} – \$${priceRange!.end.round()}',
+                  onRemove: onClearPriceRange,
+                  theme: theme,
+                  isDark: isDark,
+                ),
+              if (minRating != null && minRating! > 0)
+                _buildChip(
+                  icon: Icons.star_rounded,
+                  label: '$minRating★ & up',
+                  onRemove: onClearMinRating,
+                  theme: theme,
+                  isDark: isDark,
+                ),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onClearAll();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        size: 13,
                         color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.clearAll,
+                        style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

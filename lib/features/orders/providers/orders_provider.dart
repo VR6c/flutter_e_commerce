@@ -22,3 +22,24 @@ class Orders extends _$Orders {
     await future;
   }
 }
+
+/// Memoized derived provider calculating pipeline status counts.
+/// Avoids rebuilding order status tracker widgets and re-looping orders in build().
+final orderStatusCountsProvider = Provider<Map<String, int>>((ref) {
+  final orders = ref.watch(ordersProvider).valueOrNull ?? const [];
+  final statusCounts = <String, int>{
+    'pending': 0,
+    'processing': 0,
+    'shipped': 0,
+    'delivered': 0,
+  };
+  for (final order in orders) {
+    final s = order.status.toLowerCase();
+    if (s == 'completed') {
+      statusCounts['delivered'] = (statusCounts['delivered'] ?? 0) + 1;
+    } else if (statusCounts.containsKey(s)) {
+      statusCounts[s] = statusCounts[s]! + 1;
+    }
+  }
+  return statusCounts;
+});

@@ -118,6 +118,9 @@ class AppCachedImage extends StatelessWidget {
       return fallbackWidget;
     }
 
+    final diskCacheW = memCacheWidth != null ? memCacheWidth! * 2 : 1200;
+    final diskCacheH = memCacheHeight != null ? memCacheHeight! * 2 : null;
+
     Widget image = CachedNetworkImage(
       imageUrl: imageUrl,
       width: width,
@@ -125,6 +128,8 @@ class AppCachedImage extends StatelessWidget {
       fit: fit,
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
+      maxWidthDiskCache: diskCacheW,
+      maxHeightDiskCache: diskCacheH,
       fadeInDuration: fadeInDuration,
       placeholder: (context, url) =>
           placeholder ??
@@ -146,6 +151,8 @@ class AppCachedImage extends StatelessWidget {
             fit: fit,
             memCacheWidth: memCacheWidth,
             memCacheHeight: memCacheHeight,
+            maxWidthDiskCache: diskCacheW,
+            maxHeightDiskCache: diskCacheH,
             fadeInDuration: fadeInDuration,
             errorWidget: (_, _, _) => errorWidget ?? defaultError,
           );

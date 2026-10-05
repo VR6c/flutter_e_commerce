@@ -31,6 +31,8 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
+  static final _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
   ForgotPasswordStep _currentStep = ForgotPasswordStep.email;
 
   // Controllers
@@ -574,8 +576,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               if (value == null || value.trim().isEmpty) {
                 return 'Email is required';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  .hasMatch(value.trim())) {
+              if (!_emailRegex.hasMatch(value.trim())) {
                 return 'Please enter a valid email address';
               }
               return null;

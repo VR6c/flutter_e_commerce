@@ -29,9 +29,10 @@ class HomeSearchBar extends StatelessWidget {
     final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-      child: Row(
+    return RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+        child: Row(
         children: [
           Expanded(
             child: Container(
@@ -73,19 +74,23 @@ class HomeSearchBar extends StatelessWidget {
                     color: theme.colorScheme.primary,
                     size: 21,
                   ),
-                  suffixIcon: controller.text.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.cancel_rounded,
-                            size: 18,
-                            color: isDark ? Colors.grey[400] : const Color(0xFF94A3B8),
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            onClear();
-                          },
-                        )
-                      : null,
+                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: controller,
+                    builder: (context, value, _) {
+                      if (value.text.isEmpty) return const SizedBox.shrink();
+                      return IconButton(
+                        icon: Icon(
+                          Icons.cancel_rounded,
+                          size: 18,
+                          color: isDark ? Colors.grey[400] : const Color(0xFF94A3B8),
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          onClear();
+                        },
+                      );
+                    },
+                  ),
                   filled: true,
                   fillColor: Colors.transparent,
                   border: InputBorder.none,
@@ -181,6 +186,7 @@ class HomeSearchBar extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

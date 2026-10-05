@@ -170,13 +170,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
 
-    final criteria = ref.watch(homeFilterCriteriaProvider);
+    final selectedCategorySlug = ref.watch(homeFilterCriteriaProvider.select((c) => c.selectedCategorySlug));
+    final hasSearchQuery = ref.watch(homeFilterCriteriaProvider.select((c) => c.searchQuery.isNotEmpty));
+    final searchQuery = ref.watch(homeFilterCriteriaProvider.select((c) => c.searchQuery));
+    final activeFiltersCount = ref.watch(homeFilterCriteriaProvider.select((c) => c.activeFiltersCount));
+    final isFilterActive = ref.watch(homeFilterCriteriaProvider.select((c) => c.isFilterActive));
+    final sortBy = ref.watch(homeFilterCriteriaProvider.select((c) => c.sortBy));
+    final selectedCat = ref.watch(homeSelectedCategoryProvider);
+
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
-
-    final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
-    final selectedCat = CategoryProductsNotifier.findCategory(criteria.selectedCategorySlug, categories);
 
     return Scaffold(
       appBar: const HomeAppBar(),
@@ -221,8 +225,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _searchFocusNode.unfocus();
                   },
                   onFilterTap: _showFilterSheet,
-                  activeFiltersCount: criteria.activeFiltersCount,
-                  isFilterActive: criteria.isFilterActive,
+                  activeFiltersCount: activeFiltersCount,
+                  isFilterActive: isFilterActive,
                 ),
               ),
 
@@ -230,8 +234,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               if (_showSuggestions && _searchController.text.trim().isNotEmpty)
                 SliverToBoxAdapter(
                   child: SearchSuggestionOverlay(
-                    query: criteria.searchQuery.isNotEmpty
-                        ? criteria.searchQuery
+                    query: searchQuery.isNotEmpty
+                        ? searchQuery
                         : _searchController.text.trim(),
                     onKeywordSelected: (keyword) {
                       _searchController.text = keyword;
@@ -256,24 +260,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
 
-              // Active filter chips bar
-              if (criteria.activeFiltersCount > 0)
+              // Active filter chips bar (isolated Consumer so filter tweaks only re-render the strip)
+              if (activeFiltersCount > 0)
                 SliverToBoxAdapter(
-                  child: HomeFilterChipsBar(
-                    sortBy: criteria.sortBy,
-                    selectedCategoryName: selectedCat?.name ?? criteria.selectedCategorySlug,
-                    priceRange: criteria.priceRange,
-                    minRating: criteria.minRating,
-                    onClearSort: () => ref.read(homeFilterCriteriaProvider.notifier).setSortBy(SortOption.none),
-                    onClearCategory: () => _onCategorySelected(null),
-                    onClearPriceRange: () => ref.read(homeFilterCriteriaProvider.notifier).setPriceRange(null),
-                    onClearMinRating: () => ref.read(homeFilterCriteriaProvider.notifier).setMinRating(null),
-                    onClearAll: _clearAllFilters,
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final criteria = ref.watch(homeFilterCriteriaProvider);
+                      final currentCat = ref.watch(homeSelectedCategoryProvider);
+                      return HomeFilterChipsBar(
+                        sortBy: criteria.sortBy,
+                        selectedCategoryName: currentCat?.name ?? criteria.selectedCategorySlug,
+                        priceRange: criteria.priceRange,
+                        minRating: criteria.minRating,
+                        onClearSort: () => ref.read(homeFilterCriteriaProvider.notifier).setSortBy(SortOption.none),
+                        onClearCategory: () => _onCategorySelected(null),
+                        onClearPriceRange: () => ref.read(homeFilterCriteriaProvider.notifier).setPriceRange(null),
+                        onClearMinRating: () => ref.read(homeFilterCriteriaProvider.notifier).setMinRating(null),
+                        onClearAll: _clearAllFilters,
+                      );
+                    },
                   ),
                 ),
 
               // Banner Carousel
-              if (criteria.searchQuery.isEmpty && criteria.selectedCategorySlug == null)
+              if (!hasSearchQuery && selectedCategorySlug == null)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
@@ -299,20 +309,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
 
               // Store Highlights Perks Strip
-              if (criteria.searchQuery.isEmpty && criteria.selectedCategorySlug == null)
+              if (!hasSearchQuery && selectedCategorySlug == null)
                 const SliverToBoxAdapter(child: HomePerksBar()),
 
               // Horizontal Category Story Badges
-              if (criteria.searchQuery.isEmpty)
+              if (!hasSearchQuery)
                 SliverToBoxAdapter(
                   child: HomeCategorySelector(
-                    selectedCategorySlug: criteria.selectedCategorySlug,
+                    selectedCategorySlug: selectedCategorySlug,
                     onCategorySelected: _onCategorySelected,
                   ),
                 ),
 
               // Personalized Recommendations: Suggested For You Carousel
-              if (criteria.searchQuery.isEmpty && criteria.selectedCategorySlug == null)
+              if (!hasSearchQuery && selectedCategorySlug == null)
                 const SliverToBoxAdapter(
                   child: RepaintBoundary(
                     child: SuggestedForYouSection(),
@@ -330,9 +340,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            criteria.searchQuery.isNotEmpty
+                            hasSearchQuery
                                 ? l10n.searchResults
-                                : (criteria.selectedCategorySlug != null
+                                : (selectedCategorySlug != null
                                     ? l10n.categoryItems
                                     : l10n.ourBestItems),
                             style: theme.textTheme.titleMedium?.copyWith(
@@ -342,9 +352,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               letterSpacing: l10n.isKhmer ? 0 : -0.2,
                             ),
                           ),
-                          if (criteria.searchQuery.isNotEmpty)
+                          if (hasSearchQuery)
                             Text(
-                              l10n.showingMatchesFor(criteria.searchQuery),
+                              l10n.showingMatchesFor(searchQuery),
                               style: TextStyle(
                                 fontFamily: AppTheme.fontFamily,
                                 fontSize: 12,
@@ -353,7 +363,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                         ],
                       ),
-                      if (criteria.sortBy != SortOption.none)
+                      if (sortBy != SortOption.none)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
@@ -375,7 +385,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                criteria.sortBy.label,
+                                sortBy.label,
                                 style: TextStyle(
                                   fontFamily: AppTheme.fontFamily,
                                   color: theme.colorScheme.primary,
@@ -468,16 +478,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               children: [
                                 EmptyStateWidget(
                                   icon: Icons.search_off_rounded,
-                                  title: criteria.searchQuery.isEmpty
+                                  title: !hasSearchQuery
                                       ? (selectedCat != null
                                           ? l10n.noProductsInCategory(l10n.translateCategory(selectedCat.name))
                                           : l10n.noProductsAvailable)
-                                      : l10n.noResultsForQuery(criteria.searchQuery),
-                                  message: criteria.searchQuery.isEmpty
+                                      : l10n.noResultsForQuery(searchQuery),
+                                  message: !hasSearchQuery
                                       ? l10n.checkBackLaterStock
                                       : l10n.tryAdjustingSearch,
                                 ),
-                                if (criteria.isFilterActive) ...[
+                                if (isFilterActive) ...[
                                   const SizedBox(height: 16),
                                   OutlinedButton.icon(
                                     onPressed: _clearAllFilters,

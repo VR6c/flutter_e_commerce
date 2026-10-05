@@ -558,11 +558,13 @@ class AbaPayWayModalState extends State<AbaPayWayModal>
     );
   }
 
+  static final _khrThousandsRegex = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+
   String _formatAmount(double? amount) {
     if (amount == null) return '0.00';
     if (widget.currency.toUpperCase() == 'KHR') {
       return amount.toInt().toString().replaceAllMapped(
-            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            _khrThousandsRegex,
             (Match m) => '${m[1]},',
           );
     }

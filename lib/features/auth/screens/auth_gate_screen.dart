@@ -100,6 +100,7 @@ class AuthGateScreen extends StatelessWidget {
                                 child: Image.asset(
                                   'assets/images/shopping.png',
                                   fit: BoxFit.contain,
+                                  cacheWidth: 200,
                                 ),
                               ),
                             ),

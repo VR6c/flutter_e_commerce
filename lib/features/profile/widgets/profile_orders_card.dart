@@ -151,22 +151,7 @@ class ProfileOrderStatusCard extends ConsumerWidget {
     final l10n = context.l10n;
     final isDark = theme.brightness == Brightness.dark;
 
-    final orders = ref.watch(ordersProvider).valueOrNull ?? [];
-
-    final statusCounts = <String, int>{
-      'pending': 0,
-      'processing': 0,
-      'shipped': 0,
-      'delivered': 0,
-    };
-    for (final order in orders) {
-      final s = order.status.toLowerCase();
-      if (s == 'completed') {
-        statusCounts['delivered'] = (statusCounts['delivered'] ?? 0) + 1;
-      } else if (statusCounts.containsKey(s)) {
-        statusCounts[s] = statusCounts[s]! + 1;
-      }
-    }
+    final statusCounts = ref.watch(orderStatusCountsProvider);
 
     return RepaintBoundary(
       child: Container(

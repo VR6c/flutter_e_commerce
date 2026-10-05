@@ -231,6 +231,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                   child: Image.asset(
                                     'assets/images/shopping.png',
                                     fit: BoxFit.contain,
+                                    cacheWidth: 200,
                                   ),
                                 ),
                               ],

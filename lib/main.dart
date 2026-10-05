@@ -9,6 +9,11 @@ import 'shared/providers/theme_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Configure high-efficiency image cache thresholds to prevent memory bloating
+  PaintingBinding.instance.imageCache.maximumSize = 250;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 60 * 1024 * 1024; // 60 MB
+
   runApp(const ProviderScope(child: MyApp()));
 }
 

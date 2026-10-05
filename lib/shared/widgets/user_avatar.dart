@@ -189,14 +189,15 @@ class UserAvatar extends ConsumerWidget {
       );
     }
 
+    final result = RepaintBoundary(child: avatarWidget);
     if (onTap != null) {
       return GestureDetector(
         onTap: onTap,
-        child: avatarWidget,
+        child: result,
       );
     }
 
-    return avatarWidget;
+    return result;
   }
 
   Widget _buildFallbackInitials(ThemeData theme, String initials) {

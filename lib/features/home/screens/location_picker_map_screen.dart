@@ -223,23 +223,25 @@ class _LocationPickerMapScreenState
     return Scaffold(
       body: Stack(
         children: [
-          // ── 1. Interactive OpenStreetMap ────────────────────────────────
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _currentCenter,
-              initialZoom: 16.0,
-              minZoom: 10.0,
-              maxZoom: 18.5,
-              onPositionChanged: _onPositionChanged,
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.flutter_e_commerce',
-                maxZoom: 19,
+          // ── 1. Interactive OpenStreetMap (isolated repaint boundary) ──────
+          RepaintBoundary(
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _currentCenter,
+                initialZoom: 16.0,
+                minZoom: 10.0,
+                maxZoom: 18.5,
+                onPositionChanged: _onPositionChanged,
               ),
-            ],
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.flutter_e_commerce',
+                  maxZoom: 19,
+                ),
+              ],
+            ),
           ),
 
           // ── 2. Center Target Pin (Interactive Floating Pin) ─────────────
