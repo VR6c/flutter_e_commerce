@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/api/app_exception.dart';
+import '../../../core/router/app_routes.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_success_dialog.dart';
 
@@ -108,124 +109,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void _showForgotPasswordSheet() {
-    final theme = Theme.of(context);
-    final phoneController = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          padding: EdgeInsets.fromLTRB(
-            24,
-            20,
-            24,
-            MediaQuery.of(ctx).viewInsets.bottom + 32,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                context.l10n.resetYourPassword,
-                style: TextStyle(
-                  fontFamily: AppTheme.fontFamily,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.onSurface,
-                  letterSpacing: 0,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.pleaseEnterYourPhoneNumber,
-                style: const TextStyle(
-                  fontFamily: AppTheme.fontFamily,
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
-                  height: 1.5,
-                  letterSpacing: 0,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-                style: TextStyle(
-                  fontFamily: AppTheme.fontFamily,
-                  fontSize: 14,
-                  color: theme.colorScheme.onSurface,
-                  letterSpacing: 0,
-                ),
-                decoration: InputDecoration(
-                  hintText: context.l10n.enterPhoneNumberOrEmail,
-                  hintStyle: const TextStyle(
-                    fontFamily: AppTheme.fontFamily,
-                    letterSpacing: 0,
-                  ),
-                  prefixIcon: const Icon(Icons.phone_outlined, size: 20),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          context.l10n.verificationCodeSentTo(phoneController.text),
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontFamily,
-                            letterSpacing: 0,
-                          ),
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: theme.colorScheme.primary,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    context.l10n.sendVerificationCode,
-                    style: const TextStyle(
-                      fontFamily: AppTheme.fontFamily,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+  void _navigateToForgotPassword() {
+    context.push(
+      AppRoutes.forgotPassword,
+      extra: {
+        'email': _emailController.text.trim(),
+        'returnTo': widget.returnTo,
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -421,7 +314,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: _showForgotPasswordSheet,
+                    onTap: _navigateToForgotPassword,
                     child: Text(
                       context.l10n.forgotPassword,
                       style: TextStyle(

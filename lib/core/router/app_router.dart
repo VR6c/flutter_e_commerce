@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'app_routes.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/auth_success_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/categories/screens/category_list_screen.dart';
@@ -53,6 +54,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final returnTo = extra?['returnTo'] as String? ?? AppRoutes.home;
           return RegisterScreen(returnTo: returnTo);
+        },
+      ),
+      GoRoute(
+        name: AppRoutes.forgotPasswordName,
+        path: AppRoutes.forgotPassword,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final initialEmail = extra?['email'] as String?;
+          final returnTo = extra?['returnTo'] as String? ?? AppRoutes.home;
+          return ForgotPasswordScreen(
+            initialEmail: initialEmail,
+            returnTo: returnTo,
+          );
         },
       ),
       GoRoute(

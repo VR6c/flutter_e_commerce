@@ -10,6 +10,10 @@ class ApiEndpoints {
   static const String avatar = '/customer/avatar';
   static const String logout = '/customer/logout';
   static const String refreshToken = '/customer/refresh';
+  static const String forgotPassword = '/password/forgot';
+  static const String verifyOtp = '/password/verify-otp';
+  static const String resendOtp = '/password/resend-otp';
+  static const String resetPassword = '/password/reset';
 
   // Feature endpoints
   static const String products = '/products';

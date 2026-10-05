@@ -14,6 +14,9 @@ class AppRoutes {
   static const authSuccess = '/auth-success';
   static const authSuccessName = 'auth-success';
 
+  static const forgotPassword = '/forgot-password';
+  static const forgotPasswordName = 'forgot-password';
+
   // Bottom Navigation Branches (StatefulShellRoute)
   static const home = '/home';
   static const homeName = 'home';

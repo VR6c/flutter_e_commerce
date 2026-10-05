@@ -98,6 +98,43 @@ class AuthState extends _$AuthState {
     }
   }
 
+  Future<void> resetPassword({
+    required String email,
+    required String otp,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final response = await _authRepository.resetPassword(
+        email: email,
+        otp: otp,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      );
+      final token = response['token'] ?? response['data']?['token'];
+      if (token != null) {
+        final tokenStr = token as String;
+        await _secureStorageService.saveTokens(
+          accessToken: tokenStr,
+          refreshToken: tokenStr,
+        );
+        final customerData = response['data']?['customer'] ?? response['customer'];
+        if (customerData is Map) {
+          final map = Map<String, dynamic>.from(customerData);
+          map['status'] ??= 'active';
+          return Customer.fromJson(map);
+        }
+        return await _authRepository.getProfile();
+      }
+      return null;
+    });
+
+    if (state.hasError) {
+      throw state.error!;
+    }
+  }
+
   Future<Customer> updateProfile({
     required String name,
     required String email,

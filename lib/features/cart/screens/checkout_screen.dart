@@ -131,11 +131,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
         if (_selectedGateway == 'abapayway' && tranId != null) {
           if (!mounted) return;
+          final subtotal = ref.read(cartTotalAmountProvider);
+          final discount =
+              couponState.isApplied ? couponState.discountAmount : 0.0;
+          final fallbackTotal =
+              (subtotal - discount).clamp(0.0, double.infinity);
+
+          final double? orderTotal =
+              double.tryParse(data['data']?['total_amount']?.toString() ?? '') ??
+                  fallbackTotal;
+          final String orderCurrency =
+              data['data']?['currency']?.toString() ?? 'USD';
+          final String merchantName =
+              data['data']?['merchant_name']?.toString() ?? 'THARY VIREAK Store';
+
           await _startPaymentFlow(
             abapayDeeplink: abapayDeeplink,
             qrImageBase64: qrImage,
             tranId: tranId,
             orderId: orderId,
+            amount: orderTotal,
+            currency: orderCurrency,
+            merchantName: merchantName,
           );
         } else {
           _onOrderSuccess(orderId);
@@ -167,6 +184,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     String? qrImageBase64,
     required String tranId,
     required dynamic orderId,
+    double? amount,
+    String currency = 'USD',
+    String merchantName = 'THARY VIREAK Store',
   }) async {
     bool launched = false;
     if (abapayDeeplink != null && abapayDeeplink.isNotEmpty) {
@@ -196,6 +216,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       orderId: orderId,
       deeplink: abapayDeeplink,
       qrImageBase64: qrImageBase64,
+      amount: amount,
+      currency: currency,
+      merchantName: merchantName,
       initialShowQr: initialShowQr,
       onCheckStatus: () => ref
           .read(orderRepositoryProvider)

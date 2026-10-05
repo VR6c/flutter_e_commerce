@@ -42,6 +42,54 @@ class AuthRepository {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.forgotPassword,
+      data: {'email': email.trim()},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.verifyOtp,
+      data: {
+        'email': email.trim(),
+        'otp': otp.trim(),
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> resendOtp(String email) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.resendOtp,
+      data: {'email': email.trim()},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String otp,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.resetPassword,
+      data: {
+        'email': email.trim(),
+        'otp': otp.trim(),
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Customer> getProfile() async {
     final response = await _apiClient.get(ApiEndpoints.profile);
     final data = response.data;

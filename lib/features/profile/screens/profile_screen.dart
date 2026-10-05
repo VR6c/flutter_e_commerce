@@ -2,19 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/app_routes.dart';
-import '../../../core/utils/app_snackbar.dart';
 import '../../../shared/providers/theme_provider.dart';
-import '../../../shared/widgets/async_value_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../orders/providers/orders_provider.dart';
-import '../models/social_media_link.dart';
-import '../providers/social_media_link_provider.dart';
 import '../widgets/account_details_sheet.dart';
 import '../widgets/address_info_sheet.dart';
 import '../widgets/help_support_sheet.dart';
@@ -43,43 +38,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _launchUrl(String urlString) async {
-    final uri = Uri.parse(urlString);
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (mounted) {
-          AppSnackBar.showError(context, 'Could not open link: $urlString');
-        }
-      }
-    } catch (_) {
-      if (mounted) {
-        AppSnackBar.showError(context, 'Invalid link: $urlString');
-      }
-    }
-  }
-
-  IconData _getPlatformIcon(String platform) {
-    final clean = platform.toLowerCase();
-    if (clean.contains('facebook')) return Icons.facebook;
-    if (clean.contains('twitter') || clean.contains('x')) return Icons.alternate_email;
-    if (clean.contains('instagram')) return Icons.camera_alt;
-    if (clean.contains('linkedin')) return Icons.work;
-    if (clean.contains('youtube')) return Icons.play_arrow;
-    return Icons.link;
-  }
-
-  Color _getPlatformColor(String platform) {
-    final clean = platform.toLowerCase();
-    if (clean.contains('facebook')) return const Color(0xFF1877F2);
-    if (clean.contains('twitter') || clean.contains('x')) return const Color(0xFF0F1419);
-    if (clean.contains('instagram')) return const Color(0xFFE4405F);
-    if (clean.contains('linkedin')) return const Color(0xFF0A66C2);
-    if (clean.contains('youtube')) return const Color(0xFFFF0000);
-    return const Color(0xFF23AA49);
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen<BottomNavScrollEvent>(bottomNavScrollProvider, (previous, next) {
@@ -93,7 +51,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
 
     final customerState = ref.watch(authStateProvider);
-    final socialLinksState = ref.watch(socialMediaLinksProvider);
     final currentLocale = ref.watch(localeProvider);
     final l10n = context.l10n;
     final theme = Theme.of(context);
@@ -151,7 +108,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           : RefreshIndicator(
               color: theme.colorScheme.primary,
               onRefresh: () async {
-                ref.invalidate(socialMediaLinksProvider);
                 if (customer != null) {
                   ref.invalidate(ordersProvider);
                 }
@@ -283,11 +239,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-
-                    // Group 4: Connect With Us
-                    ProfileSectionHeader(title: l10n.connectWithUs),
-                    _buildSocialCard(socialLinksState, theme, isDark),
                     const SizedBox(height: 24),
 
                     // Logout Button (for authenticated user)
@@ -372,103 +323,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildNotificationToggleTile(ThemeData theme, bool isDark) {
     return const _NotificationToggleTile();
-  }
-
-  Widget _buildSocialCard(
-    AsyncValue<List<SocialMediaLink>> socialLinksState,
-    ThemeData theme,
-    bool isDark,
-  ) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: AsyncValueWidget(
-        value: socialLinksState,
-        loading: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-        ),
-        onRetry: () => ref.invalidate(socialMediaLinksProvider),
-        data: (links) {
-          if (links.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  context.l10n.noSocialLinks,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            );
-          }
-          return Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12,
-            runSpacing: 10,
-            children: links.map((link) {
-              final color = _getPlatformColor(link.platform);
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    _launchUrl(link.link);
-                  },
-                  borderRadius: BorderRadius.circular(30),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: isDark ? 0.15 : 0.08),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: color.withValues(alpha: isDark ? 0.3 : 0.2),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _getPlatformIcon(link.platform),
-                          color: color,
-                          size: 17,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          link.platform,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          );
-        },
-      ),
-    );
   }
 
   Widget _buildLogoutButton(BuildContext context, ThemeData theme, bool isDark) {
