@@ -14,47 +14,64 @@ class SecureStorageService {
   bool _refreshTokenLoaded = false;
 
   Future<void> saveToken(String token) async {
+    await _storage.write(key: _tokenKey, value: token);
     _cachedToken = token;
     _tokenLoaded = true;
-    await _storage.write(key: _tokenKey, value: token);
   }
 
   Future<String?> getToken() async {
     if (_tokenLoaded) {
       return _cachedToken;
     }
-    final token = await _storage.read(key: _tokenKey);
-    _cachedToken = token;
-    _tokenLoaded = true;
-    return token;
+    try {
+      final token = await _storage.read(key: _tokenKey);
+      _cachedToken = token;
+      _tokenLoaded = true;
+      return token;
+    } catch (_) {
+      // In case of hardware key corruption or Keystore error, safely reset cache
+      _cachedToken = null;
+      _tokenLoaded = true;
+      return null;
+    }
   }
 
   Future<void> deleteToken() async {
     _cachedToken = null;
     _tokenLoaded = true;
-    await _storage.delete(key: _tokenKey);
+    try {
+      await _storage.delete(key: _tokenKey);
+    } catch (_) {}
   }
 
   Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: _refreshTokenKey, value: token);
     _cachedRefreshToken = token;
     _refreshTokenLoaded = true;
-    await _storage.write(key: _refreshTokenKey, value: token);
   }
 
   Future<String?> getRefreshToken() async {
     if (_refreshTokenLoaded) {
       return _cachedRefreshToken;
     }
-    final token = await _storage.read(key: _refreshTokenKey);
-    _cachedRefreshToken = token;
-    _refreshTokenLoaded = true;
-    return token;
+    try {
+      final token = await _storage.read(key: _refreshTokenKey);
+      _cachedRefreshToken = token;
+      _refreshTokenLoaded = true;
+      return token;
+    } catch (_) {
+      _cachedRefreshToken = null;
+      _refreshTokenLoaded = true;
+      return null;
+    }
   }
 
   Future<void> deleteRefreshToken() async {
     _cachedRefreshToken = null;
     _refreshTokenLoaded = true;
-    await _storage.delete(key: _refreshTokenKey);
+    try {
+      await _storage.delete(key: _refreshTokenKey);
+    } catch (_) {}
   }
 
   Future<void> saveTokens({
@@ -72,8 +89,12 @@ class SecureStorageService {
     _cachedRefreshToken = null;
     _tokenLoaded = true;
     _refreshTokenLoaded = true;
-    await _storage.delete(key: _tokenKey);
-    await _storage.delete(key: _refreshTokenKey);
+    try {
+      await _storage.delete(key: _tokenKey);
+    } catch (_) {}
+    try {
+      await _storage.delete(key: _refreshTokenKey);
+    } catch (_) {}
   }
 }
 

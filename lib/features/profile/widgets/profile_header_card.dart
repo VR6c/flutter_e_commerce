@@ -346,38 +346,45 @@ class ProfileHeaderCard extends StatelessWidget {
 
           // Benefits Row
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildBenefitItem(
-                  Icons.local_shipping_outlined,
-                  l10n.liveTracking,
-                  theme,
+                Expanded(
+                  child: _buildBenefitItem(
+                    Icons.local_shipping_outlined,
+                    l10n.liveTracking,
+                    theme,
+                  ),
                 ),
                 Container(
                   width: 1,
-                  height: 24,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                   color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
-                _buildBenefitItem(
-                  Icons.favorite_outline_rounded,
-                  l10n.syncedWishlist,
-                  theme,
+                Expanded(
+                  child: _buildBenefitItem(
+                    Icons.favorite_outline_rounded,
+                    l10n.syncedWishlist,
+                    theme,
+                  ),
                 ),
                 Container(
                   width: 1,
-                  height: 24,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                   color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
-                _buildBenefitItem(
-                  Icons.percent_rounded,
-                  l10n.exclusiveDeals,
-                  theme,
+                Expanded(
+                  child: _buildBenefitItem(
+                    Icons.percent_rounded,
+                    l10n.exclusiveDeals,
+                    theme,
+                  ),
                 ),
               ],
             ),
@@ -457,17 +464,22 @@ class ProfileHeaderCard extends StatelessWidget {
 
   Widget _buildBenefitItem(IconData icon, String text, ThemeData theme) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: theme.colorScheme.primary),
-        const SizedBox(width: 5),
-        Text(
-          text,
-          style: TextStyle(
-            fontFamily: AppTheme.fontFamily,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+        Icon(icon, size: 13, color: theme.colorScheme.primary),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: AppTheme.fontFamily,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            ),
           ),
         ),
       ],

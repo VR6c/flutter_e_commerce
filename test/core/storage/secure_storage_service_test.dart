@@ -45,5 +45,40 @@ void main() {
 
       verify(() => mockStorage.delete(key: tokenKey)).called(1);
     });
+
+    test('getToken returns null safely when storage throws an exception', () async {
+      when(() => mockStorage.read(key: tokenKey))
+          .thenThrow(Exception('Keystore corrupted'));
+
+      final result = await secureStorageService.getToken();
+
+      expect(result, isNull);
+    });
+
+    test('saveToken propagates error if write fails without updating cache', () async {
+      when(() => mockStorage.write(key: tokenKey, value: tokenVal))
+          .thenThrow(Exception('Write failed'));
+      when(() => mockStorage.read(key: tokenKey))
+          .thenAnswer((_) async => null);
+
+      expect(
+        () => secureStorageService.saveToken(tokenVal),
+        throwsA(isA<Exception>()),
+      );
+
+      // Verify that cache was not updated with the failed token
+      final cached = await secureStorageService.getToken();
+      expect(cached, isNull);
+    });
+
+    test('clearTokens removes both access and refresh tokens', () async {
+      when(() => mockStorage.delete(key: any(named: 'key')))
+          .thenAnswer((_) async => {});
+
+      await secureStorageService.clearTokens();
+
+      verify(() => mockStorage.delete(key: 'auth_token')).called(1);
+      verify(() => mockStorage.delete(key: 'refresh_token')).called(1);
+    });
   });
 }

@@ -37,8 +37,9 @@ class LoggingInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
       if (err.type == DioExceptionType.cancel) {
+        final reason = err.error != null ? err.error.toString() : (err.message ?? 'Cancelled');
         debugPrint(
-          '[DIO -- CANCELLED] ${err.requestOptions.method} ${err.requestOptions.uri} (${err.message ?? 'Cancelled'})',
+          '[DIO -- CANCELLED] ${err.requestOptions.method} ${err.requestOptions.uri} ($reason)',
         );
         super.onError(err, handler);
         return;
