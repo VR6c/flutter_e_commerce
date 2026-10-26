@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -190,12 +191,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     String merchantName = 'THARY VIREAK Store',
   }) async {
     bool launched = false;
-    if (abapayDeeplink != null && abapayDeeplink.isNotEmpty) {
+    final isNativeMobile = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+
+    // Only attempt deeplink launch on real mobile OS with ABA Mobile installed
+    if (isNativeMobile &&
+        abapayDeeplink != null &&
+        abapayDeeplink.isNotEmpty) {
       try {
-        launched = await launchUrl(
-          Uri.parse(abapayDeeplink),
-          mode: LaunchMode.externalApplication,
-        );
+        final uri = Uri.parse(abapayDeeplink);
+        if (await canLaunchUrl(uri)) {
+          launched = await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
+        }
       } catch (_) {
         launched = false;
       }

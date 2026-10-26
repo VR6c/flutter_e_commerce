@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -279,9 +280,17 @@ class AbaPayWayModalState extends State<AbaPayWayModal>
   }
 
   Future<bool> _launchDeeplink(String url) async {
+    final isNativeMobile = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+    if (!isNativeMobile) return false;
+
     try {
       final uri = Uri.parse(url);
-      return await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (await canLaunchUrl(uri)) {
+        return await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+      return false;
     } catch (_) {
       return false;
     }
@@ -573,6 +582,9 @@ class AbaPayWayModalState extends State<AbaPayWayModal>
 
   Widget _buildQrContent(ThemeData theme, bool isDark) {
     final currencySymbol = widget.currency.toUpperCase() == 'KHR' ? '៛' : '\$';
+    final isNativeMobile = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
 
     return Column(
       children: [
@@ -766,6 +778,7 @@ class AbaPayWayModalState extends State<AbaPayWayModal>
 
         const SizedBox(height: 16),
         if (!_isPollingTimedOut &&
+            isNativeMobile &&
             widget.deeplink != null &&
             widget.deeplink!.isNotEmpty)
           SizedBox(
