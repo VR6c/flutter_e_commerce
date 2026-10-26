@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/orders_provider.dart';
 import '../services/receipt_service.dart';
+import '../services/receipt_platform_helper.dart';
 
 class ReceiptViewerScreen extends ConsumerStatefulWidget {
   final dynamic orderId;
@@ -46,6 +46,7 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
   bool _isDownloading = false;
   double? _contentHeight;
   List<int>? _pdfBytes;
+  bool _isPdf = true;
 
   @override
   void initState() {
@@ -74,6 +75,17 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
           bytes[1] == 0x50 && // P
           bytes[2] == 0x44 && // D
           bytes[3] == 0x46; // F
+      _isPdf = isPdf;
+
+      // On Web, skip native WebViewController and render through iframe/blob viewer
+      if (kIsWeb) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        return;
+      }
 
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -117,11 +129,6 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
         );
 
       if (isPdf) {
-        final tempDir = await getTemporaryDirectory();
-        final filePath = '${tempDir.path}/order_receipt_${widget.orderId}.pdf';
-        final file = File(filePath);
-        await file.writeAsBytes(bytes, flush: true);
-
         final base64Pdf = base64Encode(bytes);
         final html = _buildPdfJsHtml(base64Pdf);
         await controller.loadHtmlString(html);
@@ -422,6 +429,19 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (kIsWeb && _pdfBytes != null)
+            IconButton(
+              icon: const Icon(Icons.open_in_new_rounded, size: 20),
+              tooltip: 'Open in new tab',
+              onPressed: () {
+                platformOpenInNewTab(
+                  _pdfBytes!,
+                  _isPdf ? 'application/pdf' : 'text/html',
+                );
+              },
+            ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -511,6 +531,25 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
                   letterSpacing: 0,
                 ),
               ),
+              if (_errorMessage != null && _errorMessage!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontSize: 11,
+                      color: Color(0xFFEF4444),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -543,6 +582,40 @@ class _ReceiptViewerScreenState extends ConsumerState<ReceiptViewerScreen> {
                 ],
               ),
             ],
+          ),
+        ),
+      );
+    }
+
+    if (kIsWeb && _pdfBytes != null) {
+      final defaultHeight = MediaQuery.of(context).size.height * 0.72;
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        physics: const BouncingScrollPhysics(),
+        child: Center(
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxWidth: 800),
+            height: defaultHeight,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              border: Border.all(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: buildWebReceiptViewer(
+              bytes: _pdfBytes!,
+              isPdf: _isPdf,
+            ),
           ),
         ),
       );

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_breakpoints.dart';
 import '../../../core/api/app_exception.dart';
 import '../../../shared/widgets/price_breakdown_card.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -137,7 +138,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           final fallbackTotal =
               (subtotal - discount).clamp(0.0, double.infinity);
 
-          final double? orderTotal =
+          final double orderTotal =
               double.tryParse(data['data']?['total_amount']?.toString() ?? '') ??
                   fallbackTotal;
           final String orderCurrency =
@@ -304,9 +305,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-          children: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: context.responsive<double>(
+                mobile: double.infinity,
+                tablet: 768,
+                desktop: 900,
+              ),
+            ),
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                context.responsive<double>(mobile: 16, tablet: 24, desktop: 32),
+                8,
+                context.responsive<double>(mobile: 16, tablet: 24, desktop: 32),
+                24,
+              ),
+              children: [
             // 1. Delivery Address Card (Matching mockup)
             Container(
               padding: const EdgeInsets.all(16),
@@ -680,8 +695,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ],
         ),
       ),
-      bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+    ),
+  ),
+      bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
           border: Border(
@@ -700,36 +716,72 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ),
         child: SafeArea(
           top: false,
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitOrder,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                elevation: 0,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.responsive<double>(
+                mobile: 20.0,
+                tablet: 24.0,
+                desktop: 32.0,
               ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      context.l10n.payNowAmount(finalTotal.toStringAsFixed(2)),
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        letterSpacing: 0,
-                      ),
+              vertical: context.responsive<double>(
+                mobile: 12.0,
+                tablet: 14.0,
+                desktop: 16.0,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: context.responsive<double>(
+                      mobile: double.infinity,
+                      tablet: 520,
+                      desktop: 600,
                     ),
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: context.responsive<double>(
+                      mobile: 52,
+                      tablet: 54,
+                      desktop: 56,
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submitOrder,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              context.l10n.payNowAmount(finalTotal.toStringAsFixed(2)),
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontWeight: FontWeight.w800,
+                                fontSize: context.responsive<double>(
+                                  mobile: 16,
+                                  tablet: 16.5,
+                                  desktop: 17,
+                                ),
+                                letterSpacing: 0,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

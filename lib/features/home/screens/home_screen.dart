@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_breakpoints.dart';
 import '../../../shared/models/sort_option.dart';
 import '../../../shared/providers/bottom_nav_scroll_provider.dart';
 import '../../../shared/widgets/async_value_widget.dart';
@@ -158,6 +159,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     context.go(AppRoutes.categories);
   }
 
+  /// Responsive column count: 2 on mobile, 3 on tablet, 4 on desktop.
+  int _gridColumns(BuildContext context) =>
+      context.responsive(mobile: 2, tablet: 3, desktop: 4);
+
+  /// Horizontal padding that grows with the available canvas width.
+  double _hPad(BuildContext context) =>
+      context.responsive(mobile: 16.0, tablet: 24.0, desktop: 32.0);
+
   @override
   Widget build(BuildContext context) {
     ref.listen<BottomNavScrollEvent>(bottomNavScrollProvider, (previous, next) {
@@ -208,7 +217,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             }
             return false;
           },
-          child: CustomScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1280),
+              child: CustomScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
@@ -407,17 +419,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   final productsState = ref.watch(productsProvider);
                   return productsState.when(
                     loading: () => SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: _hPad(context)),
                       sliver: SliverGrid(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _gridColumns(context),
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
                           childAspectRatio: 0.68,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) => const ProductCardShimmer(),
-                          childCount: 4,
+                          childCount: _gridColumns(context) * 2,
                         ),
                       ),
                     ),
@@ -452,17 +464,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       final isCategoryLoading = ref.watch(homeCategoryLoadingProvider);
                       if (isCategoryLoading) {
                         return SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: EdgeInsets.symmetric(horizontal: _hPad(context)),
                           sliver: SliverGrid(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: _gridColumns(context),
                               mainAxisSpacing: 14,
                               crossAxisSpacing: 14,
                               childAspectRatio: 0.68,
                             ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) => const ProductCardShimmer(),
-                              childCount: 4,
+                              childCount: _gridColumns(context) * 2,
                             ),
                           ),
                         );
@@ -509,10 +521,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       }
 
                       return SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: EdgeInsets.symmetric(horizontal: _hPad(context)),
                         sliver: SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: _gridColumns(context),
                             mainAxisSpacing: 14,
                             crossAxisSpacing: 14,
                             childAspectRatio: 0.68,
@@ -578,6 +590,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Bottom padding for floating navigation bar
               const SliverToBoxAdapter(child: SizedBox(height: 110)),
             ],
+          ),
+            ),
           ),
         ),
       ),

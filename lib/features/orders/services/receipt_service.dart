@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,6 +8,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/orders_provider.dart';
 import '../screens/receipt_viewer_screen.dart';
+import 'receipt_platform_helper.dart';
 
 /// Service for directly downloading, saving, and sharing order receipts.
 class ReceiptService {
@@ -38,9 +40,65 @@ class ReceiptService {
         throw Exception('Empty receipt PDF data received.');
       }
 
-      // 2. Save directly to App Documents directory
+      final isPdf = bytes.length >= 4 &&
+          bytes[0] == 0x25 && // %
+          bytes[1] == 0x50 && // P
+          bytes[2] == 0x44 && // D
+          bytes[3] == 0x46; // F
+
+      final ext = isPdf ? 'pdf' : 'html';
+      final fileName = 'Order_Receipt_$orderId.$ext';
+      final mime = isPdf ? 'application/pdf' : 'text/html';
+
+      // On Web, trigger browser download directly via blob/anchor
+      if (kIsWeb) {
+        platformDownloadBytes(bytes, fileName, mime);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n.receiptDownloadedFile(fileName),
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontFamily,
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: const Color(0xFF10B981),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              action: !fromViewerScreen
+                  ? SnackBarAction(
+                      label: l10n.viewReceipt,
+                      textColor: Colors.white,
+                      onPressed: () {
+                        ReceiptViewerScreen.show(context, orderId: orderId);
+                      },
+                    )
+                  : null,
+            ),
+          );
+        }
+        return null;
+      }
+
+      // 2. Save directly to App Documents directory (mobile platforms)
       final dir = await getApplicationDocumentsDirectory();
-      final fileName = 'Order_Receipt_$orderId.pdf';
       final file = File('${dir.path}/$fileName');
       await file.writeAsBytes(bytes, flush: true);
 

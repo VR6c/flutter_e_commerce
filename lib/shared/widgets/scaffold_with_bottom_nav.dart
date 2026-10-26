@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_breakpoints.dart';
 import '../../features/cart/providers/cart_provider.dart';
 import '../../features/wishlist/providers/wishlist_provider.dart';
 import '../providers/bottom_nav_scroll_provider.dart';
@@ -56,6 +57,31 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
         : const Color(0xFFF1F5F9);
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
+    // ── Tablet / Desktop: side NavigationRail ───────────────────────────────
+    if (!context.isMobile) {
+      return Scaffold(
+        body: Row(
+          children: [
+            Expanded(child: widget.navigationShell),
+            VerticalDivider(
+              width: 1,
+              thickness: 1,
+              color: borderColor,
+            ),
+            _SideRail(
+              currentIndex: currentIndex,
+              onItemTapped: _onItemTapped,
+              isDark: isDark,
+              theme: theme,
+              l10n: l10n,
+              isExpanded: context.isDesktop,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // ── Mobile: original floating bottom bar ────────────────────────────────
     return Scaffold(
       extendBody: true,
       body: widget.navigationShell,
@@ -188,6 +214,135 @@ class _ScaffoldWithBottomNavState extends ConsumerState<ScaffoldWithBottomNav> {
                 context.push('/cart');
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Side NavigationRail for tablet / desktop
+// ---------------------------------------------------------------------------
+
+class _SideRail extends ConsumerWidget {
+  const _SideRail({
+    required this.currentIndex,
+    required this.onItemTapped,
+    required this.isDark,
+    required this.theme,
+    required this.l10n,
+    required this.isExpanded,
+  });
+
+  final int currentIndex;
+  final void Function(int) onItemTapped;
+  final bool isDark;
+  final ThemeData theme;
+  final AppLocalizations l10n;
+  final bool isExpanded;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final primary = theme.colorScheme.primary;
+    final bg = isDark ? const Color(0xFF131D38) : Colors.white;
+    final cartCount = ref.watch(cartItemsCountProvider);
+    final wishlistCount = ref.watch(wishlistCountProvider);
+
+    // Map shell index → rail destination index
+    // Rail destinations: 0=Home 1=Products 2=Cart 3=Wishlist 4=Profile
+    // Shell branches:    0=Home 1=Products 2=Wishlist 3=Profile
+    // Cart is index 2 in the rail → mapped to push('/cart')
+    int railIndex = currentIndex;
+    if (currentIndex >= 2) railIndex = currentIndex + 1; // shift past cart slot
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      color: bg,
+      child: NavigationRail(
+        extended: isExpanded,
+        backgroundColor: bg,
+        selectedIndex: railIndex,
+        useIndicator: true,
+        indicatorColor: primary.withValues(alpha: 0.12),
+        selectedIconTheme: IconThemeData(color: primary),
+        unselectedIconTheme: IconThemeData(
+          color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+        ),
+        selectedLabelTextStyle: TextStyle(
+          fontFamily: AppTheme.fontFamily,
+          color: primary,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          fontFamily: AppTheme.fontFamily,
+          color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
+        onDestinationSelected: (railIdx) {
+          if (railIdx == 2) {
+            // Cart — push route directly (no shell branch)
+            HapticFeedback.mediumImpact();
+            context.push('/cart');
+          } else {
+            final shellIdx = railIdx > 2 ? railIdx - 1 : railIdx;
+            onItemTapped(shellIdx);
+          }
+        },
+        destinations: [
+          NavigationRailDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
+            label: Text(l10n.navHome),
+          ),
+          NavigationRailDestination(
+            icon: const Icon(Icons.storefront_outlined),
+            selectedIcon: const Icon(Icons.storefront_rounded),
+            label: Text(l10n.navProducts),
+          ),
+          // Cart destination with badge
+          NavigationRailDestination(
+            icon: Badge(
+              isLabelVisible: cartCount > 0,
+              label: Text(cartCount > 99 ? '99+' : '$cartCount'),
+              backgroundColor: const Color(0xFFEF4444),
+              textStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800),
+              child: const Icon(Icons.shopping_bag_outlined),
+            ),
+            selectedIcon: Badge(
+              isLabelVisible: cartCount > 0,
+              label: Text(cartCount > 99 ? '99+' : '$cartCount'),
+              backgroundColor: const Color(0xFFEF4444),
+              textStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800),
+              child: const Icon(Icons.shopping_bag_rounded),
+            ),
+            label: const Text('Cart'),
+          ),
+          // Wishlist with badge
+          NavigationRailDestination(
+            icon: Badge(
+              isLabelVisible: wishlistCount > 0,
+              label: Text(wishlistCount > 99 ? '99+' : '$wishlistCount'),
+              backgroundColor: const Color(0xFFEF4444),
+              textStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800),
+              child: const Icon(Icons.favorite_border_rounded),
+            ),
+            selectedIcon: Badge(
+              isLabelVisible: wishlistCount > 0,
+              label: Text(wishlistCount > 99 ? '99+' : '$wishlistCount'),
+              backgroundColor: const Color(0xFFEF4444),
+              textStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800),
+              child: const Icon(Icons.favorite_rounded),
+            ),
+            label: Text(l10n.navWishlist),
+          ),
+          NavigationRailDestination(
+            icon: const Icon(Icons.person_outline_rounded),
+            selectedIcon: const Icon(Icons.person_rounded),
+            label: Text(l10n.navProfile),
           ),
         ],
       ),

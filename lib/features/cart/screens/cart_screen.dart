@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_breakpoints.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/auth/screens/auth_gate_screen.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
@@ -156,7 +157,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       ),
       body: !hasItems
           ? _buildEmptyState(context, theme, isDark)
-          : CustomScrollView(
+          : Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: context.responsive<double>(
+                    mobile: double.infinity,
+                    tablet: 768,
+                    desktop: 900,
+                  ),
+                ),
+                child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 // Virtualized lazy list of cart items
@@ -197,6 +207,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 ),
               ],
             ),
+            ),
+          ),
       bottomNavigationBar: !hasItems ? null : _buildCheckoutBottomBar(theme, l10n, isDark),
     );
   }
@@ -345,7 +357,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         final finalTotal = (totalAmount - discount).clamp(0.0, double.infinity);
 
         return Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           decoration: BoxDecoration(
             color: theme.cardColor,
             border: Border(
@@ -364,57 +375,97 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           ),
           child: SafeArea(
             top: false,
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  final isAuthenticated = ref.read(authStateProvider).valueOrNull != null;
-                  if (isAuthenticated) {
-                    context.push('/checkout');
-                  } else {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => const AuthGateScreen(returnTo: '/checkout'),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.responsive<double>(
+                  mobile: 20.0,
+                  tablet: 24.0,
+                  desktop: 32.0,
+                ),
+                vertical: context.responsive<double>(
+                  mobile: 12.0,
+                  tablet: 14.0,
+                  desktop: 16.0,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: context.responsive<double>(
+                        mobile: double.infinity,
+                        tablet: 520,
+                        desktop: 600,
+                      ),
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: context.responsive<double>(
+                        mobile: 52,
+                        tablet: 54,
+                        desktop: 56,
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          final isAuthenticated = ref.read(authStateProvider).valueOrNull != null;
+                          if (isAuthenticated) {
+                            context.push('/checkout');
+                          } else {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => const AuthGateScreen(returnTo: '/checkout'),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              l10n.proceedToCheckout,
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: context.responsive<double>(
+                                  mobile: 16,
+                                  tablet: 16.5,
+                                  desktop: 17,
+                                ),
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '(\$${finalTotal.toStringAsFixed(2)})',
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: context.responsive<double>(
+                                  mobile: 14,
+                                  tablet: 14.5,
+                                  desktop: 15,
+                                ),
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.9),
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      l10n.proceedToCheckout,
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '(\$${finalTotal.toStringAsFixed(2)})',
-                      style: TextStyle(
-                        fontFamily: AppTheme.fontFamily,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
