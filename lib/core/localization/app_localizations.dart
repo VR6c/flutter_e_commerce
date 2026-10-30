@@ -119,6 +119,21 @@ class AppLocalizations {
   String get buyNow => text('buy_now');
   String get description => text('description');
   String get reviews => text('reviews');
+  String get rateYourProducts => text('rate_your_products');
+  String get rateYourProductsDesc => text('rate_your_products_desc');
+  String get rateProduct => text('rate_product');
+  String get productNotFoundToReview => text('product_not_found_to_review');
+  String get writeReview => text('write_review');
+  String get yourRating => text('your_rating');
+  String get reviewHint => text('review_hint');
+  String get submitReview => text('submit_review');
+  String get reviewSubmitted => text('review_submitted');
+  String get noReviewsYet => text('no_reviews_yet');
+  String get signInToReview => text('sign_in_to_review');
+  String get selectRating => text('select_rating');
+  String get reviewFailed => text('review_failed');
+  String reviewCount(int count) =>
+      text('review_count').replaceAll('{count}', '$count');
   String get inStock => text('in_stock');
   String get outOfStock => text('out_of_stock');
   String get quantity => text('quantity');
@@ -698,6 +713,23 @@ class AppLocalizations {
     if (lower == 'xxl' || lower == '2xl') return 'ធំពិសេស (XXL)';
     return size;
   }
+
+  String get orderDetails => text('order_details');
+  String get allOrders => text('all_orders');
+  String get orderTimeline => text('order_timeline');
+  String get viewDetails => text('view_details');
+  String get viewFullDetails => text('view_full_details');
+  String orderPlacedOn(String date) =>
+      text('order_placed_on').replaceAll('{date}', date);
+  String get stepPlaced => text('step_placed');
+  String get stepProcessing => text('step_processing');
+  String get stepDelivering => text('step_delivering');
+  String get stepDelivered => text('step_delivered');
+  String get stepCancelled => text('step_cancelled');
+  String get orderCancelledNotice => text('order_cancelled_notice');
+  String get copiedOrderId => text('copied_order_id');
+  String get reorder => text('reorder');
+  String get statusCompleted => text('status_completed');
 }
 
 class _AppLocalizationsDelegate

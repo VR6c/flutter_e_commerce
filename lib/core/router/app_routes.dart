@@ -50,6 +50,9 @@ class AppRoutes {
   static const orders = '/orders';
   static const ordersName = 'orders';
 
+  static const orderDetail = '/order-detail';
+  static const orderDetailName = 'order-detail';
+
   static const orderSuccess = '/order-success';
   static const orderSuccessName = 'order-success';
 

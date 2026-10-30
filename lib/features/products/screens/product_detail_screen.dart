@@ -11,6 +11,7 @@ import '../../cart/providers/cart_provider.dart';
 import '../../wishlist/providers/wishlist_provider.dart';
 import '../models/product.dart';
 import '../models/product_variant.dart';
+import '../widgets/product_reviews_section.dart';
 import '../widgets/related_products_section.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
@@ -675,6 +676,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ],
                     ),
                   ),
+                  ProductReviewsSection(productSlug: widget.product.slug),
                   RelatedProductsSection(productSlug: widget.product.slug),
                   const SizedBox(height: 24),
                 ],

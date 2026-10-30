@@ -62,13 +62,26 @@ class OrderStatusBadge extends StatelessWidget {
         return _StatusConfig(
           color: const Color(0xFF059669),
           icon: Icons.check_circle_rounded,
-          label: l10n.completed,
+          label: l10n.statusCompleted,
+        );
+      case 'shipped':
+      case 'delivering':
+        return _StatusConfig(
+          color: const Color(0xFF0284C7),
+          icon: Icons.local_shipping_rounded,
+          label: l10n.shippedStatus,
         );
       case 'processing':
         return _StatusConfig(
           color: const Color(0xFF4F46E5),
           icon: Icons.sync_rounded,
           label: l10n.processingStatus,
+        );
+      case 'confirmed':
+        return _StatusConfig(
+          color: const Color(0xFF10B981),
+          icon: Icons.verified_rounded,
+          label: l10n.isKhmer ? 'បានបញ្ជាក់' : 'CONFIRMED',
         );
       case 'cancelled':
       case 'canceled':

@@ -227,7 +227,10 @@ class ProfileOrderStatusCard extends ConsumerWidget {
                 count: statusCounts['pending'] ?? 0,
                 theme: theme,
                 isDark: isDark,
-                onTap: () => context.push(AppRoutes.orders),
+                onTap: () => context.push(
+                  AppRoutes.orders,
+                  extra: {'status': 'pending'},
+                ),
               ),
               _statusItem(
                 icon: Icons.inventory_2_outlined,
@@ -235,7 +238,10 @@ class ProfileOrderStatusCard extends ConsumerWidget {
                 count: statusCounts['processing'] ?? 0,
                 theme: theme,
                 isDark: isDark,
-                onTap: () => context.push(AppRoutes.orders),
+                onTap: () => context.push(
+                  AppRoutes.orders,
+                  extra: {'status': 'processing'},
+                ),
               ),
               _statusItem(
                 icon: Icons.local_shipping_outlined,
@@ -243,7 +249,10 @@ class ProfileOrderStatusCard extends ConsumerWidget {
                 count: statusCounts['shipped'] ?? 0,
                 theme: theme,
                 isDark: isDark,
-                onTap: () => context.push(AppRoutes.orders),
+                onTap: () => context.push(
+                  AppRoutes.orders,
+                  extra: {'status': 'processing'},
+                ),
               ),
               _statusItem(
                 icon: Icons.check_circle_outline_rounded,
@@ -251,7 +260,10 @@ class ProfileOrderStatusCard extends ConsumerWidget {
                 count: statusCounts['delivered'] ?? 0,
                 theme: theme,
                 isDark: isDark,
-                onTap: () => context.push(AppRoutes.orders),
+                onTap: () => context.push(
+                  AppRoutes.orders,
+                  extra: {'status': 'completed'},
+                ),
               ),
             ],
           ),

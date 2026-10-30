@@ -10,6 +10,16 @@ class OrderRepository {
 
   OrderRepository(this._apiClient);
 
+  final Map<int, String> _productSlugCache = {};
+
+  String? getCachedSlug(int productId) => _productSlugCache[productId];
+
+  void cacheSlug(int productId, String slug) {
+    if (slug.isNotEmpty) {
+      _productSlugCache[productId] = slug;
+    }
+  }
+
   Future<List<Order>> fetchOrders() async {
     final response = await _apiClient.get(ApiEndpoints.orders);
     final data = response.data;
@@ -42,6 +52,11 @@ class OrderRepository {
           final updatedItems = itemsList.map((itemObj) {
             if (itemObj is Map) {
               final itemMap = Map<String, dynamic>.from(itemObj);
+              final prodId = (itemMap['product_id'] as num?)?.toInt();
+              final prodSlug = itemMap['product_slug']?.toString();
+              if (prodId != null && prodSlug != null && prodSlug.isNotEmpty) {
+                cacheSlug(prodId, prodSlug);
+              }
               itemMap['product_thumbnail'] = formatImageUrl(
                 itemMap['product_thumbnail']?.toString(),
                 baseUrl,
@@ -71,11 +86,34 @@ class OrderRepository {
         if (orderData is Map) {
           final orderMap = Map<String, dynamic>.from(orderData);
           final baseUrl = _apiClient.dio.options.baseUrl;
+
+          // Normalize shipping fields into root if nested
+          if (orderMap['shipping'] is Map) {
+            final shipping = Map<String, dynamic>.from(orderMap['shipping']);
+            orderMap['first_name'] ??= shipping['first_name'] ?? '';
+            orderMap['last_name'] ??= shipping['last_name'] ?? '';
+            orderMap['phone'] ??= shipping['phone'];
+            orderMap['address'] ??= shipping['address'];
+            orderMap['city'] ??= shipping['city'];
+            orderMap['country'] ??= shipping['country'];
+          }
+          orderMap['first_name'] ??= '';
+          orderMap['last_name'] ??= '';
+          orderMap['gateway'] ??= 'cod';
+          orderMap['status'] ??= 'pending';
+          orderMap['created_at'] ??= DateTime.now().toIso8601String();
+          orderMap['total'] = (orderMap['total'] as num?)?.toDouble() ?? 0.0;
+
           if (orderMap['items'] is List) {
             final itemsList = orderMap['items'] as List;
             orderMap['items'] = itemsList.map((itemObj) {
               if (itemObj is Map) {
                 final itemMap = Map<String, dynamic>.from(itemObj);
+                final prodId = (itemMap['product_id'] as num?)?.toInt();
+                final prodSlug = itemMap['product_slug']?.toString();
+                if (prodId != null && prodSlug != null && prodSlug.isNotEmpty) {
+                  cacheSlug(prodId, prodSlug);
+                }
                 itemMap['product_thumbnail'] = formatImageUrl(
                   itemMap['product_thumbnail']?.toString(),
                   baseUrl,

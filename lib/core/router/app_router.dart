@@ -16,6 +16,8 @@ import '../../features/products/models/product.dart';
 import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/cart/screens/cart_screen.dart';
 import '../../features/cart/screens/checkout_screen.dart';
+import '../../features/orders/models/order.dart';
+import '../../features/orders/screens/order_detail_screen.dart';
 import '../../features/orders/screens/order_history_screen.dart';
 import '../../features/orders/screens/receipt_viewer_screen.dart';
 import '../../features/cart/screens/order_success_screen.dart';
@@ -176,7 +178,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: AppRoutes.ordersName,
         path: AppRoutes.orders,
-        builder: (context, state) => const OrderHistoryScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final status = extra?['status'] as String? ??
+              state.uri.queryParameters['status'];
+          return OrderHistoryScreen(initialStatus: status);
+        },
+      ),
+      GoRoute(
+        name: AppRoutes.orderDetailName,
+        path: AppRoutes.orderDetail,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final order = extra?['order'] as Order?;
+          final orderId = extra?['orderId'] ??
+              state.uri.queryParameters['orderId'];
+          return OrderDetailScreen(
+            order: order,
+            orderId: orderId,
+          );
+        },
       ),
       GoRoute(
         name: AppRoutes.orderSuccessName,

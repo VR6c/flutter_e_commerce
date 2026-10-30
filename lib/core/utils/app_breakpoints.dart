@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Defines the responsive breakpoints for the app.
-///
-/// Breakpoint tiers:
-///   - **Mobile**  : width < 600 dp
-///   - **Tablet**  : 600 dp ≤ width < 1024 dp
-///   - **Desktop** : width ≥ 1024 dp
 class AppBreakpoints {
   AppBreakpoints._();
 
@@ -14,10 +8,6 @@ class AppBreakpoints {
 
   /// Minimum width (dp) for a desktop-sized screen.
   static const double desktop = 1024;
-
-  // ---------------------------------------------------------------------------
-  // Screen-type checks
-  // ---------------------------------------------------------------------------
 
   /// Returns `true` when [width] is in the mobile range (< 600 dp).
   static bool isMobile(double width) => width < tablet;
@@ -28,10 +18,6 @@ class AppBreakpoints {
   /// Returns `true` when [width] is in the desktop range (≥ 1024 dp).
   static bool isDesktop(double width) => width >= desktop;
 
-  // ---------------------------------------------------------------------------
-  // BuildContext helpers
-  // ---------------------------------------------------------------------------
-
   /// Returns the current [ScreenType] for the given [context].
   static ScreenType screenTypeOf(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
@@ -40,8 +26,6 @@ class AppBreakpoints {
     return ScreenType.mobile;
   }
 
-  /// Selects a value based on the current screen type.
-  ///
   /// Falls back to [tablet] → [mobile] when larger values are `null`.
   static T value<T>(
     BuildContext context, {
@@ -58,10 +42,6 @@ class AppBreakpoints {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Screen type enum
-// ---------------------------------------------------------------------------
-
 /// Enum representing the three responsive tiers.
 enum ScreenType {
   mobile,
@@ -72,10 +52,6 @@ enum ScreenType {
   bool get isTablet => this == ScreenType.tablet;
   bool get isDesktop => this == ScreenType.desktop;
 }
-
-// ---------------------------------------------------------------------------
-// Extension on BuildContext
-// ---------------------------------------------------------------------------
 
 extension ResponsiveContext on BuildContext {
   /// Width of the current screen.
@@ -100,10 +76,6 @@ extension ResponsiveContext on BuildContext {
         desktop: desktop,
       );
 }
-
-// ---------------------------------------------------------------------------
-// ResponsiveLayout widget
-// ---------------------------------------------------------------------------
 
 ///
 /// If [tablet] or [desktop] are omitted the next smaller layout is shown.
@@ -136,21 +108,9 @@ class ResponsiveLayout extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// ResponsiveBuilder widget
-// ---------------------------------------------------------------------------
-
 /// A builder variant of [ResponsiveLayout] that exposes the [ScreenType]
 /// and screen dimensions to the child builder.
 ///
-/// ```dart
-/// ResponsiveBuilder(
-///   builder: (context, screenType, size) {
-///     final columns = screenType.isDesktop ? 4 : screenType.isTablet ? 3 : 2;
-///     return GridView.count(crossAxisCount: columns, ...);
-///   },
-/// )
-/// ```
 class ResponsiveBuilder extends StatelessWidget {
   const ResponsiveBuilder({super.key, required this.builder});
 
