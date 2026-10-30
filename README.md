@@ -19,13 +19,13 @@ A modern, high-performance Flutter e-commerce application built with **Clean Fea
 ### Group Members
 
 | No. | Member Name | Role |
-|:---:|---|---|
-| 1 | **Thary Vireak** | Team Lead & Full-Stack / Mobile Developer |
-| 2 | **Leom Ratana** | Mobile Developer |
-| 3 | **Hout Phanit** | Mobile Developer |
-| 4 | **Rim Bunhieng** | Mobile Developer |
-| 5 | **Sok Youngje** | Mobile Developer |
-| 6 | **Seang Longmeng** | Mobile Developer |
+|:---:|---|
+| 1 | **Thary Vireak**
+| 2 | **Leom Ratana**
+| 3 | **Hout Phanit**
+| 4 | **Rim Bunhieng**
+| 5 | **Sok Youngje**
+| 6 | **Seang Longmeng**
 
 ---
 
